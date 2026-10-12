@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CTP — Khai báo Công tác phí</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f0f2f5;color:#333;min-height:100vh}
+.app-header{background:linear-gradient(135deg,#1a3a6b,#2f5496);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.app-header h1{font-size:18px;font-weight:600}
+.app-header .ver{font-size:11px;opacity:.7}
+.user-bar{display:flex;align-items:center;gap:8px}
+.user-bar .role-badge{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:12px;font-size:12px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-primary{background:#2f5496;color:#fff}
+.btn-primary:hover{background:#1a3a6b}
+.btn-outline{background:#fff;color:#2f5496;border:1.5px solid #2f5496}
+.btn-outline:hover{background:#e8f0fa}
+.btn-danger{background:#d32f2f;color:#fff}
+.btn-danger:hover{background:#b71c1c}
+.btn-success{background:#2e7d32;color:#fff}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px}
+
+.container{max-width:800px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.card-title{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;color:#1a3a6b}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-row.col3{grid-template-columns:1fr 1fr 1fr}
+.form-row.col1{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column}
+.form-group label{font-size:12px;font-weight:600;color:#555;margin-bottom:4px}
+.form-group input,.form-group select,.form-group textarea{padding:8px 10px;border:1.5px solid #d0d5dd;border-radius:8px;font-size:14px;transition:border-color .15s;background:#fff}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#2f5496;box-shadow:0 0 0 3px rgba(47,84,150,.1)}
+.form-group textarea{resize:vertical;min-height:60px}
+.form-group .helper{font-size:11px;color:#999;margin-top:2px}
+
+.result-box{margin-top:10px;padding:12px;border-radius:8px;font-size:14px}
+.result-box.normal{background:#e8f5e9;border:1px solid #a5d6a7}
+.result-box.over{background:#fce4ec;border:1px solid #ef9a9a}
+
+.tabs{display:flex;gap:0;border-bottom:2px solid #e0e0e0;margin-bottom:16px}
+.tab{padding:10px 18px;font-size:13px;font-weight:600;color:#777;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-2px}
+.tab.active{color:#2f5496;border-bottom-color:#2f5496}
+.tab:hover{color:#1a3a6b}
+
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f5f7fa;color:#555;font-weight:700;padding:10px 8px;text-align:left;border-bottom:2px solid #e0e0e0;white-space:nowrap;position:sticky;top:0}
+td{padding:8px;border-bottom:1px solid #eee}
+tr:hover td{background:#f8f9ff}
+
+.status{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700}
+.status.draft{background:#eee;color:#777}
+.status.pending{background:#fff3e0;color:#e65100}
+.status.approved{background:#e8f5e9;color:#2e7d32}
+.status.rejected{background:#fce4ec;color:#c62828}
+
+.login-card{max-width:400px;margin:40px auto}
+.login-card input{font-size:16px;padding:12px;text-align:center}
+
+.dm-table tr{cursor:pointer}
+.dm-table tr.selected{background:#e3f2fd}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:12px;padding:20px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal h3{margin-bottom:12px;color:#1a3a6b}
+
+.badge{display:inline-block;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;margin:2px}
+.badge-info{background:#e3f2fd;color:#1565c0}
+.badge-warn{background:#fff3e0;color:#e65100}
+.badge-ok{background:#e8f5e9;color:#2e7d32}
+
+.flex-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mt-8{margin-top:8px}
+.mb-8{margin-bottom:8px}
+.text-right{text-align:right}
+.text-center{text-align:center}
+.text-sm{font-size:12px}
+.text-muted{color:#888}
+
+/* Mobile */
+@media(max-width:600px){
+  .form-row{grid-template-columns:1fr}
+  .form-row.col3{grid-template-columns:1fr 1fr}
+  .container{padding:8px}
+  .card{padding:12px;margin-bottom:8px}
+  .tabs{overflow-x:auto}
+}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:8px;color:#fff;font-weight:600;font-size:14px;z-index:300;animation:slideUp .3s ease;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.toast.success{background:#2e7d32}
+.toast.error{background:#d32f2f}
+@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* Định mức highlight */
+.dm-highlight{background:#fffde7;border:2px solid #ffc107;border-radius:8px;padding:10px;margin:8px 0;font-size:13px}
+.dm-highlight strong{color:#f57c00}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div>
+    <h1>🧾 Công tác phí · Khai báo</h1>
+    <span class="ver">v1.0 · BETA</span>
+  </div>
+  <div class="user-bar">
+    <span id="userName">---</span>
+    <span class="role-badge" id="userRole">---</span>
+    <button class="btn btn-sm btn-outline" onclick="doLogout()" style="color:#fff;border-color:rgba(255,255,255,.5)">↪</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- LOGIN -->
+  <div class="card login-card" id="loginBox">
+    <div class="card-title">🔐 Đăng nhập</div>
+    <div class="form-group">
+      <label>Mã NV / Username</label>
+      <input type="text" id="loginMaNV" placeholder="Nhập mã NV..." onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="doLogin()">Đăng nhập</button>
+    <div style="margin-top:8px;font-size:11px;color:#999">Dùng mã NV từ Storelist. Demo: nhập <b>admin</b> để xem đủ quyền.</div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="mainApp" style="display:none">
+
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('declare')">📝 Khai báo</div>
+      <div class="tab" onclick="switchTab('history')">📋 Lịch sử</div>
+      <div class="tab" id="tabDuyet" onclick="switchTab('approve')" style="display:none">✅ Duyệt (<span id="pendingBadge">0</span>)</div>
+      <div class="tab" id="tabDM" onclick="switchTab('dinhmuc')" style="display:none">📐 Định mức</div>
+    </div>
+
+    <!-- TAB: KHAI BÁO -->
+    <div id="tab-declare">
+      <div class="card">
+        <div class="card-title">📝 KHAI BÁO CHUYẾN CÔNG TÁC</div>
+        <div class="dm-highlight" id="dmInfo" style="display:none">
+          📐 <strong>Định mức vùng:</strong> <span id="dmText">---</span>
+        </div>
+        <div class="form-row col3">
+          <div class="form-group">
+            <label>Ngày đi *</label>
+            <input type="date" id="ngayDi" onchange="autoCalc()">
+          </div>
+          <div class="form-group">
+            <label>Ngày về *</label>
+            <input type="date" id="ngayVe" onchange="autoCalc()">
+          </div>
+          <div class="form-group">
+            <label>Tháng phát sinh</label>
+            <select id="thangPS">
+              <option value="">Tự động</option>
+              <option>Tháng 1</option><option>Tháng 2</option><option>Tháng 3</option><option>Tháng 4</option>
+              <option>Tháng 5</option><option>Tháng 6</option><option>Tháng 7</option><option>Tháng 8</option>
+              <option>Tháng 9</option><option>Tháng 10</option><option>Tháng 11</option><option>Tháng 12</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nơi đi - Nơi đến *</label>
+            <input type="text" id="route" placeholder="VD: Hà Nội - Bắc Ninh" onchange="autoDetectDM()">
+            <span class="helper">Gõ tỉnh/thành phố đến → tự động tra định mức</span>
+          </div>
+          <div class="form-group">
+            <label>Tỉnh/TP đến (chính)</label>
+            <select id="tinhDen" onchange="autoDetectDM()">
+              <option value="">-- Chọn --</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row col3">
+          <div class="form-group">
+            <label>Số điểm công tác</label>
+            <input type="number" id="soDiemCT" value="1" min="1">
+          </div>
+          <div class="form-group">
+            <label>Số ngày tính CTP</label>
+            <input type="number" id="soNgayCTP" value="1" min="0" step="0.5" onchange="autoCalc()">
+          </div>
+          <div class="form-group">
+            <label>Số ngày tính KS</label>
+            <input type="number" id="soNgayKS" value="0" min="0" step="0.5" onchange="autoCalc()">
+          </div>
+        </div>
+
+        <div class="card-title" style="margin-top:8px">💵 CHI PHÍ</div>
+        <div class="form-row col3">
+          <div class="form-group">
+            <label>CTP/ngày (VNĐ)</label>
+            <input type="number" id="ctpNgay" value="150000" onchange="autoCalc()">
+            <span class="helper">Tự động theo định mức vùng</span>
+          </div>
+          <div class="form-group">
+            <label>CP Khách sạn/ngày (VNĐ)</label>
+            <input type="number" id="ksNgay" value="300000" onchange="autoCalc()">
+            <span class="helper">Tự động theo định mức vùng</span>
+          </div>
+          <div class="form-group">
+            <label>Số lít xăng</label>
+            <input type="number" id="litXang" value="0" onchange="autoCalc()">
+          </div>
+        </div>
+
+        <div class="form-row col3">
+          <div class="form-group">
+            <label>Xăng xe (VNĐ)</label>
+            <input type="number" id="cpXang" value="0" onchange="autoCalc()">
+            <span class="helper">Hoặc nhập số lít → tự nhân 20,000đ/lít</span>
+          </div>
+          <div class="form-group">
+            <label>Vé MB/xe/cầu đường (VNĐ)</label>
+            <input type="number" id="cpVe" value="0" onchange="autoCalc()">
+          </div>
+          <div class="form-group">
+            <label>Ghi chú chi phí vé</label>
+            <input type="text" id="noteVe" placeholder="VD: Vé MB HAN-SGN">
+          </div>
+        </div>
+
+        <div class="result-box normal" id="resultCalc" style="display:none">
+          📊 <strong>Tổng dự kiến:</strong>
+          CTP = <span id="calcCTP">0</span>đ ·
+          KS = <span id="calcKS">0</span>đ ·
+          Xăng = <span id="calcXang">0</span>đ ·
+          Vé = <span id="calcVe">0</span>đ ·
+          <strong style="font-size:16px">TỔNG: <span id="calcTotal">0</span>đ</strong>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Lý do công tác *</label>
+            <select id="lyDo">
+              <option value="">-- Chọn --</option>
+              <option>Visit CH</option>
+              <option>Họp BOD/ Lễ Hội của Công ty</option>
+              <option>Đào tạo</option>
+              <option>Hỗ trợ NSO</option>
+              <option>GHHC/ TKK/ Layout</option>
+              <option>Khác</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Phân nhóm công việc *</label>
+            <select id="phanNhom" onchange="autoSetLoai()">
+              <option value="">-- Chọn --</option>
+              <option>1. Checklist CH</option>
+              <option>2. Họp/ Đào tạo</option>
+              <option>3. Hỗ trợ CH: GHHC/ TKK/ Layout</option>
+              <option>4. Hỗ trợ NSO</option>
+              <option>5. Khác</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phương tiện di chuyển</label>
+            <select id="ptDiChuyen">
+              <option>Xe máy</option>
+              <option>Ô tô</option>
+              <option>Máy bay/ Taxi</option>
+              <option>Xe khách</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Ngoài KHCT đã gửi?</label>
+            <select id="ngoaiKHCT">
+              <option value="">---</option>
+              <option>Có</option>
+              <option>Không</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Ghi chú thêm</label>
+          <textarea id="ghiChu" rows="2" placeholder="Ghi chú bổ sung nếu cần..."></textarea>
+        </div>
+
+        <div class="flex-row" style="justify-content:flex-end;margin-top:12px;gap:10px">
+          <button class="btn btn-outline" onclick="saveDraft()">💾 Lưu nháp</button>
+          <button class="btn btn-primary" onclick="submitCTP()">📤 Gửi duyệt</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: LỊCH SỬ -->
+    <div id="tab-history" style="display:none">
+      <div class="card">
+        <div class="card-title">📋 LỊCH SỬ KHAI BÁO</div>
+        <div class="flex-row mb-8" style="justify-content:space-between">
+          <div class="flex-row">
+            <select id="filterThang" onchange="renderHistory()" style="padding:6px 10px;border-radius:6px;border:1px solid #d0d5dd">
+              <option value="all">Tất cả tháng</option>
+              <option>Tháng 7</option><option>Tháng 8</option><option>Tháng 9</option>
+              <option>Tháng 10</option><option>Tháng 11</option><option>Tháng 12</option>
+            </select>
+            <select id="filterStatus" onchange="renderHistory()" style="padding:6px 10px;border-radius:6px;border:1px solid #d0d5dd">
+              <option value="all">Tất cả trạng thái</option>
+              <option value="draft">Nháp</option>
+              <option value="pending">Chờ duyệt</option>
+              <option value="approved">Đã duyệt</option>
+              <option value="rejected">Từ chối</option>
+            </select>
+          </div>
+          <span class="text-sm text-muted" id="historyCount">0 chuyến</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ngày đi</th><th>Ngày về</th><th>Nơi đi-đến</th><th>Phân nhóm</th>
+                <th class="text-right">Tổng CP</th><th>Trạng thái</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: DUYỆT -->
+    <div id="tab-approve" style="display:none">
+      <div class="card">
+        <div class="card-title">✅ DUYỆT CÔNG TÁC PHÍ</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Người gửi</th><th>Ngày đi</th><th>Nơi đi-đến</th>
+                <th class="text-right">Tổng CP</th><th>Tháng</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="approveBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ĐỊNH MỨC -->
+    <div id="tab-dinhmuc" style="display:none">
+      <div class="card">
+        <div class="card-title">📐 BẢNG ĐỊNH MỨC CÔNG TÁC PHÍ</div>
+        <div class="flex-row mb-8">
+          <input type="text" id="dmSearch" placeholder="🔍 Tìm tỉnh/vùng..." oninput="renderDinhMuc()" style="padding:6px 10px;border-radius:6px;border:1px solid #d0d5dd;flex:1">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tỉnh / Vùng</th><th class="text-right">CTP/ngày (đ)</th><th class="text-right">KS/ngày (đ)</th>
+                <th class="text-center">Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody id="dmBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: Chi tiết chuyến -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal" id="detailContent"></div>
+</div>
+
+<script>
+// ========== DATA ==========
+const DEFAULT_DM = [
+  {tinh:'Hà Nội',ctp:150000,ks:400000,note:'Nội tỉnh'},
+  {tinh:'Hà Nội → tỉnh khác',ctp:250000,ks:450000,note:'Ngoại tỉnh gần'},
+  {tinh:'Miền núi phía Bắc',ctp:150000,ks:300000,note:'Hà Giang, Lào Cai, Điện Biên, Sơn La, Lai Châu, Cao Bằng, Bắc Kạn'},
+  {tinh:'Đồng bằng Bắc Bộ',ctp:150000,ks:400000,note:'Bắc Ninh, Bắc Giang, Hải Dương, Hưng Yên, Hà Nam, Nam Định, Thái Bình, Ninh Bình, Vĩnh Phúc, Phú Thọ, Thái Nguyên, Hòa Bình'},
+  {tinh:'Bắc Trung Bộ',ctp:150000,ks:400000,note:'Thanh Hóa, Nghệ An, Hà Tĩnh, Quảng Bình, Quảng Trị'},
+  {tinh:'Trung Bộ',ctp:200000,ks:500000,note:'Huế, Đà Nẵng, Quảng Nam, Quảng Ngãi, Bình Định, Phú Yên, Khánh Hòa'},
+  {tinh:'Tây Nguyên',ctp:150000,ks:400000,note:'Kon Tum, Gia Lai, Đắk Lắk, Đắk Nông, Lâm Đồng'},
+  {tinh:'Đông Nam Bộ',ctp:200000,ks:500000,note:'TP HCM, Bình Dương, Đồng Nai, Bà Rịa-Vũng Tàu, Bình Phước, Tây Ninh'},
+  {tinh:'Tây Nam Bộ',ctp:200000,ks:500000,note:'Long An, Tiền Giang, Bến Tre, Trà Vinh, Vĩnh Long, Đồng Tháp, Cần Thơ, Sóc Trăng, Bạc Liêu, Cà Mau, Kiên Giang, An Giang, Hậu Giang'},
+  {tinh:'Hải Phòng / Quảng Ninh',ctp:200000,ks:450000,note:'Ven biển Đông Bắc'},
+  {tinh:'Lạng Sơn',ctp:150000,ks:350000,note:'Biên giới Đông Bắc'},
+  {tinh:'Ninh Thuận / Bình Thuận',ctp:200000,ks:450000,note:'Duyên hải Nam Trung Bộ'},
+];
+
+const PROVINCE_LIST = [
+  'Hà Nội','Hà Giang','Cao Bằng','Bắc Kạn','Tuyên Quang','Lào Cai','Điện Biên','Lai Châu','Sơn La','Yên Bái',
+  'Hòa Bình','Thái Nguyên','Lạng Sơn','Quảng Ninh','Bắc Giang','Phú Thọ','Vĩnh Phúc','Bắc Ninh','Hải Dương',
+  'Hải Phòng','Hưng Yên','Thái Bình','Hà Nam','Nam Định','Ninh Bình','Thanh Hóa','Nghệ An','Hà Tĩnh',
+  'Quảng Bình','Quảng Trị','Thừa Thiên Huế','Đà Nẵng','Quảng Nam','Quảng Ngãi','Bình Định','Phú Yên',
+  'Khánh Hòa','Ninh Thuận','Bình Thuận','Kon Tum','Gia Lai','Đắk Lắk','Đắk Nông','Lâm Đồng',
+  'Bình Phước','Tây Ninh','Bình Dương','Đồng Nai','Bà Rịa - Vũng Tàu','TP HCM','Long An','Tiền Giang',
+  'Bến Tre','Trà Vinh','Vĩnh Long','Đồng Tháp','An Giang','Kiên Giang','Cần Thơ','Hậu Giang','Sóc Trăng',
+  'Bạc Liêu','Cà Mau'
+];
+
+const PHAN_NHOM = ['1. Checklist CH','2. Họp/ Đào tạo','3. Hỗ trợ CH: GHHC/ TKK/ Layout','4. Hỗ trợ NSO','5. Khác'];
+
+// ========== STATE ==========
+let currentUser = null;
+let currentTab = 'declare';
+let ctpData = JSON.parse(localStorage.getItem('ctp_data') || '[]');
+let dmData = JSON.parse(localStorage.getItem('ctp_dm') || 'null') || DEFAULT_DM;
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded', () => {
+  // Populate tỉnh dropdown
+  const sel = document.getElementById('tinhDen');
+  PROVINCE_LIST.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p; opt.textContent = p;
+    sel.appendChild(opt);
+  });
+
+  // Check auto-login
+  const saved = localStorage.getItem('ctp_user');
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      showApp();
+    } catch(e) {}
+  }
+
+  // Lưu DM mặc định nếu chưa có
+  if (!localStorage.getItem('ctp_dm')) {
+    localStorage.setItem('ctp_dm', JSON.stringify(DEFAULT_DM));
+  }
+});
+
+// ========== AUTH ==========
+function doLogin() {
+  const maNV = document.getElementById('loginMaNV').value.trim();
+  if (!maNV) return toast('Vui lòng nhập mã NV', 'error');
+
+  let user;
+  if (maNV.toLowerCase() === 'admin') {
+    user = { maNV:'admin', hoTen:'Admin', chucVu:'GĐM', gdv:'Ban Giám Đốc', role:'gdm' };
+  } else if (maNV.toLowerCase() === 'gdv') {
+    user = { maNV:'gdv', hoTen:'GĐV Demo', chucVu:'GĐV', gdv:'Nguyễn Mạnh Sơn', role:'gdv' };
+  } else {
+    // Normal user - check from Storelist would happen here
+    user = { maNV, hoTen:'NV ' + maNV, chucVu:'QLKV', gdv:'Chưa xác định', role:'nv' };
+  }
+
+  currentUser = user;
+  localStorage.setItem('ctp_user', JSON.stringify(user));
+  showApp();
+  toast('✅ Đăng nhập thành công!', 'success');
+}
+
+function doLogout() {
+  localStorage.removeItem('ctp_user');
+  currentUser = null;
+  document.getElementById('loginBox').style.display = 'block';
+  document.getElementById('mainApp').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  document.getElementById('userName').textContent = currentUser.hoTen;
+  document.getElementById('userRole').textContent = currentUser.chucVu;
+
+  // Show/hide tabs by role
+  const isManager = ['gdm','gdv'].includes(currentUser.role);
+  document.getElementById('tabDuyet').style.display = isManager ? '' : 'none';
+  document.getElementById('tabDM').style.display = isManager ? '' : 'none';
+
+  renderHistory();
+  renderApprove();
+  renderDinhMuc();
+  updatePendingBadge();
+}
+
+// ========== TAB SWITCH ==========
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('[id^="tab-"]').forEach(d => d.style.display = 'none');
+
+  document.getElementById('tab-' + tab).style.display = 'block';
+  document.querySelector('.tab:nth-child(' + (
+    tab==='declare'?1 : tab==='history'?2 : tab==='approve'?3 : 4
+  ) + ')')?.classList.add('active');
+
+  if (tab === 'history') renderHistory();
+  if (tab === 'approve') renderApprove();
+  if (tab === 'dinhmuc') renderDinhMuc();
+}
+
+// ========== ĐỊNH MỨC AUTO-DETECT ==========
+function autoDetectDM() {
+  const route = document.getElementById('route').value.trim();
+  const tinhDen = document.getElementById('tinhDen').value;
+
+  let searchText = tinhDen || route;
+  if (!searchText) {
+    document.getElementById('dmInfo').style.display = 'none';
+    return;
+  }
+
+  // Try match with DM table
+  let matched = null;
+  for (const dm of dmData) {
+    if (searchText.toLowerCase().includes(dm.tinh.toLowerCase()) ||
+        dm.tinh.toLowerCase().includes(searchText.toLowerCase())) {
+      matched = dm;
+      break;
+    }
+  }
+
+  // Also try province-level matching
+  if (!matched) {
+    for (const prov of PROVINCE_LIST) {
+      if (searchText.toLowerCase().includes(prov.toLowerCase())) {
+        // Find which DM group this province belongs to
+        for (const dm of dmData) {
+          if (dm.note && dm.note.toLowerCase().includes(prov.toLowerCase())) {
+            matched = dm;
+            break;
+          }
+        }
+        if (!matched) {
+          // Default based on region
+          matched = { tinh: prov, ctp: 150000, ks: 400000, note: 'Mặc định' };
+        }
+        break;
+      }
+    }
+  }
+
+  if (matched) {
+    document.getElementById('dmInfo').style.display = 'block';
+    document.getElementById('dmText').innerHTML =
+      `${matched.tinh}: <strong>CTP ${matched.ctp.toLocaleString()}đ/ngày</strong> · KS ${matched.ks.toLocaleString()}đ/ngày` +
+      (matched.note ? ` <span style="color:#888">(${matched.note})</span>` : '');
+    document.getElementById('ctpNgay').value = matched.ctp;
+    document.getElementById('ksNgay').value = matched.ks;
+  } else {
+    document.getElementById('dmInfo').style.display = 'none';
+  }
+
+  autoCalc();
+}
+
+// ========== AUTO CALC ==========
+function autoCalc() {
+  const ngayCTP = parseFloat(document.getElementById('soNgayCTP').value) || 0;
+  const ngayKS = parseFloat(document.getElementById('soNgayKS').value) || 0;
+  const ctpNgay = parseFloat(document.getElementById('ctpNgay').value) || 0;
+  const ksNgay = parseFloat(document.getElementById('ksNgay').value) || 0;
+  const litXang = parseFloat(document.getElementById('litXang').value) || 0;
+  const cpVe = parseFloat(document.getElementById('cpVe').value) || 0;
+
+  const cpXang = litXang > 0 ? litXang * 20000 : (parseFloat(document.getElementById('cpXang').value) || 0);
+  if (litXang > 0) document.getElementById('cpXang').value = cpXang;
+
+  const totalCTP = ngayCTP * ctpNgay;
+  const totalKS = ngayKS * ksNgay;
+  const total = totalCTP + totalKS + cpXang + cpVe;
+
+  document.getElementById('resultCalc').style.display = 'block';
+  document.getElementById('calcCTP').textContent = totalCTP.toLocaleString();
+  document.getElementById('calcKS').textContent = totalKS.toLocaleString();
+  document.getElementById('calcXang').textContent = cpXang.toLocaleString();
+  document.getElementById('calcVe').textContent = cpVe.toLocaleString();
+  document.getElementById('calcTotal').textContent = total.toLocaleString();
+
+  // Auto-calc days from dates
+  const di = document.getElementById('ngayDi').value;
+  const ve = document.getElementById('ngayVe').value;
+  if (di && ve) {
+    const d1 = new Date(di), d2 = new Date(ve);
+    const days = Math.max(1, Math.ceil((d2 - d1) / 86400000) + 1);
+    document.getElementById('soNgayCTP').value = days;
+    document.getElementById('soNgayKS').value = Math.max(0, days - 1);
+    autoCalc(); // re-calc with new values
+  }
+
+  // Auto tháng
+  if (di && !document.getElementById('thangPS').value) {
+    const m = new Date(di).getMonth() + 1;
+    document.getElementById('thangPS').value = `Tháng ${m}`;
+  }
+}
+
+// ========== SUBMIT ==========
+function saveDraft() {
+  const record = buildRecord();
+  record.status = 'draft';
+  record.id = 'CTP-' + Date.now();
+  record.createdBy = currentUser.maNV;
+  record.createdName = currentUser.hoTen;
+  record.createdAt = new Date().toISOString();
+
+  ctpData.unshift(record);
+  saveData();
+  toast('✅ Đã lưu nháp!', 'success');
+  resetForm();
+  renderHistory();
+}
+
+function submitCTP() {
+  const record = buildRecord();
+  if (!record.ngayDi || !record.route || !record.phanNhom) {
+    return toast('⚠️ Vui lòng điền đầy đủ: Ngày đi, Nơi đi-đến, Phân nhóm', 'error');
+  }
+
+  record.status = 'pending';
+  record.id = 'CTP-' + Date.now();
+  record.createdBy = currentUser.maNV;
+  record.createdName = currentUser.hoTen;
+  record.createdAt = new Date().toISOString();
+  record.approvals = [];
+
+  ctpData.unshift(record);
+  saveData();
+  toast('✅ Đã gửi duyệt!', 'success');
+  resetForm();
+  renderHistory();
+  renderApprove();
+  updatePendingBadge();
+}
+
+function buildRecord() {
+  return {
+    ngayDi: document.getElementById('ngayDi').value,
+    ngayVe: document.getElementById('ngayVe').value,
+    thangPS: document.getElementById('thangPS').value || ('Tháng ' + (new Date(document.getElementById('ngayDi').value).getMonth() + 1)),
+    route: document.getElementById('route').value.trim(),
+    tinhDen: document.getElementById('tinhDen').value,
+    soDiemCT: parseInt(document.getElementById('soDiemCT').value) || 1,
+    soNgayCTP: parseFloat(document.getElementById('soNgayCTP').value) || 0,
+    soNgayKS: parseFloat(document.getElementById('soNgayKS').value) || 0,
+    ctpNgay: parseFloat(document.getElementById('ctpNgay').value) || 0,
+    ksNgay: parseFloat(document.getElementById('ksNgay').value) || 0,
+    cpXang: parseFloat(document.getElementById('cpXang').value) || 0,
+    cpVe: parseFloat(document.getElementById('cpVe').value) || 0,
+    noteVe: document.getElementById('noteVe').value.trim(),
+    totalCTP: (parseFloat(document.getElementById('soNgayCTP').value)||0) * (parseFloat(document.getElementById('ctpNgay').value)||0),
+    totalKS: (parseFloat(document.getElementById('soNgayKS').value)||0) * (parseFloat(document.getElementById('ksNgay').value)||0),
+    tongCP: parseFloat(document.getElementById('calcTotal').textContent.replace(/,/g,'')) || 0,
+    lyDo: document.getElementById('lyDo').value,
+    phanNhom: document.getElementById('phanNhom').value,
+    ptDiChuyen: document.getElementById('ptDiChuyen').value,
+    ngoaiKHCT: document.getElementById('ngoaiKHCT').value,
+    ghiChu: document.getElementById('ghiChu').value.trim(),
+    status: 'pending'
+  };
+}
+
+function resetForm() {
+  ['ngayDi','ngayVe','route','soDiemCT','soNgayCTP','soNgayKS','ctpNgay','ksNgay','litXang','cpXang','cpVe','noteVe','ghiChu'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '';
+  });
+  document.getElementById('soDiemCT').value = '1';
+  document.getElementById('soNgayCTP').value = '1';
+  document.getElementById('soNgayKS').value = '0';
+  document.getElementById('ctpNgay').value = '150000';
+  document.getElementById('ksNgay').value = '300000';
+  document.getElementById('lyDo').selectedIndex = 0;
+  document.getElementById('phanNhom').selectedIndex = 0;
+  document.getElementById('resultCalc').style.display = 'none';
+  document.getElementById('dmInfo').style.display = 'none';
+}
+
+function saveData() {
+  localStorage.setItem('ctp_data', JSON.stringify(ctpData));
+  localStorage.setItem('ctp_dm', JSON.stringify(dmData));
+}
+
+// ========== HISTORY ==========
+function renderHistory() {
+  const tbody = document.getElementById('historyBody');
+  const filterThang = document.getElementById('filterThang')?.value || 'all';
+  const filterStatus = document.getElementById('filterStatus')?.value || 'all';
+
+  let filtered = ctpData;
+  if (currentUser.role === 'nv') {
+    filtered = filtered.filter(r => r.createdBy === currentUser.maNV);
+  }
+  if (filterThang !== 'all') filtered = filtered.filter(r => r.thangPS === filterThang);
+  if (filterStatus !== 'all') filtered = filtered.filter(r => r.status === filterStatus);
+
+  document.getElementById('historyCount').textContent = filtered.length + ' chuyến';
+
+  tbody.innerHTML = filtered.map(r => `
+    <tr>
+      <td>${r.ngayDi || '-'}</td>
+      <td>${r.ngayVe || '-'}</td>
+      <td>${r.route || '-'}</td>
+      <td><span class="badge badge-info">${r.phanNhom || '-'}</span></td>
+      <td class="text-right"><strong>${(r.tongCP||0).toLocaleString()}đ</strong></td>
+      <td><span class="status ${r.status}">${statusLabel(r.status)}</span></td>
+      <td><button class="btn btn-xs btn-outline" onclick="viewDetail('${r.id}')">👁</button></td>
+    </tr>
+  `).join('') || '<tr><td colspan="7" class="text-center text-muted">Chưa có chuyến công tác nào</td></tr>';
+}
+
+// ========== APPROVE ==========
+function renderApprove() {
+  const tbody = document.getElementById('approveBody');
+  if (!['gdm','gdv'].includes(currentUser.role)) return;
+
+  const pending = ctpData.filter(r => r.status === 'pending');
+  tbody.innerHTML = pending.map(r => `
+    <tr>
+      <td>${r.createdName} <span class="text-sm text-muted">(${r.createdBy})</span></td>
+      <td>${r.ngayDi}</td>
+      <td>${r.route || '-'}</td>
+      <td class="text-right"><strong>${(r.tongCP||0).toLocaleString()}đ</strong></td>
+      <td>${r.thangPS}</td>
+      <td>
+        <div class="flex-row" style="gap:4px">
+          <button class="btn btn-xs btn-success" onclick="approveCTP('${r.id}')">✓ Duyệt</button>
+          <button class="btn btn-xs btn-danger" onclick="rejectCTP('${r.id}')">✗ Từ chối</button>
+          <button class="btn btn-xs btn-outline" onclick="viewDetail('${r.id}')">👁</button>
+        </div>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" class="text-center text-muted">Không có yêu cầu chờ duyệt</td></tr>';
+}
+
+function approveCTP(id) {
+  const idx = ctpData.findIndex(r => r.id === id);
+  if (idx < 0) return;
+  ctpData[idx].status = 'approved';
+  ctpData[idx].approvedBy = currentUser.hoTen;
+  ctpData[idx].approvedAt = new Date().toISOString();
+  ctpData[idx].approvals = ctpData[idx].approvals || [];
+  ctpData[idx].approvals.push({ by: currentUser.hoTen, role: currentUser.role, at: new Date().toISOString(), action: 'approved' });
+  saveData();
+  renderApprove();
+  renderHistory();
+  updatePendingBadge();
+  toast('✅ Đã duyệt!', 'success');
+}
+
+function rejectCTP(id) {
+  const reason = prompt('Lý do từ chối:');
+  if (reason === null) return;
+  const idx = ctpData.findIndex(r => r.id === id);
+  if (idx < 0) return;
+  ctpData[idx].status = 'rejected';
+  ctpData[idx].rejectedBy = currentUser.hoTen;
+  ctpData[idx].rejectedAt = new Date().toISOString();
+  ctpData[idx].rejectReason = reason;
+  saveData();
+  renderApprove();
+  renderHistory();
+  updatePendingBadge();
+  toast('Đã từ chối', 'error');
+}
+
+function updatePendingBadge() {
+  const count = ctpData.filter(r => r.status === 'pending').length;
+  document.getElementById('pendingBadge').textContent = count;
+}
+
+// ========== DETAIL MODAL ==========
+function viewDetail(id) {
+  const r = ctpData.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('detailContent').innerHTML = `
+    <h3>🧾 Chi tiết CTP #${r.id}</h3>
+    <div style="font-size:13px;line-height:1.8">
+      <div><strong>Người tạo:</strong> ${r.createdName} (${r.createdBy})</div>
+      <div><strong>Ngày đi:</strong> ${r.ngayDi} → <strong>Ngày về:</strong> ${r.ngayVe}</div>
+      <div><strong>Hành trình:</strong> ${r.route}</div>
+      <div><strong>Tỉnh đến:</strong> ${r.tinhDen || '-'}</div>
+      <div><strong>Tháng:</strong> ${r.thangPS} | <strong>Điểm CT:</strong> ${r.soDiemCT}</div>
+      <hr>
+      <div>📐 <strong>Định mức:</strong> CTP ${(r.ctpNgay||0).toLocaleString()}đ/ngày · KS ${(r.ksNgay||0).toLocaleString()}đ/ngày</div>
+      <div>📅 Ngày CTP: ${r.soNgayCTP} · Ngày KS: ${r.soNgayKS}</div>
+      <div>💰 CTP: ${(r.totalCTP||0).toLocaleString()}đ · KS: ${(r.totalKS||0).toLocaleString()}đ · Xăng: ${(r.cpXang||0).toLocaleString()}đ · Vé: ${(r.cpVe||0).toLocaleString()}đ</div>
+      <div style="font-size:16px;color:#2e7d32;font-weight:700">TỔNG: ${(r.tongCP||0).toLocaleString()}đ</div>
+      <hr>
+      <div><strong>Lý do:</strong> ${r.lyDo || '-'}</div>
+      <div><strong>Phân nhóm:</strong> ${r.phanNhom || '-'}</div>
+      <div><strong>Phương tiện:</strong> ${r.ptDiChuyen} | <strong>Ngoài KHCT:</strong> ${r.ngoaiKHCT || '-'}</div>
+      <div><strong>Trạng thái:</strong> <span class="status ${r.status}">${statusLabel(r.status)}</span></div>
+      ${r.approvals ? r.approvals.map(a => `<div>✅ ${a.by} (${a.role}) duyệt lúc ${new Date(a.at).toLocaleString('vi-VN')}</div>`).join('') : ''}
+      ${r.rejectReason ? `<div style="color:#c62828">❌ Từ chối: ${r.rejectReason}</div>` : ''}
+      <div><strong>Ghi chú:</strong> ${r.ghiChu || '-'}</div>
+    </div>
+    <div class="flex-row" style="justify-content:flex-end;margin-top:12px">
+      ${r.status === 'draft' ? `<button class="btn btn-sm btn-primary" onclick="resubmitCTP('${r.id}')">📤 Gửi duyệt</button>` : ''}
+      <button class="btn btn-sm btn-outline" onclick="closeModal()">Đóng</button>
+    </div>
+  `;
+  document.getElementById('detailModal').classList.add('show');
+}
+
+function resubmitCTP(id) {
+  const idx = ctpData.findIndex(r => r.id === id);
+  if (idx < 0) return;
+  ctpData[idx].status = 'pending';
+  saveData();
+  closeModal();
+  renderHistory();
+  renderApprove();
+  updatePendingBadge();
+  toast('✅ Đã gửi duyệt!', 'success');
+}
+
+function closeModal() {
+  document.getElementById('detailModal').classList.remove('show');
+}
+
+// ========== ĐỊNH MỨC ==========
+function renderDinhMuc() {
+  const search = (document.getElementById('dmSearch')?.value || '').toLowerCase();
+  let filtered = dmData;
+  if (search) {
+    filtered = dmData.filter(d =>
+      d.tinh.toLowerCase().includes(search) ||
+      (d.note && d.note.toLowerCase().includes(search))
+    );
+  }
+
+  document.getElementById('dmBody').innerHTML = filtered.map((d, i) => `
+    <tr class="dm-table" onclick="editDinhMuc(${i})">
+      <td><strong>${d.tinh}</strong></td>
+      <td class="text-right">${(d.ctp||0).toLocaleString()}</td>
+      <td class="text-right">${(d.ks||0).toLocaleString()}</td>
+      <td class="text-center text-sm text-muted">${d.note || ''}</td>
+    </tr>
+  `).join('');
+}
+
+function editDinhMuc(idx) {
+  const d = dmData[idx];
+  const newCtp = prompt(`CTP/ngày cho "${d.tinh}":`, d.ctp);
+  if (newCtp === null) return;
+  const newKs = prompt(`KS/ngày cho "${d.tinh}":`, d.ks);
+  if (newKs === null) return;
+  dmData[idx].ctp = parseInt(newCtp) || d.ctp;
+  dmData[idx].ks = parseInt(newKs) || d.ks;
+  saveData();
+  renderDinhMuc();
+  toast('✅ Đã cập nhật định mức!', 'success');
+}
+
+// ========== UTILS ==========
+function statusLabel(s) {
+  const map = { draft: 'Nháp', pending: 'Chờ duyệt', approved: 'Đã duyệt', rejected: 'Từ chối' };
+  return map[s] || s;
+}
+
+function toast(msg, type) {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2500);
+}
+</script>
+</body>
+</html>
