@@ -178,9 +178,9 @@ tr:hover td{background:#f8f9ff}
           </div>
           <div class="form-group">
             <label>Chức vụ *</label>
-            <select id="chucVuCT">
+            <select id="chucVuCT" onchange="autoDetectDM()">
               <option value="">-- Chọn --</option>
-              <option>CHT-NVCH</option>
+              <option>CHT</option>
               <option>QLKV</option>
               <option>HCV</option>
               <option>GĐV</option>
@@ -418,19 +418,26 @@ tr:hover td{background:#f8f9ff}
 
 <script>
 // ========== DATA ==========
+// Định mức CTP theo chức vụ (từ data T7-T9/2026)
+const DM_BY_CHUCVU = {
+  'CHT-NVCH': { ctp: 150000, ks: 300000 },
+  'QLKV':     { ctp: 200000, ks: 400000 },
+  'HCV':      { ctp: 250000, ks: 450000 },
+  'GĐV':      { ctp: 250000, ks: 500000 },
+  'GĐM':      { ctp: 300000, ks: 600000 },
+};
+
 const DEFAULT_DM = [
-  {tinh:'Hà Nội',ctp:150000,ks:400000,note:'Nội tỉnh'},
-  {tinh:'Hà Nội → tỉnh khác',ctp:250000,ks:450000,note:'Ngoại tỉnh gần'},
-  {tinh:'Miền núi phía Bắc',ctp:150000,ks:300000,note:'Hà Giang, Lào Cai, Điện Biên, Sơn La, Lai Châu, Cao Bằng, Bắc Kạn'},
-  {tinh:'Đồng bằng Bắc Bộ',ctp:150000,ks:400000,note:'Bắc Ninh, Bắc Giang, Hải Dương, Hưng Yên, Hà Nam, Nam Định, Thái Bình, Ninh Bình, Vĩnh Phúc, Phú Thọ, Thái Nguyên, Hòa Bình'},
-  {tinh:'Bắc Trung Bộ',ctp:150000,ks:400000,note:'Thanh Hóa, Nghệ An, Hà Tĩnh, Quảng Bình, Quảng Trị'},
-  {tinh:'Trung Bộ',ctp:200000,ks:500000,note:'Huế, Đà Nẵng, Quảng Nam, Quảng Ngãi, Bình Định, Phú Yên, Khánh Hòa'},
-  {tinh:'Tây Nguyên',ctp:150000,ks:400000,note:'Kon Tum, Gia Lai, Đắk Lắk, Đắk Nông, Lâm Đồng'},
-  {tinh:'Đông Nam Bộ',ctp:200000,ks:500000,note:'TP HCM, Bình Dương, Đồng Nai, Bà Rịa-Vũng Tàu, Bình Phước, Tây Ninh'},
-  {tinh:'Tây Nam Bộ',ctp:200000,ks:500000,note:'Long An, Tiền Giang, Bến Tre, Trà Vinh, Vĩnh Long, Đồng Tháp, Cần Thơ, Sóc Trăng, Bạc Liêu, Cà Mau, Kiên Giang, An Giang, Hậu Giang'},
-  {tinh:'Hải Phòng / Quảng Ninh',ctp:200000,ks:450000,note:'Ven biển Đông Bắc'},
-  {tinh:'Lạng Sơn',ctp:150000,ks:350000,note:'Biên giới Đông Bắc'},
-  {tinh:'Ninh Thuận / Bình Thuận',ctp:200000,ks:450000,note:'Duyên hải Nam Trung Bộ'},
+  {tinh:'Miền núi phía Bắc',note:'Hà Giang, Lào Cai, Điện Biên, Sơn La, Lai Châu, Cao Bằng, Bắc Kạn'},
+  {tinh:'Đồng bằng Bắc Bộ',note:'Bắc Ninh, Bắc Giang, Hải Dương, Hưng Yên, Hà Nam, Nam Định, Thái Bình, Ninh Bình, Vĩnh Phúc, Phú Thọ, Thái Nguyên, Hòa Bình'},
+  {tinh:'Hà Nội',note:'Nội thành + ngoại thành'},
+  {tinh:'Bắc Trung Bộ',note:'Thanh Hóa, Nghệ An, Hà Tĩnh, Quảng Bình, Quảng Trị'},
+  {tinh:'Trung Bộ',note:'Huế, Đà Nẵng, Quảng Nam, Quảng Ngãi, Bình Định, Phú Yên, Khánh Hòa'},
+  {tinh:'Tây Nguyên',note:'Kon Tum, Gia Lai, Đắk Lắk, Đắk Nông, Lâm Đồng'},
+  {tinh:'Đông Nam Bộ',note:'TP HCM, Bình Dương, Đồng Nai, Bà Rịa-Vũng Tàu, Bình Phước, Tây Ninh'},
+  {tinh:'Tây Nam Bộ',note:'Long An, Tiền Giang, Bến Tre, Trà Vinh, Vĩnh Long, Đồng Tháp, Cần Thơ, Sóc Trăng, Bạc Liêu, Cà Mau, Kiên Giang'},
+  {tinh:'Hải Phòng / Quảng Ninh',note:'Ven biển Đông Bắc'},
+  {tinh:'Lạng Sơn',note:'Biên giới Đông Bắc'},
 ];
 
 const PROVINCE_LIST = [
@@ -579,13 +586,18 @@ function autoDetectDM() {
     }
   }
 
+  // Get định mức theo chức vụ
+  const cv = document.getElementById('chucVuCT').value;
+  const rate = DM_BY_CHUCVU[cv] || DM_BY_CHUCVU['CHT-NVCH'];
+  
   if (matched) {
     document.getElementById('dmInfo').style.display = 'block';
     document.getElementById('dmText').innerHTML =
-      `${matched.tinh}: <strong>CTP ${matched.ctp.toLocaleString()}đ/ngày</strong> · KS ${matched.ks.toLocaleString()}đ/ngày` +
-      (matched.note ? ` <span style="color:#888">(${matched.note})</span>` : '');
-    document.getElementById('ctpNgay').value = matched.ctp;
-    document.getElementById('ksNgay').value = matched.ks;
+      `${matched.tinh}: <strong>CTP ${rate.ctp.toLocaleString()}đ/ngày</strong> · KS ${rate.ks.toLocaleString()}đ/ngày` +
+      (matched.note ? ` <span style="color:#888">(${matched.note})</span>` : '') +
+      ` <span style="color:#2f5496">[${cv || 'CHT-NVCH'}]</span>`;
+    document.getElementById('ctpNgay').value = rate.ctp;
+    document.getElementById('ksNgay').value = rate.ks;
   } else {
     document.getElementById('dmInfo').style.display = 'none';
   }
@@ -712,8 +724,10 @@ function resetForm() {
   document.getElementById('soDiemCT').value = '1';
   document.getElementById('soNgayCTP').value = '1';
   document.getElementById('soNgayKS').value = '0';
-  document.getElementById('ctpNgay').value = '150000';
-  document.getElementById('ksNgay').value = '300000';
+  const cv = document.getElementById('chucVuCT').value;
+  const rate = DM_BY_CHUCVU[cv] || DM_BY_CHUCVU['CHT-NVCH'];
+  document.getElementById('ctpNgay').value = rate.ctp;
+  document.getElementById('ksNgay').value = rate.ks;
   document.getElementById('selMien').selectedIndex = 0; document.getElementById('selGDV').innerHTML = '<option value="">-- Chọn GĐV --</option>'; document.getElementById('selCH').innerHTML = '<option value="">-- Chọn CH --</option>';
   document.getElementById('maNV').value = '';
   document.getElementById('hoTenCT').value = '';
