@@ -108,7 +108,7 @@ tr:hover td{background:#f8f9ff}
 <div class="app-header">
   <div>
     <h1>🧾 Công tác phí · Khai báo</h1>
-    <span class="ver">v1.3 · BETA</span>
+    <span class="ver">v1.4 · BETA</span>
   </div>
   <div class="user-bar">
     <span id="userName">---</span>
@@ -147,12 +147,24 @@ tr:hover td{background:#f8f9ff}
         <div class="card-title">📝 KHAI BÁO CHUYẾN CÔNG TÁC</div>
         
         <div class="card-title" style="font-size:13px;margin-top:4px">👤 THÔNG TIN NGƯỜI CÔNG TÁC</div>
-        <div class="form-row">
+        <div class="form-row col3">
           <div class="form-group">
-            <label>Mã CH *</label>
-            <input type="text" id="maCH" placeholder="Nhập mã CH hoặc tên cửa hàng..." oninput="searchStore(this.value)" list="storeList">
-            <div id="storeSuggestions" style="display:none;position:absolute;background:#fff;border:1px solid #ddd;border-radius:8px;max-height:200px;overflow-y:auto;z-index:10;width:100%;box-shadow:0 4px 12px rgba(0,0,0,.1)"></div>
-            <span class="helper">Gõ mã hoặc tên CH → tự động gợi ý từ Storelist</span>
+            <label>Miền *</label>
+            <select id="selMien" onchange="onMienChange()">
+              <option value="">-- Chọn Miền --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>GĐV *</label>
+            <select id="selGDV" onchange="onGDVChange()">
+              <option value="">-- Chọn GĐV --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>CH *</label>
+            <select id="selCH" onchange="onCHChange()">
+              <option value="">-- Chọn CH --</option>
+            </select>
           </div>
         </div>
         <div class="form-row col3">
@@ -662,7 +674,7 @@ function submitCTP() {
 
 function buildRecord() {
   return {
-    maCH: document.getElementById('maCH').value.trim(),
+    maCH: document.getElementById('selCH').value,
     maNV: document.getElementById('maNV').value.trim(),
     hoTenCT: document.getElementById('hoTenCT').value.trim(),
     chucVuCT: document.getElementById('chucVuCT').value,
@@ -702,7 +714,7 @@ function resetForm() {
   document.getElementById('soNgayKS').value = '0';
   document.getElementById('ctpNgay').value = '150000';
   document.getElementById('ksNgay').value = '300000';
-  document.getElementById('maCH').value = '';
+  document.getElementById('selMien').selectedIndex = 0; document.getElementById('selGDV').innerHTML = '<option value="">-- Chọn GĐV --</option>'; document.getElementById('selCH').innerHTML = '<option value="">-- Chọn CH --</option>';
   document.getElementById('maNV').value = '';
   document.getElementById('hoTenCT').value = '';
   document.getElementById('chucVuCT').selectedIndex = 0;
@@ -896,9 +908,11 @@ function statusLabel(s) {
 }
 
 
-// ========== STORELIST AUTOCOMPLETE ==========
+// ========== STORELIST CASCADE: Miền → GĐV → CH ==========
 const STORELIST_SHEET = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:csv&gid=900581387';
 let storeData = [];
+let miensSet = new Set();
+let gdvMap = {}; // miền -> Set of GĐV
 
 async function loadStorelist() {
   try {
@@ -907,65 +921,106 @@ async function loadStorelist() {
     const lines = csv.split('\n');
     const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
     const idxMaCH = headers.findIndex(h => h.includes('Mã SAP') || h.includes('SAP'));
-    const idxTenCH = headers.findIndex(h => h.includes('Tên') && (h.includes('CH') || h.includes('cửa')));
-    const idxGDV = headers.findIndex(h => h.includes('GĐV'));
-    const idxQLKV = headers.findIndex(h => h.includes('QLKV'));
+    const idxTenCH = headers.findIndex(h => (h.includes('Tên') && (h.includes('CH') || h.includes('cửa'))) || h.includes('Tên cửa hàng'));
+    const idxGDV = headers.findIndex(h => h === 'GĐV' || h.includes('GĐV'));
+    const idxQLKV = headers.findIndex(h => h === 'QLKV' || h.includes('QLKV'));
     const idxTinh = headers.findIndex(h => h.includes('Tỉnh'));
+    const idxMien = headers.findIndex(h => h === 'Miền' || h.includes('Miền'));
+    const idxTrangThai = headers.findIndex(h => h.includes('Tình Trạng') || h.includes('Tình trạng') || h.includes('Trạng thái'));
     
     storeData = [];
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split(',').map(c => c.replace(/"/g, '').trim());
-      if (cols.length < 3) continue;
-      storeData.push({
+      if (cols.length < 5) continue;
+      // Filter active stores only
+      if (idxTrangThai >= 0 && cols[idxTrangThai] && !cols[idxTrangThai].includes('Đang hoạt động') && !cols[idxTrangThai].includes('đang hoạt động')) continue;
+      
+      const s = {
         maCH: cols[idxMaCH] || '',
         tenCH: cols[idxTenCH] || '',
         gdv: cols[idxGDV] || '',
         qlkv: cols[idxQLKV] || '',
-        tinh: cols[idxTinh] || ''
-      });
+        tinh: cols[idxTinh] || '',
+        mien: cols[idxMien] || ''
+      };
+      if (!s.maCH) continue;
+      storeData.push(s);
+      
+      // Determine miền
+      let mien = s.mien;
+      if (!mien || mien === 'None') {
+        // Derive from GĐV or region
+        if (s.tinh) mien = 'Miền Bắc'; // default
+      }
+      miensSet.add(mien);
+      if (!gdvMap[mien]) gdvMap[mien] = new Set();
+      if (s.gdv) gdvMap[mien].add(s.gdv);
     }
-    console.log('Storelist loaded:', storeData.length, 'stores');
+    console.log('Storelist loaded:', storeData.length, 'stores,', miensSet.size, 'miền');
+    populateMienDropdown();
   } catch(e) {
-    console.log('Storelist load error, using empty:', e.message);
+    console.log('Storelist load error:', e.message);
   }
 }
 loadStorelist();
 
-function searchStore(query) {
-  const el = document.getElementById('storeSuggestions');
-  if (!query || query.length < 2) { el.style.display = 'none'; return; }
-  const q = query.toLowerCase();
-  const matches = storeData.filter(s => 
-    s.maCH.toLowerCase().includes(q) || s.tenCH.toLowerCase().includes(q)
-  ).slice(0, 10);
-  
-  if (matches.length === 0) { el.style.display = 'none'; return; }
-  
-  el.innerHTML = matches.map(s => `
-    <div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #eee;font-size:13px"
-         onmousedown="selectStore('${s.maCH}', '${s.tenCH.replace(/'/g, "\'")}', '${s.gdv.replace(/'/g, "\'")}')">
-      <strong>${s.maCH}</strong> — ${s.tenCH}<br>
-      <span style="color:#888;font-size:11px">GĐV: ${s.gdv} | QLKV: ${s.qlkv} | ${s.tinh}</span>
-    </div>
-  `).join('');
-  el.style.display = 'block';
+function populateMienDropdown() {
+  const sel = document.getElementById('selMien');
+  sel.innerHTML = '<option value="">-- Chọn Miền --</option>';
+  [...miensSet].sort().forEach(m => {
+    if (m && m !== 'None') {
+      const count = storeData.filter(s => s.mien === m).length;
+      sel.innerHTML += `<option value="${m}">${m} (${count} CH)</option>`;
+    }
+  });
 }
 
-function selectStore(maCH, tenCH, gdv) {
-  document.getElementById('maCH').value = maCH;
-  document.getElementById('storeSuggestions').style.display = 'none';
-  // Auto-fill GĐV context
-  if (gdv && gdv !== 'undefined') {
-    document.getElementById('hoTenCT').focus();
-  }
+function onMienChange() {
+  const mien = document.getElementById('selMien').value;
+  const selGDV = document.getElementById('selGDV');
+  const selCH = document.getElementById('selCH');
+  selGDV.innerHTML = '<option value="">-- Chọn GĐV --</option>';
+  selCH.innerHTML = '<option value="">-- Chọn CH --</option>';
+  if (!mien) return;
+  
+  const gdvs = gdvMap[mien] || new Set();
+  [...gdvs].sort().forEach(g => {
+    const count = storeData.filter(s => s.mien === mien && s.gdv === g).length;
+    selGDV.innerHTML += `<option value="${g}">${g} (${count} CH)</option>`;
+  });
 }
 
-// Close suggestions on click outside
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('#maCH')) {
-    document.getElementById('storeSuggestions').style.display = 'none';
+function onGDVChange() {
+  const mien = document.getElementById('selMien').value;
+  const gdv = document.getElementById('selGDV').value;
+  const selCH = document.getElementById('selCH');
+  selCH.innerHTML = '<option value="">-- Chọn CH --</option>';
+  if (!gdv) return;
+  
+  const stores = storeData.filter(s => s.mien === mien && s.gdv === gdv);
+  stores.forEach(s => {
+    selCH.innerHTML += `<option value="${s.maCH}">${s.maCH} — ${s.tenCH}</option>`;
+  });
+}
+
+function onCHChange() {
+  const maCH = document.getElementById('selCH').value;
+  if (!maCH) return;
+  const s = storeData.find(x => x.maCH === maCH);
+  if (s) {
+    // Auto-fill tinhDen if possible
+    if (s.tinh && s.tinh !== 'None') {
+      const selTinh = document.getElementById('tinhDen');
+      for (let i = 0; i < selTinh.options.length; i++) {
+        if (selTinh.options[i].value.toLowerCase().includes(s.tinh.toLowerCase())) {
+          selTinh.selectedIndex = i;
+          break;
+        }
+      }
+      autoDetectDM();
+    }
   }
-});
+}
 
 function toast(msg, type) {
   const el = document.createElement('div');
