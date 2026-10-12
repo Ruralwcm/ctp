@@ -142,6 +142,38 @@ tr:hover td{background:#f8f9ff}
     <div id="tab-declare">
       <div class="card">
         <div class="card-title">📝 KHAI BÁO CHUYẾN CÔNG TÁC</div>
+        
+        <div class="card-title" style="font-size:13px;margin-top:4px">👤 THÔNG TIN NGƯỜI CÔNG TÁC</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Mã CH *</label>
+            <input type="text" id="maCH" placeholder="Nhập mã CH hoặc tên cửa hàng..." oninput="searchStore(this.value)" list="storeList">
+            <div id="storeSuggestions" style="display:none;position:absolute;background:#fff;border:1px solid #ddd;border-radius:8px;max-height:200px;overflow-y:auto;z-index:10;width:100%;box-shadow:0 4px 12px rgba(0,0,0,.1)"></div>
+            <span class="helper">Gõ mã hoặc tên CH → tự động gợi ý từ Storelist</span>
+          </div>
+        </div>
+        <div class="form-row col3">
+          <div class="form-group">
+            <label>Mã NV</label>
+            <input type="text" id="maNV" placeholder="Nhập mã NV...">
+          </div>
+          <div class="form-group">
+            <label>Họ và Tên *</label>
+            <input type="text" id="hoTenCT" placeholder="Nhập họ và tên...">
+          </div>
+          <div class="form-group">
+            <label>Chức vụ *</label>
+            <select id="chucVuCT">
+              <option value="">-- Chọn --</option>
+              <option>CHT</option>
+              <option>QLKV</option>
+              <option>HCV</option>
+              <option>GĐV</option>
+              <option>GĐM</option>
+            </select>
+          </div>
+        </div>
+
         <div class="dm-highlight" id="dmInfo" style="display:none">
           📐 <strong>Định mức vùng:</strong> <span id="dmText">---</span>
         </div>
@@ -312,7 +344,7 @@ tr:hover td{background:#f8f9ff}
           <table>
             <thead>
               <tr>
-                <th>Ngày đi</th><th>Ngày về</th><th>Nơi đi-đến</th><th>Phân nhóm</th>
+                <th>Mã CH</th><th>Họ tên</th><th>Ngày đi</th><th>Nơi đi-đến</th>
                 <th class="text-right">Tổng CP</th><th>Trạng thái</th><th></th>
               </tr>
             </thead>
@@ -627,6 +659,10 @@ function submitCTP() {
 
 function buildRecord() {
   return {
+    maCH: document.getElementById('maCH').value.trim(),
+    maNV: document.getElementById('maNV').value.trim(),
+    hoTenCT: document.getElementById('hoTenCT').value.trim(),
+    chucVuCT: document.getElementById('chucVuCT').value,
     ngayDi: document.getElementById('ngayDi').value,
     ngayVe: document.getElementById('ngayVe').value,
     thangPS: document.getElementById('thangPS').value || ('Tháng ' + (new Date(document.getElementById('ngayDi').value).getMonth() + 1)),
@@ -663,6 +699,10 @@ function resetForm() {
   document.getElementById('soNgayKS').value = '0';
   document.getElementById('ctpNgay').value = '150000';
   document.getElementById('ksNgay').value = '300000';
+  document.getElementById('maCH').value = '';
+  document.getElementById('maNV').value = '';
+  document.getElementById('hoTenCT').value = '';
+  document.getElementById('chucVuCT').selectedIndex = 0;
   document.getElementById('lyDo').value = '';
   document.getElementById('phanNhom').selectedIndex = 0;
   document.getElementById('resultCalc').style.display = 'none';
@@ -691,10 +731,10 @@ function renderHistory() {
 
   tbody.innerHTML = filtered.map(r => `
     <tr>
+      <td>${r.maCH || '-'}</td>
+      <td>${r.hoTenCT || r.createdName || '-'}</td>
       <td>${r.ngayDi || '-'}</td>
-      <td>${r.ngayVe || '-'}</td>
       <td>${r.route || '-'}</td>
-      <td><span class="badge badge-info">${r.phanNhom || '-'}</span></td>
       <td class="text-right"><strong>${(r.tongCP||0).toLocaleString()}đ</strong></td>
       <td><span class="status ${r.status}">${statusLabel(r.status)}</span></td>
       <td><button class="btn btn-xs btn-outline" onclick="viewDetail('${r.id}')">👁</button></td>
@@ -851,6 +891,78 @@ function statusLabel(s) {
   const map = { draft: 'Nháp', pending: 'Chờ duyệt', approved: 'Đã duyệt', rejected: 'Từ chối' };
   return map[s] || s;
 }
+
+
+// ========== STORELIST AUTOCOMPLETE ==========
+const STORELIST_SHEET = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:csv&gid=900581387';
+let storeData = [];
+
+async function loadStorelist() {
+  try {
+    const resp = await fetch(STORELIST_SHEET);
+    const csv = await resp.text();
+    const lines = csv.split('\n');
+    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+    const idxMaCH = headers.findIndex(h => h.includes('Mã SAP') || h.includes('SAP'));
+    const idxTenCH = headers.findIndex(h => h.includes('Tên') && (h.includes('CH') || h.includes('cửa')));
+    const idxGDV = headers.findIndex(h => h.includes('GĐV'));
+    const idxQLKV = headers.findIndex(h => h.includes('QLKV'));
+    const idxTinh = headers.findIndex(h => h.includes('Tỉnh'));
+    
+    storeData = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',').map(c => c.replace(/"/g, '').trim());
+      if (cols.length < 3) continue;
+      storeData.push({
+        maCH: cols[idxMaCH] || '',
+        tenCH: cols[idxTenCH] || '',
+        gdv: cols[idxGDV] || '',
+        qlkv: cols[idxQLKV] || '',
+        tinh: cols[idxTinh] || ''
+      });
+    }
+    console.log('Storelist loaded:', storeData.length, 'stores');
+  } catch(e) {
+    console.log('Storelist load error, using empty:', e.message);
+  }
+}
+loadStorelist();
+
+function searchStore(query) {
+  const el = document.getElementById('storeSuggestions');
+  if (!query || query.length < 2) { el.style.display = 'none'; return; }
+  const q = query.toLowerCase();
+  const matches = storeData.filter(s => 
+    s.maCH.toLowerCase().includes(q) || s.tenCH.toLowerCase().includes(q)
+  ).slice(0, 10);
+  
+  if (matches.length === 0) { el.style.display = 'none'; return; }
+  
+  el.innerHTML = matches.map(s => `
+    <div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #eee;font-size:13px"
+         onmousedown="selectStore('${s.maCH}', '${s.tenCH.replace(/'/g, "\'")}', '${s.gdv.replace(/'/g, "\'")}')">
+      <strong>${s.maCH}</strong> — ${s.tenCH}<br>
+      <span style="color:#888;font-size:11px">GĐV: ${s.gdv} | QLKV: ${s.qlkv} | ${s.tinh}</span>
+    </div>
+  `).join('');
+  el.style.display = 'block';
+}
+
+function selectStore(maCH, tenCH, gdv) {
+  document.getElementById('maCH').value = maCH;
+  document.getElementById('storeSuggestions').style.display = 'none';
+  // Auto-fill GĐV context
+  if (gdv && gdv !== 'undefined') {
+    document.getElementById('hoTenCT').focus();
+  }
+}
+
+// Close suggestions on click outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#maCH')) {
+    document.getElementById('storeSuggestions').style.display = 'none';
+  }
+});
 
 function toast(msg, type) {
   const el = document.createElement('div');
