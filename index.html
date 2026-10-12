@@ -239,15 +239,9 @@ tr:hover td{background:#f8f9ff}
 
         <div class="form-row">
           <div class="form-group">
-            <label>Lý do công tác *</label>
+            <label>Lý do công tác</label>
             <select id="lyDo">
-              <option value="">-- Chọn --</option>
-              <option>Visit CH</option>
-              <option>Họp BOD/ Lễ Hội của Công ty</option>
-              <option>Đào tạo</option>
-              <option>Hỗ trợ NSO</option>
-              <option>GHHC/ TKK/ Layout</option>
-              <option>Khác</option>
+              <option value="Họp" selected>Họp</option>
             </select>
           </div>
           <div class="form-group">
@@ -671,7 +665,7 @@ function resetForm() {
   document.getElementById('soNgayKS').value = '0';
   document.getElementById('ctpNgay').value = '150000';
   document.getElementById('ksNgay').value = '300000';
-  document.getElementById('lyDo').selectedIndex = 0;
+  document.getElementById('lyDo').value = 'Họp';
   document.getElementById('phanNhom').selectedIndex = 0;
   document.getElementById('resultCalc').style.display = 'none';
   document.getElementById('dmInfo').style.display = 'none';
