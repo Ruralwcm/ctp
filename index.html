@@ -8,8 +8,9 @@
 <meta http-equiv="Expires" content="0">
 <title>CTP — Khai báo Công tác phí</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f0f2f5;color:#333;min-height:100vh}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f4f6f8;color:#333;min-height:100vh}
 .app-header{background:linear-gradient(135deg,#1a3a6b,#2f5496);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .app-header h1{font-size:18px;font-weight:600}
 .app-header .ver{font-size:11px;opacity:.7}
@@ -72,7 +73,7 @@ tr:hover td{background:#f8f9ff}
 .modal h3{margin-bottom:12px;color:#1a3a6b}
 
 .badge{display:inline-block;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;margin:2px}
-.badge-info{background:#e3f2fd;color:#1565c0}
+.badge-info{background:#e3f2fd;color:#0f5f57}
 .badge-warn{background:#fff3e0;color:#e65100}
 .badge-ok{background:#e8f5e9;color:#2e7d32}
 
@@ -101,6 +102,16 @@ tr:hover td{background:#f8f9ff}
 /* Định mức highlight */
 .dm-highlight{background:#fffde7;border:2px solid #ffc107;border-radius:8px;padding:10px;margin:8px 0;font-size:13px}
 .dm-highlight strong{color:#f57c00}
+
+@media (prefers-color-scheme: dark) {
+  body{background:#0f1724;color:#e8ecf1}
+  .card,.stat-card,.app-card,.modal,.confirm-box,.login-box{background:#1a2332;border-color:#2a3646}
+  thead th{background:#1a2332;color:#cbd5e1;border-bottom-color:#2a3646}
+  td{border-bottom-color:#2a3646}
+  .sidebar{background:#0a2a24}
+  .topbar{background:#b3121b}
+  input,select,textarea{background:#1a2332;color:#e8ecf1;border-color:#2a3646}
+}
 </style>
 </head>
 <body>
