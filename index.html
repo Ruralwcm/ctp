@@ -23,7 +23,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f4f6f
 .btn-outline:hover{background:#e8f0fa}
 .btn-danger{background:#d32f2f;color:#fff}
 .btn-danger:hover{background:#b71c1c}
-.btn-success{background:#2e7d32;color:#fff}
+.btn-success{background:#1a3c6e;color:#fff}
 .btn-sm{padding:5px 12px;font-size:12px}
 .btn-xs{padding:3px 8px;font-size:11px}
 
@@ -41,7 +41,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f4f6f
 .form-group .helper{font-size:11px;color:#999;margin-top:2px}
 
 .result-box{margin-top:10px;padding:12px;border-radius:8px;font-size:14px}
-.result-box.normal{background:#e8f5e9;border:1px solid #a5d6a7}
+.result-box.normal{background:#e8f0fe;border:1px solid #a5d6a7}
 .result-box.over{background:#fce4ec;border:1px solid #ef9a9a}
 
 .tabs{display:flex;gap:0;border-bottom:2px solid #e0e0e0;margin-bottom:16px}
@@ -57,8 +57,8 @@ tr:hover td{background:#f8f9ff}
 
 .status{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700}
 .status.draft{background:#eee;color:#777}
-.status.pending{background:#fff3e0;color:#e65100}
-.status.approved{background:#e8f5e9;color:#2e7d32}
+.status.pending{background:#fef9c3;color:#e65100}
+.status.approved{background:#e8f0fe;color:#1a3c6e}
 .status.rejected{background:#fce4ec;color:#c62828}
 
 .login-card{max-width:400px;margin:40px auto}
@@ -74,8 +74,8 @@ tr:hover td{background:#f8f9ff}
 
 .badge{display:inline-block;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;margin:2px}
 .badge-info{background:#e3f2fd;color:#d71920}
-.badge-warn{background:#fff3e0;color:#e65100}
-.badge-ok{background:#e8f5e9;color:#2e7d32}
+.badge-warn{background:#fef9c3;color:#e65100}
+.badge-ok{background:#e8f0fe;color:#1a3c6e}
 
 .flex-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .mt-8{margin-top:8px}
@@ -95,7 +95,7 @@ tr:hover td{background:#f8f9ff}
 }
 
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:8px;color:#fff;font-weight:600;font-size:14px;z-index:300;animation:slideUp .3s ease;box-shadow:0 4px 12px rgba(0,0,0,.2)}
-.toast.success{background:#2e7d32}
+.toast.success{background:#1a3c6e}
 .toast.error{background:#d32f2f}
 @keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 
@@ -858,7 +858,7 @@ function viewDetail(id) {
       <div>📐 <strong>Định mức:</strong> CTP ${(r.ctpNgay||0).toLocaleString()}đ/ngày · KS ${(r.ksNgay||0).toLocaleString()}đ/ngày</div>
       <div>📅 Ngày CTP: ${r.soNgayCTP} · Ngày KS: ${r.soNgayKS}</div>
       <div>💰 CTP: ${(r.totalCTP||0).toLocaleString()}đ · KS: ${(r.totalKS||0).toLocaleString()}đ · Xăng: ${(r.cpXang||0).toLocaleString()}đ · Vé: ${(r.cpVe||0).toLocaleString()}đ</div>
-      <div style="font-size:16px;color:#2e7d32;font-weight:700">TỔNG: ${(r.tongCP||0).toLocaleString()}đ</div>
+      <div style="font-size:16px;color:#1a3c6e;font-weight:700">TỔNG: ${(r.tongCP||0).toLocaleString()}đ</div>
       <hr>
       <div><strong>Lý do:</strong> ${r.lyDo || '-'}</div>
       <div><strong>Phân nhóm:</strong> ${r.phanNhom || '-'}</div>
