@@ -261,17 +261,22 @@ tr:hover td{background:#f8f9ff}
       <div class="ch-info hidden" id="denInfo"></div>
 
       <div class="row col3">
-        <div class="fld"><label>Km *</label><input id="f-km" type="number" readonly placeholder="Tự tính" oninput="liveValid()"></div>
-        <div class="fld"><label>Ngày đi *</label><input id="f-ngaydi" type="date" onchange="autoDays()"></div>
-        <div class="fld"><label>Ngày về *</label><input id="f-ngayve" type="date" onchange="autoDays()"></div>
-      </div>
-      <div class="row col3">
-        <div class="fld"><label>Ngày CTP</label><input id="f-ngayctp" readonly placeholder="về−đi+1"></div>
-        <div class="fld"><label>Ngày KS</label><input id="f-ngayks" readonly placeholder="về−đi"></div>
+        <div class="fld"><label>Km *</label><input id="f-km" type="number" readonly placeholder="Tự tính"></div>
         <div class="fld"><label>PT</label>
-          <select id="f-pt">
+          <select id="f-pt" onchange="liveValid()">
             <option>Xe máy</option><option>Ô tô</option><option>Máy bay</option><option>Xe khách</option>
           </select>
+        </div>
+      </div>
+      <div class="row col3">
+        <div class="fld"><label>Ngày đi *</label><input id="f-ngaydi" type="date" onchange="autoDays()"></div>
+        <div class="fld"><label>Ngày về *</label><input id="f-ngayve" type="date" onchange="autoDays()"></div>
+        <div class="fld"><label>Ngày CTP</label><input id="f-ngayctp" readonly placeholder="về−đi+1"></div>
+      </div>
+      <div class="row col3">
+        <div class="fld"><label>Ngày KS</label><input id="f-ngayks" readonly placeholder="về−đi"></div>
+        <div class="fld" style="grid-column:span 2"><label>Lý do / Ghi chú *</label>
+          <textarea id="f-ghichu" placeholder="Nhập lý do, mục đích chuyến đi (bắt buộc)..." rows="1"></textarea>
         </div>
       </div>
 
@@ -281,15 +286,12 @@ tr:hover td{background:#f8f9ff}
 
       <div class="sec-label">💵 Chi phí</div>
       <div class="row col3">
-        <div class="fld"><label>CTP/ngày (đ)</label><input id="f-ctp" type="text" inputmode="numeric" placeholder="150.000" oninput="moneyInput(this);autoCalc()"></div>
-        <div class="fld"><label>KS/ngày (đ)</label><input id="f-ks" type="text" inputmode="numeric" placeholder="300.000" oninput="moneyInput(this);autoCalc()"></div>
-        <div class="fld"><label>Xăng/đi lại (đ)</label><input id="f-xang" type="text" inputmode="numeric" placeholder="200.000" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>CTP/ngày</label><input id="f-ctp" type="text" inputmode="numeric" placeholder="150.000" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>KS/ngày</label><input id="f-ks" type="text" inputmode="numeric" placeholder="300.000" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>Xăng/đi lại</label><input id="f-xang" type="text" inputmode="numeric" placeholder="200.000" oninput="moneyInput(this);autoCalc()"></div>
       </div>
       <div class="row col3">
-        <div class="fld"><label>Vé/cầu đường (đ)</label><input id="f-ve" type="text" inputmode="numeric" placeholder="0" oninput="moneyInput(this);autoCalc()"></div>
-        <div class="fld" style="grid-column:span 2"><label>Lý do / Ghi chú *</label>
-          <textarea id="f-ghichu" placeholder="Nhập lý do, mục đích chuyến đi (bắt buộc)..." rows="1"></textarea>
-        </div>
+        <div class="fld"><label>Vé/cầu đường</label><input id="f-ve" type="text" inputmode="numeric" placeholder="0" oninput="moneyInput(this);autoCalc()"></div>
       </div>
 
       <div class="result-box calc" style="font-size:12px;padding:8px 10px">
