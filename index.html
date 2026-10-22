@@ -266,8 +266,13 @@ tr:hover td{background:#f8f9ff}
         <div class="fld"><label>Km *</label><input id="f-km" type="number" readonly placeholder="Tự tính"></div>
       </div>
       <div class="ch-info hidden" id="chInfo"></div>
-      </div>
       <div class="ch-info hidden" id="denInfo"></div>
+      <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <div class="fld"><label>Ngày bắt đầu *</label><input id="f-ngaydi" type="date" onchange="autoDays()"></div>
+        <div class="fld"><label>Ngày kết thúc *</label><input id="f-ngayve" type="date" onchange="autoDays()"></div>
+        <div class="fld"><label>Ngày CTP</label><input id="f-ngayctp" readonly placeholder="1"></div>
+        <div class="fld"><label>Ngày KS</label><input id="f-ngayks" readonly placeholder="0"></div>
+      </div>
       <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="fld"><label>Lý do công tác *</label>
           <select id="f-lydo" onchange="onLyDoChange()">
