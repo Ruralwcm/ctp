@@ -240,15 +240,6 @@ tr:hover td{background:#f8f9ff}
             <option value="GĐM">GĐM</option>
           </select>
         </div>
-        <div class="fld"><label>Loại CT *</label>
-          <select id="f-loai" onchange="liveValid()">
-            <option>1. Checklist CH</option>
-            <option>2. Họp / Đào tạo</option>
-            <option>3. Hỗ trợ CH</option>
-            <option>4. Hỗ trợ NSO</option>
-            <option>5. Khác</option>
-          </select>
-        </div>
       </div>
 
       <div class="dm-info hidden" id="dmInfoBox">
@@ -295,8 +286,8 @@ tr:hover td{background:#f8f9ff}
       </div>
       <div class="row col3">
         <div class="fld"><label>Vé/cầu đường (đ)</label><input id="f-ve" type="text" inputmode="numeric" placeholder="0" oninput="moneyInput(this);autoCalc()"></div>
-        <div class="fld" style="grid-column:span 2"><label>Lý do / Ghi chú</label>
-          <textarea id="f-ghichu" placeholder="Lý do, mục đích chuyến đi..." rows="1"></textarea>
+        <div class="fld" style="grid-column:span 2"><label>Lý do / Ghi chú *</label>
+          <textarea id="f-ghichu" placeholder="Nhập lý do, mục đích chuyến đi (bắt buộc)..." rows="1"></textarea>
         </div>
       </div>
 
@@ -760,7 +751,6 @@ function liveValid() {
   const box = $('validBox');
   const km = +($('f-km').value) || 0;
   const soNgay = +($('f-ngayctp').value) || 0;
-  const loai = $('f-loai').value;
   const cv = $('f-chucvu').value;
   const total = +(($('calcTotal').textContent || '').replace(/,/g, '')) || 0;
   const gdvName = selCH ? selCH.gdv : null;
@@ -771,8 +761,8 @@ function liveValid() {
   let pass = true;
   const isNV = cv === 'CHT-NVCH';
 
-  if (loai.includes('NSO') && km <= 30) {
-    w.push('⚠️ ≤ 30km → KHÔNG hỗ trợ CP (NVCH tự túc).');
+  if (km <= 30) {
+    w.push('⚠️ ≤ 30km → không hỗ trợ CP (tự túc).');
     pass = false;
   }
   if (km > 80 && isNV) {
@@ -832,6 +822,7 @@ function submitKB() {
   if (!ngaydi) { toast('⚠️ Bước 3: Nhập Ngày đi', 'error'); return; }
   if (!route) { toast('⚠️ Vui lòng nhập Nơi đi - Nơi đến', 'error'); return; }
   if (!km) { toast('⚠️ Vui lòng nhập Khoảng cách', 'error'); return; }
+  if (!$('f-ghichu').value.trim()) { toast('⚠️ Vui lòng nhập Lý do / Ghi chú', 'error'); return; }
 
   const rec = buildRecord();
   const total = +(($('calcTotal').textContent || '').replace(/,/g, '')) || 0;
@@ -883,7 +874,7 @@ function buildRecord() {
     maNV: $('f-manv').value.trim(),
     ten: $('f-hoten').value.trim(),
     chucVu: $('f-chucvu').value,
-    loai: $('f-loai').value,
+    loai: '',
     route: $('f-route').value.trim(),
     den: $('f-den').value.trim(),
     km: +($('f-km').value) || 0,
@@ -905,7 +896,7 @@ function buildRecord() {
 function resetForm() {
   ['f-mach','f-manv','f-hoten','f-route','f-den','f-km','f-ngaydi','f-ngayve','f-ngayctp','f-ngayks','f-xang','f-ve','f-ghichu'].forEach(id => $(id).value = '');
   $('f-ctp').value = '150.000'; $('f-ks').value = '300.000';
-  $('f-loai').value = '4. Hỗ trợ NSO'; $('f-chucvu').value = 'CHT-NVCH';
+  $('f-chucvu').value = 'CHT-NVCH';
   $('f-thang').selectedIndex = 0; $('f-pt').selectedIndex = 0;
   $('chInfo').classList.add('hidden'); $('dmInfoBox').classList.add('hidden');
   $('validBox').classList.add('hidden');
@@ -1062,7 +1053,7 @@ function itemHtml(r, showActs) {
   return `<div class="item">
     <div class="top"><div>
       <div class="name">${r.ten || r.maNV} <span style="font-weight:400;font-size:12px;color:var(--muted)">(${r.chucVu||'—'})</span></div>
-      <div class="meta">${r.loai||'—'} · ${r.tenCH||r.maCH||'—'} → ${r.den||r.route||'—'} · ${r.km||0}km · ${r.soNgay||0} ngày</div>
+      <div class="meta">${r.tenCH||r.maCH||'—'} → ${r.den||r.route||'—'} · ${r.km||0}km · ${r.soNgay||0} ngày</div>
       <div class="meta">GĐV: ${r.gdv||'—'} · ${r.ngayDi||'—'} → ${r.ngayVe||'—'} · ${r.ngayTao||''}</div>
     </div>
     <div style="text-align:right"><div class="money">${fmt(r.tong||0)}</div><span class="badge ${cls}">${st}</span></div></div>
