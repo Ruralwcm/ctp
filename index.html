@@ -220,10 +220,10 @@ tr:hover td{background:#f8f9ff}
       <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="fld auto-wrap">
           <label>Mã NV *</label>
-          <input id="f-manv" placeholder="Gõ mã NV..." autocomplete="off" oninput="acNV(this.value)">
+          <input id="f-manv" autocomplete="off" oninput="acNV(this.value)">
           <div class="suggest hidden" id="nvSug"></div>
         </div>
-        <div class="fld"><label>Họ và tên *</label><input id="f-hoten" placeholder="Tự động từ Mã NV"></div>
+        <div class="fld"><label>Họ và tên *</label><input id="f-hoten"></div>
       </div>
       <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="fld"><label>Chức vụ *</label>
@@ -250,12 +250,12 @@ tr:hover td{background:#f8f9ff}
       <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
         <div class="fld auto-wrap">
           <label>Địa điểm đi *</label>
-          <input id="f-mach" placeholder="Gõ mã hoặc tên CH..." autocomplete="off" oninput="acCH(this.value)">
+          <input id="f-mach" autocomplete="off" oninput="acCH(this.value)">
           <div class="suggest hidden" id="chSug"></div>
         </div>
         <div class="fld auto-wrap">
           <label>Địa điểm đến *</label>
-          <input id="f-den" placeholder="Gõ mã CH đến..." autocomplete="off" oninput="acDen(this.value)">
+          <input id="f-den" autocomplete="off" oninput="acDen(this.value)">
           <div class="suggest hidden" id="denSug"></div>
         </div>
         <div class="fld"><label>PT</label>
@@ -263,15 +263,15 @@ tr:hover td{background:#f8f9ff}
             <option>Xe máy</option><option>Ô tô</option><option>Máy bay</option><option>Xe khách</option>
           </select>
         </div>
-        <div class="fld"><label>Km *</label><input id="f-km" type="number" readonly placeholder="Tự tính"></div>
+        <div class="fld"><label>Km *</label><input id="f-km" type="number" readonly></div>
       </div>
       <div class="ch-info hidden" id="chInfo"></div>
       <div class="ch-info hidden" id="denInfo"></div>
       <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
         <div class="fld"><label>Ngày bắt đầu *</label><input id="f-ngaydi" type="date" onchange="autoDays()"></div>
         <div class="fld"><label>Ngày kết thúc *</label><input id="f-ngayve" type="date" onchange="autoDays()"></div>
-        <div class="fld"><label>Ngày CTP</label><input id="f-ngayctp" readonly placeholder="1"></div>
-        <div class="fld"><label>Ngày KS</label><input id="f-ngayks" readonly placeholder="0"></div>
+        <div class="fld"><label>Ngày CTP</label><input id="f-ngayctp" readonly></div>
+        <div class="fld"><label>Ngày KS</label><input id="f-ngayks" readonly></div>
       </div>
       <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="fld"><label>Lý do công tác *</label>
@@ -285,7 +285,7 @@ tr:hover td{background:#f8f9ff}
           </select>
         </div>
         <div class="fld hidden" id="lydoKhacBox"><label>Nhập cụ thể *</label>
-          <input id="f-lydo-khac" placeholder="Nhập lý do cụ thể...">
+          <input id="f-lydo-khac">
         </div>
       </div>
 
@@ -296,10 +296,10 @@ tr:hover td{background:#f8f9ff}
       <!-- SECTION 3: CHI PHÍ -->
       <h3 style="margin-top:12px">💵 Chi phí</h3>
       <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        <div class="fld"><label>CTP/ngày 🔒</label><input id="f-ctp" type="text" inputmode="numeric" placeholder="150k" readonly></div>
-        <div class="fld"><label>KS/ngày</label><input id="f-ks" type="text" inputmode="numeric" placeholder="300k" oninput="moneyInput(this);autoCalc()"></div>
-        <div class="fld"><label>Xăng</label><input id="f-xang" type="text" inputmode="numeric" placeholder="200k" oninput="moneyInput(this);autoCalc()"></div>
-        <div class="fld"><label>Vé</label><input id="f-ve" type="text" inputmode="numeric" placeholder="0" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>CTP/ngày 🔒</label><input id="f-ctp" type="text" inputmode="numeric" readonly></div>
+        <div class="fld"><label>KS/ngày</label><input id="f-ks" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>Xăng</label><input id="f-xang" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>Vé</label><input id="f-ve" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
       </div>
 
       <div class="result-box calc" style="font-size:12px;padding:8px 10px">
