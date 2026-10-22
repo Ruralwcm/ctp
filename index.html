@@ -170,29 +170,29 @@ tr:hover td{background:#f8f9ff}
 </head>
 <body>
 
-<!-- ========== LOGIN ========== -->
-<div id="login">
-  <div class="login-card">
-    <div class="logo">
-      <div class="t">🧾 Công tác phí</div>
-      <div class="s">Khai báo · Valid định mức · Phê duyệt phân quyền</div>
-    </div>
+<!-- ========== LOGIN MODAL (for admin tabs) ========== -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <h3>🔐 Đăng nhập Quản trị</h3>
     <label>Mã nhân viên (Mã NV)</label>
-    <input id="loginMaNV" placeholder="VD: NV001 / QLKV001 / GDV001 / GDM001 / admin" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <input id="loginMaNV" placeholder="VD: GDV001 / GDM001 / admin" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
     <div style="height:12px"></div>
     <button class="btn btn-primary btn-block" onclick="doLogin()">Đăng nhập</button>
     <div style="margin-top:10px;font-size:11px;color:var(--muted);text-align:center">
-      Demo: <b>NV001</b> (NVCH) · <b>QLKV001</b> · <b>GDV001</b> (GĐV) · <b>GDM001</b> (GĐM) · <b>admin</b> (Admin)
+      Demo: <b>GDV001</b> (GĐV) · <b>GDM001</b> (GĐM) · <b>admin</b> (Admin)
+    </div>
+    <div style="text-align:center;margin-top:10px">
+      <button class="btn btn-ghost btn-sm" onclick="closeLoginModal()">Đóng</button>
     </div>
   </div>
 </div>
 
 <!-- ========== MAIN APP ========== -->
-<div id="app" class="hidden">
+<div id="app">
   <header>
     <div class="title">🧾 Công tác phí</div>
     <div class="user" id="userLine"></div>
-    <button class="logout-btn" onclick="doLogout()">Đăng xuất</button>
+    <button class="logout-btn" id="headerLoginBtn" onclick="showLogin()">🔐 Đăng nhập</button>
   </header>
 
   <!-- TABS -->
@@ -511,6 +511,14 @@ const ST_CLASS = {
 // =================== AUTH ===================
 function findNV(ma) { return NVDB.find(u => u.maNV.toLowerCase() === String(ma).toLowerCase()); }
 
+function showLogin() {
+  $('loginModal').classList.add('show');
+  $('loginMaNV').focus();
+}
+function closeLoginModal() {
+  $('loginModal').classList.remove('show');
+}
+
 function doLogin() {
   const ma = $('loginMaNV').value.trim();
   if (!ma) { toast('Vui lòng nhập mã NV', 'error'); return; }
@@ -520,21 +528,40 @@ function doLogin() {
     user = { maNV: 'admin', ten: 'Administrator', chucVu: 'ADMIN', gdv: '*' };
   } else {
     user = findNV(ma);
-    if (!user) { toast('Không tìm thấy mã NV: ' + ma + ' (thêm ở tab Nhân viên nếu là Admin)', 'error'); return; }
+    if (!user) { toast('Không tìm thấy mã NV: ' + ma, 'error'); return; }
+  }
+
+  // Only managers can login to admin
+  if (!['GĐV','GĐM','ADMIN'].includes(user.chucVu)) {
+    toast('⚠️ Chỉ GĐV / GĐM / Admin mới đăng nhập được. CBNV dùng tab Khai báo không cần login.', 'error');
+    return;
   }
 
   ME = user;
   sessionStorage.setItem(K_SESSION, ma);
-  $('login').classList.add('hidden');
-  $('app').classList.remove('hidden');
+  closeLoginModal();
   $('userLine').innerHTML = ME.ten + ' · ' + ME.chucVu + (ME.gdv ? ' · ' + ME.gdv : '');
-  switchTab('kb');
+  $('headerLoginBtn').innerHTML = '↪ Đăng xuất';
+  $('headerLoginBtn').onclick = doLogout;
+  $('headerLoginBtn').style.background = 'rgba(255,255,255,.18)';
+  toast('✅ Đã đăng nhập: ' + ME.ten + ' (' + ME.chucVu + ')', 'success');
   renderAll();
 }
 
 function doLogout() {
   sessionStorage.removeItem(K_SESSION);
-  location.reload();
+  ME = null;
+  $('userLine').innerHTML = '';
+  $('headerLoginBtn').innerHTML = '🔐 Đăng nhập';
+  $('headerLoginBtn').onclick = showLogin;
+  $('headerLoginBtn').style.background = 'rgba(255,255,255,.18)';
+  // Switch to kb tab if on admin tab
+  const activeTab = document.querySelector('.tab.active');
+  if (activeTab && ['valid','pd'].includes(activeTab.dataset.tab)) {
+    switchTab('kb');
+  }
+  renderAll();
+  toast('Đã đăng xuất');
 }
 
 // Auto-login from session
@@ -550,6 +577,11 @@ function doLogout() {
 
 // =================== TABS ===================
 function switchTab(k) {
+  // Admin tabs require login
+  if ((k === 'valid' || k === 'pd') && !ME) {
+    showLogin();
+    return;
+  }
   $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === k));
   ['kb','valid','pd'].forEach(x => $('tab-' + x).classList.toggle('hidden', x !== k));
   if (k === 'valid') renderValid();
@@ -826,15 +858,17 @@ function submitKB() {
   const total = +(($('calcTotal').textContent || '').replace(/,/g, '')) || 0;
   if (!total) { toast('⚠️ Vui lòng nhập chi phí', 'error'); return; }
 
-  // Determine status based on submitter role
-  const cv = ME.chucVu;
+  // Determine status: if logged in as manager, auto-approve; otherwise pending
   let status = 'cho_gdv';
-  if (cv === 'GĐV') status = (km > 80 || soNgay > 2) ? 'cho_gdm' : 'done';
-  if (['GĐM', 'ADMIN'].includes(cv)) status = 'done';
+  if (ME) {
+    const cv = ME.chucVu;
+    if (cv === 'GĐV') status = (km > 80 || soNgay > 2) ? 'cho_gdm' : 'done';
+    if (['GĐM','ADMIN'].includes(cv)) status = 'done';
+  }
 
   rec.trangThai = status;
   rec.id = Date.now();
-  rec.nguoiTao = ME.maNV;
+  rec.nguoiTao = ME ? ME.maNV : manv;
   rec.ngayTao = new Date().toISOString().slice(0, 16).replace('T', ' ');
 
   RECORDS.unshift(rec);
@@ -943,7 +977,7 @@ function renderAll() { renderValid(); renderPD(); }
 
 function renderValid() {
   // KPI
-  const mine = RECORDS.filter(r => ME.chucVu === 'GĐV' ? r.gdv === ME.ten : true);
+  const mine = ME ? RECORDS.filter(r => ME.chucVu === 'GĐV' ? r.gdv === ME.ten : true) : RECORDS;
   const pending = mine.filter(r => ['cho_gdv', 'gdv_duyet', 'cho_gdm'].includes(r.trangThai)).length;
   const doneCount = mine.filter(r => r.trangThai === 'done').length;
   const doneTotal = mine.filter(r => r.trangThai === 'done').reduce((s, r) => s + (r.tong || 0), 0);
@@ -1011,32 +1045,36 @@ function editDM(idx) {
 function renderPD() {
   updatePDBadge();
 
-  // Pending approvals
-  let pool = RECORDS;
-  if (ME.chucVu === 'GĐV') {
-    pool = pool.filter(r => r.gdv === ME.ten && r.trangThai === 'cho_gdv');
-  } else if (ME.chucVu === 'GĐM' || ME.chucVu === 'ADMIN') {
-    pool = pool.filter(r => ['cho_gdv', 'cho_gdm'].includes(r.trangThai));
-  } else {
-    pool = [];
+  // Pending approvals - only for logged-in managers
+  let pool = [];
+  if (ME) {
+    if (ME.chucVu === 'GĐV') {
+      pool = RECORDS.filter(r => r.gdv === ME.ten && r.trangThai === 'cho_gdv');
+    } else if (ME.chucVu === 'GĐM' || ME.chucVu === 'ADMIN') {
+      pool = RECORDS.filter(r => ['cho_gdv', 'cho_gdm'].includes(r.trangThai));
+    }
   }
 
-  $('pendingList').innerHTML = pool.length ? pool.map(r => itemHtml(r, true)).join('') :
-    '<div class="empty">✅ Không có phiếu nào chờ duyệt</div>';
+  $('pendingList').innerHTML = pool.length
+    ? pool.map(r => itemHtml(r, true)).join('')
+    : '<div class="empty">✅ Không có phiếu nào chờ duyệt</div>';
 
-  // History
+  // History - show all for guest, filtered for logged-in
   const filterStatus = $('pdFilterStatus')?.value || 'all';
   const filterThang = $('pdFilterThang')?.value || 'all';
   let hist = RECORDS;
-  if (ME.chucVu === 'GĐV') hist = hist.filter(r => r.gdv === ME.ten);
-  if (ME.chucVu === 'CHT-NVCH' || ME.chucVu === 'QLKV' || ME.chucVu === 'HCV') {
-    hist = hist.filter(r => r.maNV === ME.maNV || r.nguoiTao === ME.maNV);
+  if (ME) {
+    if (ME.chucVu === 'GĐV') hist = hist.filter(r => r.gdv === ME.ten);
+    if (ME.chucVu === 'CHT-NVCH' || ME.chucVu === 'QLKV' || ME.chucVu === 'HCV') {
+      hist = hist.filter(r => r.maNV === ME.maNV || r.nguoiTao === ME.maNV);
+    }
   }
   if (filterStatus !== 'all') hist = hist.filter(r => r.trangThai === filterStatus);
   if (filterThang !== 'all') hist = hist.filter(r => r.thang === filterThang);
 
-  $('historyList').innerHTML = hist.length ? hist.map(r => itemHtml(r, false)).join('') :
-    '<div class="empty">Chưa có khai báo nào</div>';
+  $('historyList').innerHTML = hist.length
+    ? hist.map(r => itemHtml(r, false)).join('')
+    : '<div class="empty">Chưa có khai báo nào</div>';
 }
 
 function itemHtml(r, showActs) {
