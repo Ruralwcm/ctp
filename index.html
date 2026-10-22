@@ -192,14 +192,14 @@ tr:hover td{background:#f8f9ff}
   <header>
     <div class="title">🧾 Công tác phí</div>
     <div class="user" id="userLine"></div>
-    <button class="logout-btn" id="headerLoginBtn" onclick="showLogin()">🔐 Đăng nhập</button>
+    <button class="logout-btn" id="headerLoginBtn" onclick="showLogin()">📊 Dashboard</button>
   </header>
 
-  <!-- TABS -->
-  <div class="tabs">
-    <div class="tab active" data-tab="kb" onclick="switchTab('kb')">📝 Khai báo</div>
-    <div class="tab" data-tab="valid" onclick="switchTab('valid')">📐 Valid &amp; Định mức</div>
-    <div class="tab" data-tab="pd" onclick="switchTab('pd')">✅ Phê duyệt <span class="badge-count" id="pdBadge" style="display:none">0</span></div>
+  <!-- ADMIN TABS (hidden until login) -->
+  <div class="tabs hidden" id="adminTabs">
+    <div class="tab" data-tab="tiendo" onclick="switchAdminTab('tiendo')">📊 Tiến độ</div>
+    <div class="tab" data-tab="dinhmuc" onclick="switchAdminTab('dinhmuc')">📐 Định mức</div>
+    <div class="tab" data-tab="pd" onclick="switchAdminTab('pd')">✅ Phê duyệt <span class="badge-count" id="pdBadge" style="display:none">0</span></div>
   </div>
 
   <!-- ========== TAB: KHAI BÁO ========== -->
@@ -335,30 +335,15 @@ tr:hover td{background:#f8f9ff}
     </div>
   </div>
 
-  <!-- ========== TAB: VALID & ĐỊNH MỨC ========== -->
-  <div id="tab-valid" class="hidden">
+  <!-- ========== ADMIN TAB: TIẾN ĐỘ ========== -->
+  <div id="tab-tiendo" class="hidden">
     <!-- KPI -->
-    <div class="kpis" id="validKpis"></div>
+    <div class="kpis" id="tienDoKpis"></div>
 
     <!-- NGÂN SÁCH GĐV -->
     <div class="card">
       <h3>💰 Ngân sách công tác phí theo GĐV (tháng)</h3>
       <div id="budgetList"></div>
-    </div>
-
-    <!-- ĐỊNH MỨC TABLE -->
-    <div class="card">
-      <h3>📐 Bảng định mức CTP theo vùng & chức vụ</h3>
-      <div class="row" style="margin-bottom:10px">
-        <div class="fld"><input id="dmSearch" placeholder="🔍 Tìm tỉnh/vùng..." oninput="renderDM()"></div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Vùng / Tỉnh</th><th>CHT-NVCH</th><th>QLKV</th><th>HCV</th><th>GĐV</th><th>GĐM</th><th>Ghi chú</th></tr></thead>
-          <tbody id="dmBody"></tbody>
-        </table>
-      </div>
-      <div style="margin-top:8px;font-size:11px;color:var(--muted)">💡 Click vào vùng để sửa định mức (GĐM/Admin)</div>
     </div>
 
     <!-- VALID RULES -->
@@ -371,6 +356,23 @@ tr:hover td{background:#f8f9ff}
         <div>⚠️ <b>&gt; 2 ngày</b> → Cần GĐM duyệt</div>
         <div>🔴 <b>Vượt ngân sách GĐV</b> → Cần duyệt ngoại lệ</div>
       </div>
+    </div>
+  </div>
+
+  <!-- ========== ADMIN TAB: ĐỊNH MỨC ========== -->
+  <div id="tab-dinhmuc" class="hidden">
+    <div class="card">
+      <h3>📐 Bảng định mức CTP theo vùng & chức vụ</h3>
+      <div class="row" style="margin-bottom:10px">
+        <div class="fld"><input id="dmSearch" placeholder="🔍 Tìm tỉnh/vùng..." oninput="renderDM()"></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Vùng / Tỉnh</th><th>CHT-NVCH</th><th>QLKV</th><th>HCV</th><th>GĐV</th><th>GĐM</th><th>Ghi chú</th></tr></thead>
+          <tbody id="dmBody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">💡 Click vào vùng để sửa định mức (GĐM/Admin)</div>
     </div>
   </div>
 
@@ -544,6 +546,8 @@ function doLogin() {
   $('headerLoginBtn').innerHTML = '↪ Đăng xuất';
   $('headerLoginBtn').onclick = doLogout;
   $('headerLoginBtn').style.background = 'rgba(255,255,255,.18)';
+  $('adminTabs').classList.remove('hidden');
+  switchAdminTab('tiendo');
   toast('✅ Đã đăng nhập: ' + ME.ten + ' (' + ME.chucVu + ')', 'success');
   renderAll();
 }
@@ -552,40 +556,37 @@ function doLogout() {
   sessionStorage.removeItem(K_SESSION);
   ME = null;
   $('userLine').innerHTML = '';
-  $('headerLoginBtn').innerHTML = '🔐 Đăng nhập';
+  $('headerLoginBtn').innerHTML = '📊 Dashboard';
   $('headerLoginBtn').onclick = showLogin;
   $('headerLoginBtn').style.background = 'rgba(255,255,255,.18)';
-  // Switch to kb tab if on admin tab
-  const activeTab = document.querySelector('.tab.active');
-  if (activeTab && ['valid','pd'].includes(activeTab.dataset.tab)) {
-    switchTab('kb');
-  }
+  $('adminTabs').classList.add('hidden');
+  hideAllAdminTabs();
   renderAll();
   toast('Đã đăng xuất');
 }
 
-// Auto-login from session
+// Auto-login from session -> show admin tabs
 (function() {
   const m = sessionStorage.getItem(K_SESSION);
   if (m) {
     $('loginMaNV').value = m;
     if (m.toLowerCase() === 'admin') { doLogin(); return; }
     const u = findNV(m);
-    if (u) { doLogin(); }
+    if (u && ['GĐV','GĐM','ADMIN'].includes(u.chucVu)) { doLogin(); }
   }
 })();
 
 // =================== TABS ===================
-function switchTab(k) {
-  // Admin tabs require login
-  if ((k === 'valid' || k === 'pd') && !ME) {
-    showLogin();
-    return;
-  }
+function switchAdminTab(k) {
+  if (!ME) { showLogin(); return; }
   $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === k));
-  ['kb','valid','pd'].forEach(x => $('tab-' + x).classList.toggle('hidden', x !== k));
-  if (k === 'valid') renderValid();
-  if (k === 'pd') renderPD();
+  hideAllAdminTabs();
+  if (k === 'tiendo') { $('tab-tiendo').classList.remove('hidden'); renderTienDo(); }
+  if (k === 'dinhmuc') { $('tab-dinhmuc').classList.remove('hidden'); renderDM(); }
+  if (k === 'pd') { $('tab-pd').classList.remove('hidden'); renderPD(); }
+}
+function hideAllAdminTabs() {
+  ['tab-tiendo','tab-dinhmuc','tab-pd'].forEach(x => $(x)?.classList.add('hidden'));
 }
 
 // =================== STORELIST LOAD ===================
@@ -973,16 +974,17 @@ function reject(id) {
 }
 
 // =================== RENDER ===================
-function renderAll() { renderValid(); renderPD(); }
+function renderAll() { renderTienDo(); renderPD(); renderDM(); }
 
-function renderValid() {
+function renderTienDo() {
   // KPI
   const mine = ME ? RECORDS.filter(r => ME.chucVu === 'GĐV' ? r.gdv === ME.ten : true) : RECORDS;
   const pending = mine.filter(r => ['cho_gdv', 'gdv_duyet', 'cho_gdm'].includes(r.trangThai)).length;
   const doneCount = mine.filter(r => r.trangThai === 'done').length;
   const doneTotal = mine.filter(r => r.trangThai === 'done').reduce((s, r) => s + (r.tong || 0), 0);
 
-  $('validKpis').innerHTML = `
+  const kpiEl = $('tienDoKpis');
+  if (kpiEl) kpiEl.innerHTML = `
     <div class="kpi"><div class="v">${mine.length}</div><div class="l">Tổng khai báo</div></div>
     <div class="kpi danger"><div class="v">${pending}</div><div class="l">Chờ duyệt</div></div>
     <div class="kpi ok"><div class="v">${fmtTr(doneTotal/1e6)}<small>tr</small></div><div class="l">Đã duyệt</div></div>
