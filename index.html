@@ -197,7 +197,7 @@ tr:hover td{background:#f8f9ff}
 <!-- ========== MAIN APP ========== -->
 <div id="app">
   <header>
-    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v1.16</span></div>
+    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v1.17</span></div>
     <div class="user" id="userLine"></div>
     <button class="logout-btn" id="headerLoginBtn" onclick="showLogin()">📊 Dashboard</button>
   </header>
@@ -269,17 +269,17 @@ tr:hover td{background:#f8f9ff}
         </div>
       </div>
       <div class="row col3">
-        <div class="fld"><label>Ngày đi *</label><input id="f-ngaydi" type="date" onchange="autoDays()"></div>
-        <div class="fld"><label>Ngày về *</label><input id="f-ngayve" type="date" onchange="autoDays()"></div>
-        <div class="fld">
-          <div style="display:flex;gap:8px">
-            <div style="flex:1"><label>Ngày CTP</label><input id="f-ngayctp" readonly placeholder="về−đi+1"></div>
-            <div style="flex:1"><label>Ngày KS</label><input id="f-ngayks" readonly placeholder="về−đi"></div>
-          </div>
+        <div class="fld" style="display:flex;gap:8px">
+          <div style="flex:1"><label>Ngày đi *</label><input id="f-ngaydi" type="date" onchange="autoDays()"></div>
+          <div style="flex:1"><label>Ngày về *</label><input id="f-ngayve" type="date" onchange="autoDays()"></div>
         </div>
-      </div>
-      <div class="fld"><label>Lý do / Ghi chú *</label>
-        <textarea id="f-ghichu" placeholder="Nhập lý do, mục đích chuyến đi (bắt buộc)..." rows="1"></textarea>
+        <div class="fld" style="display:flex;gap:8px">
+          <div style="flex:1"><label>Ngày CTP</label><input id="f-ngayctp" readonly placeholder="về−đi+1"></div>
+          <div style="flex:1"><label>Ngày KS</label><input id="f-ngayks" readonly placeholder="về−đi"></div>
+        </div>
+        <div class="fld"><label>Lý do / Ghi chú *</label>
+          <textarea id="f-ghichu" placeholder="Nhập lý do (bắt buộc)..." rows="1"></textarea>
+        </div>
       </div>
 
       <div class="dm-info hidden" id="dmInfoBox">
