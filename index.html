@@ -219,18 +219,11 @@ tr:hover td{background:#f8f9ff}
       <h3>👤 Thông tin nhân sự</h3>
       <div class="row col3">
         <div class="fld auto-wrap">
-          <label>Mã CH *</label>
-          <input id="f-mach" placeholder="Gõ mã hoặc tên CH..." autocomplete="off" oninput="acCH(this.value)">
-          <div class="suggest hidden" id="chSug"></div>
-        </div>
-        <div class="fld auto-wrap">
           <label>Mã NV *</label>
           <input id="f-manv" placeholder="Gõ mã NV..." autocomplete="off" oninput="acNV(this.value)">
           <div class="suggest hidden" id="nvSug"></div>
         </div>
         <div class="fld"><label>Họ và tên *</label><input id="f-hoten" placeholder="Tự động từ Mã NV"></div>
-      </div>
-      <div class="row col3">
         <div class="fld"><label>Chức vụ *</label>
           <select id="f-chucvu" onchange="onChucVuChange()">
             <option value="CHT-NVCH">CHT-NVCH</option>
@@ -240,6 +233,8 @@ tr:hover td{background:#f8f9ff}
             <option value="GĐM">GĐM</option>
           </select>
         </div>
+      </div>
+      <div class="row col3">
         <div class="fld"><label>Tháng</label>
           <select id="f-thang">
             <option value="">Tự động</option>
@@ -249,12 +244,15 @@ tr:hover td{background:#f8f9ff}
           </select>
         </div>
       </div>
-      <div class="ch-info hidden" id="chInfo"></div>
 
       <!-- SECTION 2: ĐỊA ĐIỂM & THÔNG TIN CÔNG TÁC -->
       <h3 style="margin-top:12px">🧭 Địa điểm &amp; Thông tin công tác</h3>
       <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        <div class="fld"><label>Địa điểm đi</label><input id="f-diadiemdi" readonly placeholder="Từ Mã CH"></div>
+        <div class="fld auto-wrap">
+          <label>Địa điểm đi *</label>
+          <input id="f-mach" placeholder="Gõ mã hoặc tên CH..." autocomplete="off" oninput="acCH(this.value)">
+          <div class="suggest hidden" id="chSug"></div>
+        </div>
         <div class="fld auto-wrap">
           <label>Địa điểm đến *</label>
           <input id="f-den" placeholder="Gõ mã CH đến..." autocomplete="off" oninput="acDen(this.value)">
@@ -267,11 +265,7 @@ tr:hover td{background:#f8f9ff}
         </div>
         <div class="fld"><label>Km *</label><input id="f-km" type="number" readonly placeholder="Tự tính"></div>
       </div>
-      <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        <div class="fld"><label>Ngày bắt đầu *</label><input id="f-ngaydi" type="date" onchange="autoDays()"></div>
-        <div class="fld"><label>Ngày kết thúc *</label><input id="f-ngayve" type="date" onchange="autoDays()"></div>
-        <div class="fld"><label>Ngày CTP</label><input id="f-ngayctp" readonly placeholder="về−đi+1"></div>
-        <div class="fld"><label>Ngày KS</label><input id="f-ngayks" readonly placeholder="về−đi"></div>
+      <div class="ch-info hidden" id="chInfo"></div>
       </div>
       <div class="ch-info hidden" id="denInfo"></div>
       <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -622,8 +616,7 @@ function acCH(v) {
 function pickCH(ma) {
   selCH = STORELIST.find(s => s.ma === ma);
   if (!selCH) return;
-  $('f-mach').value = ma;
-  $('f-diadiemdi').value = selCH.ma + ' — ' + selCH.ten;
+  $('f-mach').value = selCH.ma + ' — ' + selCH.ten;
   $('chSug').classList.add('hidden');
   $('chInfo').classList.remove('hidden');
   $('chInfo').innerHTML = `<b>${selCH.ma} — ${selCH.ten}</b><br>Miền: <b>${selCH.mien||'—'}</b> · GĐV: <b>${selCH.gdv||'—'}</b> · QLKV: <b>${selCH.qlkv||'—'}</b>`;
@@ -838,7 +831,7 @@ function submitKB() {
   const km = +($('f-km').value) || 0;
   const soNgay = +($('f-ngayctp').value) || 0;
 
-  if (!mach || !selCH) { toast('⚠️ Bước 1: Chọn Mã CH trước', 'error'); return; }
+  if (!mach || !selCH) { toast('⚠️ Chọn Địa điểm đi', 'error'); return; }
   if (!manv) { toast('⚠️ Bước 2: Nhập Mã NV người công tác', 'error'); return; }
   if (!selDen) { toast('⚠️ Chọn Địa điểm đến', 'error'); return; }
   if (!ngaydi) { toast('⚠️ Vui lòng nhập Ngày bắt đầu', 'error'); return; }
@@ -924,7 +917,7 @@ function buildRecord() {
 }
 
 function resetForm() {
-  ['f-mach','f-manv','f-hoten','f-diadiemdi','f-den','f-km','f-ngaydi','f-ngayve','f-ngayctp','f-ngayks','f-xang','f-ve','f-lydo-khac'].forEach(id => $(id).value = '');
+  ['f-mach','f-manv','f-hoten','f-den','f-km','f-ngaydi','f-ngayve','f-ngayctp','f-ngayks','f-xang','f-ve','f-lydo-khac'].forEach(id => $(id).value = '');
   $('f-ctp').value = '150.000'; $('f-ks').value = '300.000';
   $('f-chucvu').value = 'CHT-NVCH';
   $('f-lydo').selectedIndex = 0; $('lydoKhacBox').classList.add('hidden');
