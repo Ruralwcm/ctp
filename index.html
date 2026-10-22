@@ -737,7 +737,7 @@ function updateDMInfo() {
 
 // =================== AUTO CALC ===================
 function autoCalc() {
-  const ngayCTP = +($('f-ngayctp').value) || 0;
+  const ngayCTP = +($('f-ngayctp').value) || 1;
   const ngayKS = +($('f-ngayks').value) || 0;
   const ctp = money($('f-ctp'));
   const ks = money($('f-ks'));
@@ -1112,8 +1112,9 @@ document.addEventListener('click', e => {
   }
 });
 
-// Init ĐM display
+// Init
 if (!localStorage.getItem(K_DM)) saveDM();
+setTimeout(() => { onChucVuChange(); autoCalc(); }, 300);
 </script>
 </body>
 </html>
