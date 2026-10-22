@@ -217,13 +217,15 @@ tr:hover td{background:#f8f9ff}
 
       <!-- SECTION 1: NHÂN SỰ -->
       <h3>👤 Thông tin nhân sự</h3>
-      <div class="row col3">
+      <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="fld auto-wrap">
           <label>Mã NV *</label>
           <input id="f-manv" placeholder="Gõ mã NV..." autocomplete="off" oninput="acNV(this.value)">
           <div class="suggest hidden" id="nvSug"></div>
         </div>
         <div class="fld"><label>Họ và tên *</label><input id="f-hoten" placeholder="Tự động từ Mã NV"></div>
+      </div>
+      <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="fld"><label>Chức vụ *</label>
           <select id="f-chucvu" onchange="onChucVuChange()">
             <option value="CHT-NVCH">CHT-NVCH</option>
@@ -233,9 +235,7 @@ tr:hover td{background:#f8f9ff}
             <option value="GĐM">GĐM</option>
           </select>
         </div>
-      </div>
-      <div class="row col3">
-        <div class="fld"><label>Tháng</label>
+        <div class="fld"><label>Tháng CTP</label>
           <select id="f-thang">
             <option value="">Tự động</option>
             <option>T1</option><option>T2</option><option>T3</option><option>T4</option>
