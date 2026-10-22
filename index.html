@@ -6,1054 +6,1075 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>CTP — Khai báo Công tác phí</title>
+<title>CTP — Khai báo · Valid · Phê duyệt</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f0f2f5;color:#333;min-height:100vh}
-.app-header{background:linear-gradient(135deg,#1a3a6b,#2f5496);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.app-header h1{font-size:18px;font-weight:600}
-.app-header .ver{font-size:11px;opacity:.7}
-.user-bar{display:flex;align-items:center;gap:8px}
-.user-bar .role-badge{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:12px;font-size:12px}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s}
-.btn-primary{background:#2f5496;color:#fff}
-.btn-primary:hover{background:#1a3a6b}
-.btn-outline{background:#fff;color:#2f5496;border:1.5px solid #2f5496}
-.btn-outline:hover{background:#e8f0fa}
-.btn-danger{background:#d32f2f;color:#fff}
-.btn-danger:hover{background:#b71c1c}
-.btn-success{background:#2e7d32;color:#fff}
-.btn-sm{padding:5px 12px;font-size:12px}
-.btn-xs{padding:3px 8px;font-size:11px}
+:root{
+  --blue:#1F4E78; --blue2:#2E6DA4; --bg:#f2f5f9; --card:#fff; --line:#e3e8ef;
+  --ok:#1e8e3e; --warn:#e8a020; --err:#d93025; --muted:#7a8699;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:#1a1a1a;font-size:15px;line-height:1.45;min-height:100vh}
 
-.container{max-width:800px;margin:0 auto;padding:16px}
-.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.card-title{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;color:#1a3a6b}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.form-row.col3{grid-template-columns:1fr 1fr 1fr}
-.form-row.col1{grid-template-columns:1fr}
-.form-group{display:flex;flex-direction:column}
-.form-group label{font-size:12px;font-weight:600;color:#555;margin-bottom:4px}
-.form-group input,.form-group select,.form-group textarea{padding:8px 10px;border:1.5px solid #d0d5dd;border-radius:8px;font-size:14px;transition:border-color .15s;background:#fff}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#2f5496;box-shadow:0 0 0 3px rgba(47,84,150,.1)}
-.form-group textarea{resize:vertical;min-height:60px}
-.form-group .helper{font-size:11px;color:#999;margin-top:2px}
+/* LOGIN */
+#login{max-width:420px;margin:8vh auto;padding:0 16px}
+.login-card{background:var(--card);border-radius:14px;padding:28px 20px;box-shadow:0 2px 14px rgba(0,0,0,.06)}
+.logo{text-align:center;margin-bottom:18px}
+.logo .t{font-size:22px;font-weight:800;color:var(--blue)}
+.logo .s{font-size:12px;color:var(--muted);margin-top:4px}
+label{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 4px;font-weight:600}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px;background:#fafbfd;color:#1a1a1a}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue2);background:#fff}
+input[readonly]{background:#f0f3f7;color:#555}
+textarea{resize:vertical;min-height:64px}
 
-.result-box{margin-top:10px;padding:12px;border-radius:8px;font-size:14px}
-.result-box.normal{background:#e8f5e9;border:1px solid #a5d6a7}
-.result-box.over{background:#fce4ec;border:1px solid #ef9a9a}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;color:#fff}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--blue)}
+.btn-primary:hover{background:#163d5c}
+.btn-ok{background:var(--ok)}
+.btn-danger{background:var(--err)}
+.btn-ghost{background:#eef2f7;color:var(--blue)}
+.btn-outline{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
+.btn-sm{padding:7px 14px;font-size:12.5px}
+.btn-xs{padding:4px 10px;font-size:11px}
+.btn-block{width:100%}
 
-.tabs{display:flex;gap:0;border-bottom:2px solid #e0e0e0;margin-bottom:16px}
-.tab{padding:10px 18px;font-size:13px;font-weight:600;color:#777;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-2px}
-.tab.active{color:#2f5496;border-bottom-color:#2f5496}
-.tab:hover{color:#1a3a6b}
+/* APP */
+#app{max-width:720px;margin:0 auto;padding:12px 12px 90px}
+header{background:linear-gradient(135deg,var(--blue),#2f5496);color:#fff;border-radius:12px;padding:14px 16px;margin-bottom:12px;position:relative}
+header .title{font-size:18px;font-weight:800}
+header .user{font-size:12px;opacity:.9;margin-top:3px}
+header .logout-btn{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.18);border:none;color:#fff;padding:7px 12px;border-radius:8px;font-size:12.5px;cursor:pointer}
 
-.table-wrap{overflow-x:auto}
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px}
+.tab{flex:1;min-width:90px;text-align:center;padding:11px 6px;background:var(--card);border:1px solid var(--line);border-radius:10px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;transition:.15s}
+.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.tab .badge-count{display:inline-block;background:var(--err);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;font-weight:700}
+.tab.active .badge-count{background:rgba(255,255,255,.3)}
+
+/* CARDS */
+.card{background:var(--card);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.card h3{font-size:14px;color:var(--blue);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.card .sec-label{font-size:12px;color:var(--muted);font-weight:700;margin:12px 0 6px;text-transform:uppercase;letter-spacing:.3px}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.kpi{background:var(--card);border-radius:10px;padding:12px 10px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.kpi .v{font-size:20px;font-weight:800;color:var(--blue)}
+.kpi .l{font-size:11px;color:var(--muted);margin-top:2px}
+.kpi.danger .v{color:var(--err)}
+.kpi.ok .v{color:var(--ok)}
+
+/* FORM */
+.row{display:flex;gap:10px}.row>*{flex:1}
+.fld{margin-bottom:10px;position:relative}
+.auto-wrap{position:relative}
+.suggest{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:0 0 9px 9px;max-height:240px;overflow-y:auto;z-index:50;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.suggest .sg{padding:10px 12px;font-size:13.5px;border-bottom:1px solid #f4f6f8;cursor:pointer}
+.suggest .sg:hover{background:#eef4fb}
+.suggest .sg .st{font-weight:700;color:var(--blue)}
+.suggest .sg .sub{font-size:12px;color:var(--muted)}
+
+/* CH INFO */
+.ch-info{background:#f0f4fa;border:1px dashed #c0cfe0;border-radius:9px;padding:10px 12px;font-size:13px;line-height:1.7;margin-bottom:10px}
+.ch-info b{color:var(--blue)}
+
+/* DM INFO */
+.dm-info{background:#fffde7;border:2px solid #ffc107;border-radius:9px;padding:10px 12px;font-size:13px;margin-bottom:10px;line-height:1.6}
+.dm-info strong{color:#f57c00}
+
+/* VALID BOX */
+.valid-box{border-radius:9px;padding:10px 12px;font-size:12.5px;margin-top:10px;line-height:1.5}
+.valid-box.pass{background:#eaf7ef;color:#1a3c6e}
+.valid-box.warn{background:#fff6e5;color:#1a3c6e}
+.valid-box.fail{background:#fdecea;color:#b3261e}
+
+/* RESULT */
+.result-box{border-radius:9px;padding:12px;font-size:13px;margin-top:8px}
+.result-box.calc{background:#e8f0fe;border:1px solid #a5c8e8}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;margin-top:8px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:#f5f7fa;color:#555;font-weight:700;padding:10px 8px;text-align:left;border-bottom:2px solid #e0e0e0;white-space:nowrap;position:sticky;top:0}
+th{background:#f5f7fa;color:#555;font-weight:700;padding:10px 8px;text-align:left;border-bottom:2px solid #e0e0e0;white-space:nowrap}
 td{padding:8px;border-bottom:1px solid #eee}
 tr:hover td{background:#f8f9ff}
 
-.status{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700}
-.status.draft{background:#eee;color:#777}
-.status.pending{background:#fef9c3;color:#e65100}
-.status.approved{background:#e8f5e9;color:#2e7d32}
-.status.rejected{background:#fce4ec;color:#c62828}
+/* STATUS BADGES */
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.b-wait{background:#fff3d6;color:#e65100}
+.b-gdv{background:#d9ecff;color:#1a3c6e}
+.b-gdm{background:#e8f0fe;color:#1a3c6e}
+.b-reject{background:#fde2df;color:#c62828}
+.b-done{background:#e8f0fe;color:#1a3c6e}
+.b-draft{background:#eee;color:#777}
 
-.login-card{max-width:400px;margin:40px auto}
-.login-card input{font-size:16px;padding:12px;text-align:center}
+/* ITEMS */
+.item{background:var(--card);border-radius:12px;padding:13px 14px;margin-bottom:10px;border:1px solid var(--line)}
+.item .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.item .name{font-weight:700;font-size:14.5px}
+.item .meta{font-size:12px;color:var(--muted);margin-top:2px}
+.item .money{font-weight:800;color:var(--blue);font-size:15px;white-space:nowrap}
+.item .body{font-size:13px;margin-top:8px;color:#444}
+.item .acts{display:flex;gap:8px;margin-top:10px}
 
-.dm-table tr{cursor:pointer}
-.dm-table tr.selected{background:#e3f2fd}
+/* PROGRESS BAR */
+.prog{height:8px;background:#eef2f7;border-radius:6px;overflow:hidden;margin-top:6px}
+.prog>div{height:100%;background:var(--ok);border-radius:6px;transition:width .3s}
+.prog.over>div{background:var(--err)}
 
+/* EMPTY */
+.empty{text-align:center;color:var(--muted);padding:26px 10px;font-size:13.5px}
+
+/* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:#fff;border-radius:12px;padding:20px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2)}
-.modal h3{margin-bottom:12px;color:#1a3a6b}
+.modal h3{margin-bottom:12px;color:var(--blue)}
 
-.badge{display:inline-block;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;margin:2px}
-.badge-info{background:#e3f2fd;color:#d71920}
-.badge-warn{background:#fef9c3;color:#e65100}
-.badge-ok{background:#e8f5e9;color:#2e7d32}
+/* TOAST */
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:11px 20px;border-radius:10px;font-size:14px;z-index:300;opacity:0;transition:.25s;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.toast.show{opacity:1}
+.toast.success{background:var(--ok)}
+.toast.error{background:var(--err)}
 
-.flex-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.mt-8{margin-top:8px}
-.mb-8{margin-bottom:8px}
-.text-right{text-align:right}
-.text-center{text-align:center}
-.text-sm{font-size:12px}
-.text-muted{color:#888}
-
-/* Mobile */
+/* MOBILE */
 @media(max-width:600px){
-  .form-row{grid-template-columns:1fr}
-  .form-row.col3{grid-template-columns:1fr 1fr}
-  .container{padding:8px}
+  .row{flex-direction:column;gap:0}
+  .tabs{font-size:12px}
+  .tab{padding:10px 4px;font-size:12px;min-width:70px}
+  #app{padding:8px 8px 90px}
   .card{padding:12px;margin-bottom:8px}
-  .tabs{overflow-x:auto}
 }
 
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:8px;color:#fff;font-weight:600;font-size:14px;z-index:300;animation:slideUp .3s ease;box-shadow:0 4px 12px rgba(0,0,0,.2)}
-.toast.success{background:#2e7d32}
-.toast.error{background:#d32f2f}
-@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-
-/* Định mức highlight */
-.dm-highlight{background:#fffde7;border:2px solid #ffc107;border-radius:8px;padding:10px;margin:8px 0;font-size:13px}
-.dm-highlight strong{color:#f57c00}
-
-@media (prefers-color-scheme: dark) {
+/* DARK MODE */
+@media(prefers-color-scheme:dark){
   body{background:#0f1724;color:#e8ecf1}
-  .card,.stat-card,.app-card,.modal,.confirm-box,.login-box{background:#1a2332;border-color:#2a3646}
-  thead th{background:#1a2332;color:#cbd5e1;border-bottom-color:#2a3646}
+  .card,.item,.login-card,.modal{background:#1a2332;border-color:#2a3646}
+  th{background:#1a2332;color:#cbd5e1;border-bottom-color:#2a3646}
   td{border-bottom-color:#2a3646}
-  .sidebar{background:#0a2a24}
-  .topbar{background:#b3121b}
   input,select,textarea{background:#1a2332;color:#e8ecf1;border-color:#2a3646}
+  input[readonly]{background:#243044}
+  .ch-info{background:#1a2740;border-color:#2a3f5a}
+  .dm-info{background:#2a2410;border-color:#665000}
+  .result-box.calc{background:#1a2740;border-color:#2a3f5a}
+  .suggest{background:#1a2332;border-color:#2a3646}
+  .suggest .sg{border-bottom-color:#2a3646}
+  .btn-ghost{background:#243044;color:#9ec5fe}
+  .btn-outline{background:#1a2332;color:#9ec5fe;border-color:#2a3646}
 }
 </style>
 </head>
 <body>
 
-<div class="app-header">
-  <div>
-    <h1>🧾 Công tác phí · Khai báo</h1>
-    <span class="ver">v1.3 · BETA</span>
-  </div>
-  <div class="user-bar">
-    <span id="userName">---</span>
-    <span class="role-badge" id="userRole">---</span>
-    <button class="btn btn-sm btn-outline" onclick="doLogout()" style="color:#fff;border-color:rgba(255,255,255,.5)">↪</button>
-  </div>
-</div>
-
-<div class="container">
-
-  <!-- LOGIN -->
-  <div class="card login-card" id="loginBox">
-    <div class="card-title">🔐 Đăng nhập</div>
-    <div class="form-group">
-      <label>Mã NV / Username</label>
-      <input type="text" id="loginMaNV" placeholder="Nhập mã NV..." onkeydown="if(event.key==='Enter')doLogin()">
+<!-- ========== LOGIN ========== -->
+<div id="login">
+  <div class="login-card">
+    <div class="logo">
+      <div class="t">🧾 Công tác phí</div>
+      <div class="s">Khai báo · Valid định mức · Phê duyệt phân quyền</div>
     </div>
-    <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="doLogin()">Đăng nhập</button>
-    <div style="margin-top:8px;font-size:11px;color:#999">Dùng mã NV từ Storelist. Demo: nhập <b>admin</b> để xem đủ quyền.</div>
-  </div>
-
-  <!-- MAIN APP -->
-  <div id="mainApp" style="display:none">
-
-    <!-- TABS -->
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('declare')">📝 Khai báo</div>
-      <div class="tab" onclick="switchTab('history')">📋 Lịch sử</div>
-      <div class="tab" id="tabDuyet" onclick="switchTab('approve')" style="display:none">✅ Duyệt (<span id="pendingBadge">0</span>)</div>
-      <div class="tab" id="tabDM" onclick="switchTab('dinhmuc')" style="display:none">📐 Định mức</div>
+    <label>Mã nhân viên (Mã NV)</label>
+    <input id="loginMaNV" placeholder="VD: NV001 / QLKV001 / GDV001 / GDM001 / admin" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <div style="height:12px"></div>
+    <button class="btn btn-primary btn-block" onclick="doLogin()">Đăng nhập</button>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted);text-align:center">
+      Demo: <b>NV001</b> (NVCH) · <b>QLKV001</b> · <b>GDV001</b> (GĐV) · <b>GDM001</b> (GĐM) · <b>admin</b> (Admin)
     </div>
-
-    <!-- TAB: KHAI BÁO -->
-    <div id="tab-declare">
-      <div class="card">
-        <div class="card-title">📝 KHAI BÁO CHUYẾN CÔNG TÁC</div>
-        
-        <div class="card-title" style="font-size:13px;margin-top:4px">👤 THÔNG TIN NGƯỜI CÔNG TÁC</div>
-        <div class="form-row col3">
-          <div class="form-group">
-            <label>Miền *</label>
-            <select id="selMien" onchange="onMienChange()">
-              <option value="">-- Chọn Miền --</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>GĐV *</label>
-            <select id="selGDV" onchange="onGDVChange()">
-              <option value="">-- Chọn GĐV --</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>CH *</label>
-            <select id="selCH" onchange="onCHChange()">
-              <option value="">-- Chọn CH --</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row col3">
-          <div class="form-group">
-            <label>Mã NV</label>
-            <input type="text" id="maNV" placeholder="Nhập mã NV...">
-          </div>
-          <div class="form-group">
-            <label>Họ và Tên *</label>
-            <input type="text" id="hoTenCT" placeholder="Nhập họ và tên...">
-          </div>
-          <div class="form-group">
-            <label>Chức vụ *</label>
-            <select id="chucVuCT" onchange="autoDetectDM()">
-              <option value="">-- Chọn --</option>
-              <option>CHT</option>
-              <option>QLKV</option>
-              <option>HCV</option>
-              <option>GĐV</option>
-              <option>GĐM</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="dm-highlight" id="dmInfo" style="display:none">
-          📐 <strong>Định mức vùng:</strong> <span id="dmText">---</span>
-        </div>
-        <div class="form-row col3">
-          <div class="form-group">
-            <label>Ngày đi *</label>
-            <input type="date" id="ngayDi" onchange="autoCalc()">
-          </div>
-          <div class="form-group">
-            <label>Ngày về *</label>
-            <input type="date" id="ngayVe" onchange="autoCalc()">
-          </div>
-          <div class="form-group">
-            <label>Tháng phát sinh</label>
-            <select id="thangPS">
-              <option value="">Tự động</option>
-              <option>Tháng 1</option><option>Tháng 2</option><option>Tháng 3</option><option>Tháng 4</option>
-              <option>Tháng 5</option><option>Tháng 6</option><option>Tháng 7</option><option>Tháng 8</option>
-              <option>Tháng 9</option><option>Tháng 10</option><option>Tháng 11</option><option>Tháng 12</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Nơi đi - Nơi đến *</label>
-            <input type="text" id="route" placeholder="VD: Hà Nội - Bắc Ninh" onchange="autoDetectDM()">
-            <span class="helper">Gõ tỉnh/thành phố đến → tự động tra định mức</span>
-          </div>
-          <div class="form-group">
-            <label>Tỉnh/TP đến (chính)</label>
-            <select id="tinhDen" onchange="autoDetectDM()">
-              <option value="">-- Chọn --</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row col3">
-          <div class="form-group">
-            <label>Số điểm công tác</label>
-            <input type="number" id="soDiemCT" value="1" min="1">
-          </div>
-          <div class="form-group">
-            <label>Số ngày tính CTP</label>
-            <input type="number" id="soNgayCTP" value="1" min="0" step="0.5" onchange="autoCalc()">
-          </div>
-          <div class="form-group">
-            <label>Số ngày tính KS</label>
-            <input type="number" id="soNgayKS" value="0" min="0" step="0.5" onchange="autoCalc()">
-          </div>
-        </div>
-
-        <div class="card-title" style="margin-top:8px">💵 CHI PHÍ</div>
-        <div class="form-row col3">
-          <div class="form-group">
-            <label>CTP/ngày (VNĐ)</label>
-            <input type="number" id="ctpNgay" value="150000" onchange="autoCalc()">
-            <span class="helper">Tự động theo định mức vùng</span>
-          </div>
-          <div class="form-group">
-            <label>CP Khách sạn/ngày (VNĐ)</label>
-            <input type="number" id="ksNgay" value="300000" onchange="autoCalc()">
-            <span class="helper">Tự động theo định mức vùng</span>
-          </div>
-          <div class="form-group">
-            <label>Số lít xăng</label>
-            <input type="number" id="litXang" value="0" onchange="autoCalc()">
-          </div>
-        </div>
-
-        <div class="form-row col3">
-          <div class="form-group">
-            <label>Xăng xe (VNĐ)</label>
-            <input type="number" id="cpXang" value="0" onchange="autoCalc()">
-            <span class="helper">Hoặc nhập số lít → tự nhân 20,000đ/lít</span>
-          </div>
-          <div class="form-group">
-            <label>Vé MB/xe/cầu đường (VNĐ)</label>
-            <input type="number" id="cpVe" value="0" onchange="autoCalc()">
-          </div>
-          <div class="form-group">
-            <label>Ghi chú chi phí vé</label>
-            <input type="text" id="noteVe" placeholder="VD: Vé MB HAN-SGN">
-          </div>
-        </div>
-
-        <div class="result-box normal" id="resultCalc" style="display:none">
-          📊 <strong>Tổng dự kiến:</strong>
-          CTP = <span id="calcCTP">0</span>đ ·
-          KS = <span id="calcKS">0</span>đ ·
-          Xăng = <span id="calcXang">0</span>đ ·
-          Vé = <span id="calcVe">0</span>đ ·
-          <strong style="font-size:16px">TỔNG: <span id="calcTotal">0</span>đ</strong>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Lý do công tác</label>
-            <input type="text" id="lyDo" placeholder="Nhập lý do công tác...">
-          </div>
-          <div class="form-group">
-            <label>Phân nhóm công việc *</label>
-            <select id="phanNhom" onchange="autoSetLoai()">
-              <option value="">-- Chọn --</option>
-              <option>1. Checklist CH</option>
-              <option>2. Họp/ Đào tạo</option>
-              <option>3. Hỗ trợ CH: GHHC/ TKK/ Layout</option>
-              <option>4. Hỗ trợ NSO</option>
-              <option>5. Khác</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Phương tiện di chuyển</label>
-            <select id="ptDiChuyen">
-              <option>Xe máy</option>
-              <option>Ô tô</option>
-              <option>Máy bay/ Taxi</option>
-              <option>Xe khách</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Ngoài KHCT đã gửi?</label>
-            <select id="ngoaiKHCT">
-              <option value="">---</option>
-              <option>Có</option>
-              <option>Không</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Ghi chú thêm</label>
-          <textarea id="ghiChu" rows="2" placeholder="Ghi chú bổ sung nếu cần..."></textarea>
-        </div>
-
-        <div class="flex-row" style="justify-content:flex-end;margin-top:12px;gap:10px">
-          <button class="btn btn-outline" onclick="saveDraft()">💾 Lưu nháp</button>
-          <button class="btn btn-primary" onclick="submitCTP()">📤 Gửi duyệt</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: LỊCH SỬ -->
-    <div id="tab-history" style="display:none">
-      <div class="card">
-        <div class="card-title">📋 LỊCH SỬ KHAI BÁO</div>
-        <div class="flex-row mb-8" style="justify-content:space-between">
-          <div class="flex-row">
-            <select id="filterThang" onchange="renderHistory()" style="padding:6px 10px;border-radius:6px;border:1px solid #d0d5dd">
-              <option value="all">Tất cả tháng</option>
-              <option>Tháng 7</option><option>Tháng 8</option><option>Tháng 9</option>
-              <option>Tháng 10</option><option>Tháng 11</option><option>Tháng 12</option>
-            </select>
-            <select id="filterStatus" onchange="renderHistory()" style="padding:6px 10px;border-radius:6px;border:1px solid #d0d5dd">
-              <option value="all">Tất cả trạng thái</option>
-              <option value="draft">Nháp</option>
-              <option value="pending">Chờ duyệt</option>
-              <option value="approved">Đã duyệt</option>
-              <option value="rejected">Từ chối</option>
-            </select>
-          </div>
-          <span class="text-sm text-muted" id="historyCount">0 chuyến</span>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Mã CH</th><th>Họ tên</th><th>Ngày đi</th><th>Nơi đi-đến</th>
-                <th class="text-right">Tổng CP</th><th>Trạng thái</th><th></th>
-              </tr>
-            </thead>
-            <tbody id="historyBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: DUYỆT -->
-    <div id="tab-approve" style="display:none">
-      <div class="card">
-        <div class="card-title">✅ DUYỆT CÔNG TÁC PHÍ</div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Người gửi</th><th>Ngày đi</th><th>Nơi đi-đến</th>
-                <th class="text-right">Tổng CP</th><th>Tháng</th><th></th>
-              </tr>
-            </thead>
-            <tbody id="approveBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: ĐỊNH MỨC -->
-    <div id="tab-dinhmuc" style="display:none">
-      <div class="card">
-        <div class="card-title">📐 BẢNG ĐỊNH MỨC CÔNG TÁC PHÍ</div>
-        <div class="flex-row mb-8">
-          <input type="text" id="dmSearch" placeholder="🔍 Tìm tỉnh/vùng..." oninput="renderDinhMuc()" style="padding:6px 10px;border-radius:6px;border:1px solid #d0d5dd;flex:1">
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Tỉnh / Vùng</th><th class="text-right">CTP/ngày (đ)</th><th class="text-right">KS/ngày (đ)</th>
-                <th class="text-center">Ghi chú</th>
-              </tr>
-            </thead>
-            <tbody id="dmBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>
 
-<!-- MODAL: Chi tiết chuyến -->
-<div class="modal-overlay" id="detailModal">
-  <div class="modal" id="detailContent"></div>
+<!-- ========== MAIN APP ========== -->
+<div id="app" class="hidden">
+  <header>
+    <div class="title">🧾 Công tác phí</div>
+    <div class="user" id="userLine"></div>
+    <button class="logout-btn" onclick="doLogout()">Đăng xuất</button>
+  </header>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" data-tab="kb" onclick="switchTab('kb')">📝 Khai báo</div>
+    <div class="tab" data-tab="valid" onclick="switchTab('valid')">📐 Valid &amp; Định mức</div>
+    <div class="tab" data-tab="pd" onclick="switchTab('pd')">✅ Phê duyệt <span class="badge-count" id="pdBadge" style="display:none">0</span></div>
+  </div>
+
+  <!-- ========== TAB: KHAI BÁO ========== -->
+  <div id="tab-kb">
+    <div class="card">
+      <h3>📝 Khai báo chuyến công tác</h3>
+
+      <div class="sec-label">🏪 Bước 1 — Chọn cửa hàng (auto GĐV / Miền)</div>
+      <div class="fld auto-wrap">
+        <label>Mã CH (Mã SAP) *</label>
+        <input id="f-mach" placeholder="Gõ mã hoặc tên cửa hàng..." autocomplete="off" oninput="acCH(this.value)">
+        <div class="suggest hidden" id="chSug"></div>
+      </div>
+      <div class="ch-info hidden" id="chInfo"></div>
+
+      <div class="sec-label">👤 Bước 2 — Người công tác</div>
+      <div class="row">
+        <div class="fld auto-wrap">
+          <label>Mã NV *</label>
+          <input id="f-manv" placeholder="Gõ mã NV..." autocomplete="off" oninput="acNV(this.value)">
+          <div class="suggest hidden" id="nvSug"></div>
+        </div>
+        <div class="fld"><label>Họ và tên *</label><input id="f-hoten" placeholder="Nhập họ tên"></div>
+      </div>
+      <div class="row">
+        <div class="fld"><label>Chức vụ *</label>
+          <select id="f-chucvu" onchange="onChucVuChange()">
+            <option value="CHT-NVCH">CHT-NVCH</option>
+            <option value="QLKV">QLKV</option>
+            <option value="HCV">HCV</option>
+            <option value="GĐV">GĐV</option>
+            <option value="GĐM">GĐM</option>
+          </select>
+        </div>
+        <div class="fld"><label>Tháng phát sinh</label>
+          <select id="f-thang">
+            <option value="">Tự động</option>
+            <option>T1</option><option>T2</option><option>T3</option><option>T4</option>
+            <option>T5</option><option>T6</option><option>T7</option><option>T8</option>
+            <option>T9</option><option>T10</option><option>T11</option><option>T12</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="dm-info hidden" id="dmInfoBox">
+        📐 <strong>Định mức tự động:</strong> <span id="dmInfoText">---</span>
+      </div>
+
+      <div class="sec-label">🧾 Bước 3 — Thông tin chuyến đi</div>
+      <div class="row">
+        <div class="fld"><label>Loại công tác *</label>
+          <select id="f-loai" onchange="liveValid()">
+            <option>Hỗ trợ NSO</option><option>Hỗ trợ CH</option><option>Checklist CH</option>
+            <option>Họp / Đào tạo</option><option>Khác</option>
+          </select>
+        </div>
+        <div class="fld"><label>Phân nhóm công việc</label>
+          <select id="f-phannhom">
+            <option value="">-- Chọn --</option>
+            <option>1. Checklist CH</option>
+            <option>2. Họp / Đào tạo</option>
+            <option>3. Hỗ trợ CH: GHHC / TKK / Layout</option>
+            <option>4. Hỗ trợ NSO</option>
+            <option>5. Khác</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="fld"><label>Nơi đi - Nơi đến *</label>
+          <input id="f-route" placeholder="VD: Hà Nội → Bắc Ninh">
+        </div>
+        <div class="fld auto-wrap">
+          <label>Điểm đến (CH/NSO)</label>
+          <input id="f-den" placeholder="Gõ mã/tên CH hoặc điểm đến..." autocomplete="off" oninput="acDen(this.value)">
+          <div class="suggest hidden" id="denSug"></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="fld"><label>Khoảng cách (km)</label>
+          <input id="f-km" type="number" placeholder="45" oninput="liveValid()">
+        </div>
+        <div class="fld"><label>Phương tiện</label>
+          <select id="f-pt">
+            <option>Xe máy</option><option>Ô tô</option><option>Máy bay / Taxi</option><option>Xe khách</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="fld"><label>Ngày đi *</label><input id="f-ngaydi" type="date" onchange="autoDays()"></div>
+        <div class="fld"><label>Ngày về *</label><input id="f-ngayve" type="date" onchange="autoDays()"></div>
+      </div>
+      <div class="row">
+        <div class="fld"><label>Số ngày CTP</label><input id="f-ngayctp" readonly placeholder="về − đi + 1"></div>
+        <div class="fld"><label>Số ngày KS</label><input id="f-ngayks" readonly placeholder="về − đi"></div>
+      </div>
+
+      <div class="sec-label">💵 Chi phí</div>
+      <div class="row">
+        <div class="fld"><label>CTP/ngày (đ)</label>
+          <input id="f-ctp" type="text" inputmode="numeric" placeholder="150.000" oninput="moneyInput(this);autoCalc()">
+        </div>
+        <div class="fld"><label>KS/ngày (đ)</label>
+          <input id="f-ks" type="text" inputmode="numeric" placeholder="300.000" oninput="moneyInput(this);autoCalc()">
+        </div>
+      </div>
+      <div class="row">
+        <div class="fld"><label>Xăng / đi lại (đ)</label>
+          <input id="f-xang" type="text" inputmode="numeric" placeholder="200.000" oninput="moneyInput(this);autoCalc()">
+        </div>
+        <div class="fld"><label>Vé MB / cầu đường (đ)</label>
+          <input id="f-ve" type="text" inputmode="numeric" placeholder="0" oninput="moneyInput(this);autoCalc()">
+        </div>
+      </div>
+      <div class="fld"><label>Lý do / Ghi chú</label>
+        <textarea id="f-ghichu" placeholder="Lý do, mục đích chuyến đi..."></textarea>
+      </div>
+
+      <div class="result-box calc">
+        📊 <strong>Tổng dự kiến:</strong>
+        CTP = <b id="calcCTP">0</b>đ ·
+        KS = <b id="calcKS">0</b>đ ·
+        Xăng = <b id="calcXang">0</b>đ ·
+        Vé = <b id="calcVe">0</b>đ ·
+        <strong style="font-size:17px;color:var(--blue)">TỔNG: <span id="calcTotal">0</span>đ</strong>
+      </div>
+
+      <div class="valid-box pass hidden" id="validBox"></div>
+
+      <div style="display:flex;gap:10px;margin-top:12px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="saveDraft()">💾 Lưu nháp</button>
+        <button class="btn btn-primary btn-sm" onclick="submitKB()">📤 Gửi duyệt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TAB: VALID & ĐỊNH MỨC ========== -->
+  <div id="tab-valid" class="hidden">
+    <!-- KPI -->
+    <div class="kpis" id="validKpis"></div>
+
+    <!-- NGÂN SÁCH GĐV -->
+    <div class="card">
+      <h3>💰 Ngân sách công tác phí theo GĐV (tháng)</h3>
+      <div id="budgetList"></div>
+    </div>
+
+    <!-- ĐỊNH MỨC TABLE -->
+    <div class="card">
+      <h3>📐 Bảng định mức CTP theo vùng & chức vụ</h3>
+      <div class="row" style="margin-bottom:10px">
+        <div class="fld"><input id="dmSearch" placeholder="🔍 Tìm tỉnh/vùng..." oninput="renderDM()"></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Vùng / Tỉnh</th><th>CHT-NVCH</th><th>QLKV</th><th>HCV</th><th>GĐV</th><th>GĐM</th><th>Ghi chú</th></tr></thead>
+          <tbody id="dmBody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">💡 Click vào vùng để sửa định mức (GĐM/Admin)</div>
+    </div>
+
+    <!-- VALID RULES -->
+    <div class="card">
+      <h3>📋 Quy tắc kiểm tra (Valid)</h3>
+      <div style="font-size:13px;line-height:2">
+        <div>✅ <b>≤ 30km</b> → NVCH tự túc, không hỗ trợ chi phí</div>
+        <div>✅ <b>30–80km</b> → NVCH/QLKV được hỗ trợ CTP + KS theo định mức</div>
+        <div>⚠️ <b>&gt; 80km</b> → Chỉ QLKV/đội NSO chuyên trách, cần GĐM duyệt</div>
+        <div>⚠️ <b>&gt; 2 ngày</b> → Cần GĐM duyệt</div>
+        <div>🔴 <b>Vượt ngân sách GĐV</b> → Cần duyệt ngoại lệ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TAB: PHÊ DUYỆT ========== -->
+  <div id="tab-pd" class="hidden">
+    <!-- PENDING APPROVALS -->
+    <div class="card">
+      <h3>⏳ Chờ phê duyệt</h3>
+      <div id="pendingList"></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="card">
+      <h3>📋 Lịch sử phê duyệt</h3>
+      <div style="margin-bottom:10px" class="row">
+        <div class="fld">
+          <select id="pdFilterStatus" onchange="renderAll()">
+            <option value="all">Tất cả trạng thái</option>
+            <option value="cho_gdv">Chờ GĐV</option>
+            <option value="gdv_duyet">GĐV đã duyệt</option>
+            <option value="cho_gdm">Chờ GĐM</option>
+            <option value="done">Hoàn tất</option>
+            <option value="tu_choi">Từ chối</option>
+            <option value="draft">Nháp</option>
+          </select>
+        </div>
+        <div class="fld">
+          <select id="pdFilterThang" onchange="renderAll()">
+            <option value="all">Tất cả tháng</option>
+            <option>T1</option><option>T2</option><option>T3</option><option>T4</option>
+            <option>T5</option><option>T6</option><option>T7</option><option>T8</option>
+            <option>T9</option><option>T10</option><option>T11</option><option>T12</option>
+          </select>
+        </div>
+      </div>
+      <div id="historyList"></div>
+    </div>
+  </div>
 </div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
-// ========== DATA ==========
-// Định mức CTP theo chức vụ (từ data T7-T9/2026)
+// =================== DATA ===================
 const DM_BY_CHUCVU = {
   'CHT-NVCH': { ctp: 150000, ks: 300000 },
-  'QLKV':     { ctp: 200000, ks: 400000 },
-  'HCV':      { ctp: 250000, ks: 450000 },
-  'GĐV':      { ctp: 250000, ks: 500000 },
-  'GĐM':      { ctp: 300000, ks: 600000 },
+  'QLKV':      { ctp: 200000, ks: 400000 },
+  'HCV':       { ctp: 250000, ks: 450000 },
+  'GĐV':       { ctp: 250000, ks: 500000 },
+  'GĐM':       { ctp: 300000, ks: 600000 },
 };
 
 const DEFAULT_DM = [
-  {tinh:'Miền núi phía Bắc',note:'Hà Giang, Lào Cai, Điện Biên, Sơn La, Lai Châu, Cao Bằng, Bắc Kạn'},
-  {tinh:'Đồng bằng Bắc Bộ',note:'Bắc Ninh, Bắc Giang, Hải Dương, Hưng Yên, Hà Nam, Nam Định, Thái Bình, Ninh Bình, Vĩnh Phúc, Phú Thọ, Thái Nguyên, Hòa Bình'},
-  {tinh:'Hà Nội',note:'Nội thành + ngoại thành'},
-  {tinh:'Bắc Trung Bộ',note:'Thanh Hóa, Nghệ An, Hà Tĩnh, Quảng Bình, Quảng Trị'},
-  {tinh:'Trung Bộ',note:'Huế, Đà Nẵng, Quảng Nam, Quảng Ngãi, Bình Định, Phú Yên, Khánh Hòa'},
-  {tinh:'Tây Nguyên',note:'Kon Tum, Gia Lai, Đắk Lắk, Đắk Nông, Lâm Đồng'},
-  {tinh:'Đông Nam Bộ',note:'TP HCM, Bình Dương, Đồng Nai, Bà Rịa-Vũng Tàu, Bình Phước, Tây Ninh'},
-  {tinh:'Tây Nam Bộ',note:'Long An, Tiền Giang, Bến Tre, Trà Vinh, Vĩnh Long, Đồng Tháp, Cần Thơ, Sóc Trăng, Bạc Liêu, Cà Mau, Kiên Giang'},
-  {tinh:'Hải Phòng / Quảng Ninh',note:'Ven biển Đông Bắc'},
-  {tinh:'Lạng Sơn',note:'Biên giới Đông Bắc'},
+  {vung:'Miền núi phía Bắc',ctpNV:150000,ksNV:300000,ctpQL:200000,ksQL:400000,ctpHC:250000,ksHC:450000,ctpGDV:250000,ksGDV:500000,ctpGDM:300000,ksGDM:600000,note:'Hà Giang, Lào Cai, Điện Biên, Sơn La, Lai Châu, Cao Bằng, Bắc Kạn'},
+  {vung:'Đồng bằng Bắc Bộ',ctpNV:150000,ksNV:300000,ctpQL:200000,ksQL:400000,ctpHC:250000,ksHC:450000,ctpGDV:250000,ksGDV:500000,ctpGDM:300000,ksGDM:600000,note:'Bắc Ninh, Bắc Giang, Hải Dương, Hưng Yên, Hà Nam, Nam Định, Thái Bình, Ninh Bình, Vĩnh Phúc, Phú Thọ, Thái Nguyên, Hòa Bình'},
+  {vung:'Hà Nội',ctpNV:200000,ksNV:400000,ctpQL:250000,ksQL:500000,ctpHC:300000,ksHC:550000,ctpGDV:300000,ksGDV:600000,ctpGDM:350000,ksGDM:700000,note:'Nội thành + ngoại thành'},
+  {vung:'Hải Phòng / Quảng Ninh',ctpNV:180000,ksNV:350000,ctpQL:220000,ksQL:450000,ctpHC:270000,ksHC:500000,ctpGDV:270000,ksGDV:550000,ctpGDM:320000,ksGDM:650000,note:'Ven biển Đông Bắc'},
+  {vung:'Bắc Trung Bộ',ctpNV:150000,ksNV:300000,ctpQL:200000,ksQL:400000,ctpHC:250000,ksHC:450000,ctpGDV:250000,ksGDV:500000,ctpGDM:300000,ksGDM:600000,note:'Thanh Hóa, Nghệ An, Hà Tĩnh, Quảng Bình, Quảng Trị'},
+  {vung:'Trung Bộ',ctpNV:180000,ksNV:400000,ctpQL:230000,ksQL:500000,ctpHC:280000,ksHC:550000,ctpGDV:280000,ksGDV:600000,ctpGDM:350000,ksGDM:700000,note:'Huế, Đà Nẵng, Quảng Nam, Quảng Ngãi, Bình Định, Phú Yên, Khánh Hòa'},
+  {vung:'Tây Nguyên',ctpNV:180000,ksNV:350000,ctpQL:220000,ksQL:450000,ctpHC:270000,ksHC:500000,ctpGDV:270000,ksGDV:550000,ctpGDM:320000,ksGDM:650000,note:'Kon Tum, Gia Lai, Đắk Lắk, Đắk Nông, Lâm Đồng'},
+  {vung:'Đông Nam Bộ',ctpNV:200000,ksNV:450000,ctpQL:250000,ksQL:550000,ctpHC:300000,ksHC:600000,ctpGDV:300000,ksGDV:650000,ctpGDM:400000,ksGDM:800000,note:'TP HCM, Bình Dương, Đồng Nai, Bà Rịa-Vũng Tàu, Bình Phước, Tây Ninh'},
+  {vung:'Tây Nam Bộ',ctpNV:180000,ksNV:400000,ctpQL:220000,ksQL:500000,ctpHC:270000,ksHC:550000,ctpGDV:270000,ksGDV:600000,ctpGDM:350000,ksGDM:700000,note:'Long An, Tiền Giang, Bến Tre, Trà Vinh, Vĩnh Long, Đồng Tháp, Cần Thơ, Sóc Trăng, Bạc Liêu, Cà Mau, Kiên Giang'},
 ];
 
-const PROVINCE_LIST = [
-  'Hà Nội','Hà Giang','Cao Bằng','Bắc Kạn','Tuyên Quang','Lào Cai','Điện Biên','Lai Châu','Sơn La','Yên Bái',
-  'Hòa Bình','Thái Nguyên','Lạng Sơn','Quảng Ninh','Bắc Giang','Phú Thọ','Vĩnh Phúc','Bắc Ninh','Hải Dương',
-  'Hải Phòng','Hưng Yên','Thái Bình','Hà Nam','Nam Định','Ninh Bình','Thanh Hóa','Nghệ An','Hà Tĩnh',
-  'Quảng Bình','Quảng Trị','Thừa Thiên Huế','Đà Nẵng','Quảng Nam','Quảng Ngãi','Bình Định','Phú Yên',
-  'Khánh Hòa','Ninh Thuận','Bình Thuận','Kon Tum','Gia Lai','Đắk Lắk','Đắk Nông','Lâm Đồng',
-  'Bình Phước','Tây Ninh','Bình Dương','Đồng Nai','Bà Rịa - Vũng Tàu','TP HCM','Long An','Tiền Giang',
-  'Bến Tre','Trà Vinh','Vĩnh Long','Đồng Tháp','An Giang','Kiên Giang','Cần Thơ','Hậu Giang','Sóc Trăng',
-  'Bạc Liêu','Cà Mau'
+const GDV_BUDGET = [
+  {ten:"Nguyễn Đức Chung",CH:318,NSO:10,K:1.2,budget:129.0},
+  {ten:"Hồ Nam",CH:267,NSO:13,K:1.3,budget:132.9},
+  {ten:"Lê Thị Hồng Thu",CH:234,NSO:13,K:1.1,budget:103.4},
+  {ten:"Tạ Công Nhận",CH:218,NSO:4,K:1.0,budget:67.5},
+  {ten:"Phạm Minh Thu",CH:193,NSO:4,K:1.0,budget:61.3},
+  {ten:"Bùi Anh Tuấn",CH:187,NSO:2,K:1.2,budget:65.7},
+  {ten:"Nguyễn Mạnh Sơn",CH:165,NSO:20,K:1.5,budget:141.4},
+  {ten:"Tạ Quốc Huy",CH:165,NSO:8,K:1.0,budget:64.3},
+  {ten:"Nguyễn Duy Đoàn",CH:154,NSO:10,K:1.0,budget:66.5},
+  {ten:"Nguyễn Thị Thu",CH:147,NSO:12,K:1.2,budget:83.7},
+  {ten:"Đặng Văn Dũng",CH:146,NSO:9,K:1.0,budget:62.0},
+  {ten:"Dương Tùng",CH:90,NSO:15,K:1.5,budget:94.5},
+  {ten:"Bùi Thị Thu Nhài",CH:94,NSO:6,K:1.0,budget:41.5},
+  {ten:"Lạc Nhật Minh",CH:97,NSO:0,K:1.1,budget:30.0},
+  {ten:"Nguyễn Năng Toản",CH:86,NSO:6,K:1.2,budget:47.4},
+  {ten:"Nguyễn Thị Yến",CH:66,NSO:0,K:1.1,budget:21.5},
 ];
 
-const PHAN_NHOM = ['1. Checklist CH','2. Họp/ Đào tạo','3. Hỗ trợ CH: GHHC/ TKK/ Layout','4. Hỗ trợ NSO','5. Khác'];
+const DEFAULT_NV = [
+  {maNV:"NV001",ten:"Nguyễn Văn A",chucVu:"CHT-NVCH",gdv:"Hồ Nam"},
+  {maNV:"NV002",ten:"Trần Thị B",chucVu:"CHT-NVCH",gdv:"Nguyễn Mạnh Sơn"},
+  {maNV:"QLKV001",ten:"Lê Văn C",chucVu:"QLKV",gdv:"Nguyễn Mạnh Sơn"},
+  {maNV:"GDV001",ten:"Hồ Nam",chucVu:"GĐV",gdv:"Hồ Nam"},
+  {maNV:"GDV002",ten:"Nguyễn Mạnh Sơn",chucVu:"GĐV",gdv:"Nguyễn Mạnh Sơn"},
+  {maNV:"GDM001",ten:"Trần Đăng Hảo",chucVu:"GĐM",gdv:"*"},
+];
 
-// ========== STATE ==========
-let currentUser = null;
-let currentTab = 'declare';
-let ctpData = JSON.parse(localStorage.getItem('ctp_data') || '[]');
-let dmData = JSON.parse(localStorage.getItem('ctp_dm') || 'null') || DEFAULT_DM;
+const STORELIST_URL = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:csv&gid=900581387';
 
-// ========== INIT ==========
-document.addEventListener('DOMContentLoaded', () => {
-  // Populate tỉnh dropdown
-  const sel = document.getElementById('tinhDen');
-  PROVINCE_LIST.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p; opt.textContent = p;
-    sel.appendChild(opt);
-  });
+// =================== STATE ===================
+const K_RECORDS = 'ctp_records_v4', K_SESSION = 'ctp_session_v4', K_NV = 'ctp_nvdb_v2', K_DM = 'ctp_dm_v2';
+let RECORDS = JSON.parse(localStorage.getItem(K_RECORDS) || '[]');
+let NVDB = JSON.parse(localStorage.getItem(K_NV) || 'null') || DEFAULT_NV;
+let DM_DATA = JSON.parse(localStorage.getItem(K_DM) || 'null') || DEFAULT_DM;
+let STORELIST = [];
+let ME = null;
+let selCH = null, selDen = null;
 
-  // Check auto-login
-  const saved = localStorage.getItem('ctp_user');
-  if (saved) {
-    try {
-      currentUser = JSON.parse(saved);
-      showApp();
-    } catch(e) {}
-  }
+function save(){ localStorage.setItem(K_RECORDS, JSON.stringify(RECORDS)); }
+function saveNV(){ localStorage.setItem(K_NV, JSON.stringify(NVDB)); }
+function saveDM(){ localStorage.setItem(K_DM, JSON.stringify(DM_DATA)); }
 
-  // Lưu DM mặc định nếu chưa có
-  if (!localStorage.getItem('ctp_dm')) {
-    localStorage.setItem('ctp_dm', JSON.stringify(DEFAULT_DM));
-  }
-});
+const $ = id => document.getElementById(id);
+const $$ = (sel, ctx) => (ctx||document).querySelectorAll(sel);
+const isManager = () => ME && ['GĐV','GĐM','ADMIN'].includes(ME.chucVu);
 
-// ========== AUTH ==========
-function doLogin() {
-  const maNV = document.getElementById('loginMaNV').value.trim();
-  if (!maNV) return toast('Vui lòng nhập mã NV', 'error');
-
-  let user;
-  if (maNV.toLowerCase() === 'admin') {
-    user = { maNV:'admin', hoTen:'Admin', chucVu:'GĐM', gdv:'Ban Giám Đốc', role:'gdm' };
-  } else if (maNV.toLowerCase() === 'gdv') {
-    user = { maNV:'gdv', hoTen:'GĐV Demo', chucVu:'GĐV', gdv:'Nguyễn Mạnh Sơn', role:'gdv' };
-  } else {
-    // Normal user - check from Storelist would happen here
-    user = { maNV, hoTen:'NV ' + maNV, chucVu:'QLKV', gdv:'Chưa xác định', role:'nv' };
-  }
-
-  currentUser = user;
-  localStorage.setItem('ctp_user', JSON.stringify(user));
-  showApp();
-  toast('✅ Đăng nhập thành công!', 'success');
+// =================== UTILS ===================
+function toast(msg, type='') {
+  const t = $('toast'); t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 2200);
 }
+function fmt(n) { return (n || 0).toLocaleString('vi-VN') + 'đ'; }
+function fmtTr(n) { return n.toLocaleString('vi-VN', { maximumFractionDigits: 1 }); }
+function money(el) { return +(el.value.replace(/[^\d]/g, '')) || 0; }
 
-function doLogout() {
-  localStorage.removeItem('ctp_user');
-  currentUser = null;
-  document.getElementById('loginBox').style.display = 'block';
-  document.getElementById('mainApp').style.display = 'none';
-}
-
-function showApp() {
-  document.getElementById('loginBox').style.display = 'none';
-  document.getElementById('mainApp').style.display = 'block';
-  document.getElementById('userName').textContent = currentUser.hoTen;
-  document.getElementById('userRole').textContent = currentUser.chucVu;
-
-  // Show/hide tabs by role
-  const isManager = ['gdm','gdv'].includes(currentUser.role);
-  document.getElementById('tabDuyet').style.display = isManager ? '' : 'none';
-  document.getElementById('tabDM').style.display = isManager ? '' : 'none';
-
-  renderHistory();
-  renderApprove();
-  renderDinhMuc();
-  updatePendingBadge();
-}
-
-// ========== TAB SWITCH ==========
-function switchTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('[id^="tab-"]').forEach(d => d.style.display = 'none');
-
-  document.getElementById('tab-' + tab).style.display = 'block';
-  document.querySelector('.tab:nth-child(' + (
-    tab==='declare'?1 : tab==='history'?2 : tab==='approve'?3 : 4
-  ) + ')')?.classList.add('active');
-
-  if (tab === 'history') renderHistory();
-  if (tab === 'approve') renderApprove();
-  if (tab === 'dinhmuc') renderDinhMuc();
-}
-
-// ========== ĐỊNH MỨC AUTO-DETECT ==========
-function autoDetectDM() {
-  const route = document.getElementById('route').value.trim();
-  const tinhDen = document.getElementById('tinhDen').value;
-
-  let searchText = tinhDen || route;
-  if (!searchText) {
-    document.getElementById('dmInfo').style.display = 'none';
-    return;
-  }
-
-  // Try match with DM table
-  let matched = null;
-  for (const dm of dmData) {
-    if (searchText.toLowerCase().includes(dm.tinh.toLowerCase()) ||
-        dm.tinh.toLowerCase().includes(searchText.toLowerCase())) {
-      matched = dm;
-      break;
-    }
-  }
-
-  // Also try province-level matching
-  if (!matched) {
-    for (const prov of PROVINCE_LIST) {
-      if (searchText.toLowerCase().includes(prov.toLowerCase())) {
-        // Find which DM group this province belongs to
-        for (const dm of dmData) {
-          if (dm.note && dm.note.toLowerCase().includes(prov.toLowerCase())) {
-            matched = dm;
-            break;
-          }
-        }
-        if (!matched) {
-          // Default based on region
-          matched = { tinh: prov, ctp: 150000, ks: 400000, note: 'Mặc định' };
-        }
-        break;
-      }
-    }
-  }
-
-  // Get định mức theo chức vụ
-  const cv = document.getElementById('chucVuCT').value;
-  const rate = DM_BY_CHUCVU[cv] || DM_BY_CHUCVU['CHT-NVCH'];
-  
-  if (matched) {
-    document.getElementById('dmInfo').style.display = 'block';
-    document.getElementById('dmText').innerHTML =
-      `${matched.tinh}: <strong>CTP ${rate.ctp.toLocaleString()}đ/ngày</strong> · KS ${rate.ks.toLocaleString()}đ/ngày` +
-      (matched.note ? ` <span style="color:#888">(${matched.note})</span>` : '') +
-      ` <span style="color:#2f5496">[${cv || 'CHT-NVCH'}]</span>`;
-    document.getElementById('ctpNgay').value = rate.ctp;
-    document.getElementById('ksNgay').value = rate.ks;
-  } else {
-    document.getElementById('dmInfo').style.display = 'none';
-  }
-
+function moneyInput(el) {
+  const v = el.value.replace(/[^\d]/g, '');
+  if (v) el.value = Number(v).toLocaleString('vi-VN');
   autoCalc();
 }
 
-// ========== AUTO CALC ==========
-function autoCalc() {
-  const ngayCTP = parseFloat(document.getElementById('soNgayCTP').value) || 0;
-  const ngayKS = parseFloat(document.getElementById('soNgayKS').value) || 0;
-  const ctpNgay = parseFloat(document.getElementById('ctpNgay').value) || 0;
-  const ksNgay = parseFloat(document.getElementById('ksNgay').value) || 0;
-  const litXang = parseFloat(document.getElementById('litXang').value) || 0;
-  const cpVe = parseFloat(document.getElementById('cpVe').value) || 0;
+const ST_LABEL = {
+  draft: 'Nháp', cho_gdv: 'Chờ GĐV', gdv_duyet: 'GĐV duyệt',
+  cho_gdm: 'Chờ GĐM', done: 'Hoàn tất', tu_choi: 'Từ chối'
+};
+const ST_CLASS = {
+  draft: 'b-draft', cho_gdv: 'b-wait', gdv_duyet: 'b-gdv',
+  cho_gdm: 'b-gdm', done: 'b-done', tu_choi: 'b-reject'
+};
 
-  const cpXang = litXang > 0 ? litXang * 20000 : (parseFloat(document.getElementById('cpXang').value) || 0);
-  if (litXang > 0) document.getElementById('cpXang').value = cpXang;
+// =================== AUTH ===================
+function findNV(ma) { return NVDB.find(u => u.maNV.toLowerCase() === String(ma).toLowerCase()); }
 
-  const totalCTP = ngayCTP * ctpNgay;
-  const totalKS = ngayKS * ksNgay;
-  const total = totalCTP + totalKS + cpXang + cpVe;
+function doLogin() {
+  const ma = $('loginMaNV').value.trim();
+  if (!ma) { toast('Vui lòng nhập mã NV', 'error'); return; }
 
-  document.getElementById('resultCalc').style.display = 'block';
-  document.getElementById('calcCTP').textContent = totalCTP.toLocaleString();
-  document.getElementById('calcKS').textContent = totalKS.toLocaleString();
-  document.getElementById('calcXang').textContent = cpXang.toLocaleString();
-  document.getElementById('calcVe').textContent = cpVe.toLocaleString();
-  document.getElementById('calcTotal').textContent = total.toLocaleString();
-
-  // Auto-calc days from dates
-  const di = document.getElementById('ngayDi').value;
-  const ve = document.getElementById('ngayVe').value;
-  if (di && ve) {
-    const d1 = new Date(di), d2 = new Date(ve);
-    const days = Math.max(1, Math.ceil((d2 - d1) / 86400000) + 1);
-    document.getElementById('soNgayCTP').value = days;
-    document.getElementById('soNgayKS').value = Math.max(0, days - 1);
-    autoCalc(); // re-calc with new values
+  let user;
+  if (ma.toLowerCase() === 'admin') {
+    user = { maNV: 'admin', ten: 'Administrator', chucVu: 'ADMIN', gdv: '*' };
+  } else {
+    user = findNV(ma);
+    if (!user) { toast('Không tìm thấy mã NV: ' + ma + ' (thêm ở tab Nhân viên nếu là Admin)', 'error'); return; }
   }
 
-  // Auto tháng
-  if (di && !document.getElementById('thangPS').value) {
-    const m = new Date(di).getMonth() + 1;
-    document.getElementById('thangPS').value = `Tháng ${m}`;
+  ME = user;
+  sessionStorage.setItem(K_SESSION, ma);
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  $('userLine').innerHTML = ME.ten + ' · ' + ME.chucVu + (ME.gdv ? ' · ' + ME.gdv : '');
+  switchTab('kb');
+  renderAll();
+}
+
+function doLogout() {
+  sessionStorage.removeItem(K_SESSION);
+  location.reload();
+}
+
+// Auto-login from session
+(function() {
+  const m = sessionStorage.getItem(K_SESSION);
+  if (m) {
+    $('loginMaNV').value = m;
+    if (m.toLowerCase() === 'admin') { doLogin(); return; }
+    const u = findNV(m);
+    if (u) { doLogin(); }
   }
+})();
+
+// =================== TABS ===================
+function switchTab(k) {
+  $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === k));
+  ['kb','valid','pd'].forEach(x => $('tab-' + x).classList.toggle('hidden', x !== k));
+  if (k === 'valid') renderValid();
+  if (k === 'pd') renderPD();
 }
 
-// ========== SUBMIT ==========
-function saveDraft() {
-  const record = buildRecord();
-  record.status = 'draft';
-  record.id = 'CTP-' + Date.now();
-  record.createdBy = currentUser.maNV;
-  record.createdName = currentUser.hoTen;
-  record.createdAt = new Date().toISOString();
-
-  ctpData.unshift(record);
-  saveData();
-  toast('✅ Đã lưu nháp!', 'success');
-  resetForm();
-  renderHistory();
-}
-
-function submitCTP() {
-  const record = buildRecord();
-  if (!record.ngayDi || !record.route || !record.phanNhom) {
-    return toast('⚠️ Vui lòng điền đầy đủ: Ngày đi, Nơi đi-đến, Phân nhóm', 'error');
-  }
-
-  record.status = 'pending';
-  record.id = 'CTP-' + Date.now();
-  record.createdBy = currentUser.maNV;
-  record.createdName = currentUser.hoTen;
-  record.createdAt = new Date().toISOString();
-  record.approvals = [];
-
-  ctpData.unshift(record);
-  saveData();
-  toast('✅ Đã gửi duyệt!', 'success');
-  resetForm();
-  renderHistory();
-  renderApprove();
-  updatePendingBadge();
-}
-
-function buildRecord() {
-  return {
-    maCH: document.getElementById('selCH').value,
-    maNV: document.getElementById('maNV').value.trim(),
-    hoTenCT: document.getElementById('hoTenCT').value.trim(),
-    chucVuCT: document.getElementById('chucVuCT').value,
-    ngayDi: document.getElementById('ngayDi').value,
-    ngayVe: document.getElementById('ngayVe').value,
-    thangPS: document.getElementById('thangPS').value || ('Tháng ' + (new Date(document.getElementById('ngayDi').value).getMonth() + 1)),
-    route: document.getElementById('route').value.trim(),
-    tinhDen: document.getElementById('tinhDen').value,
-    soDiemCT: parseInt(document.getElementById('soDiemCT').value) || 1,
-    soNgayCTP: parseFloat(document.getElementById('soNgayCTP').value) || 0,
-    soNgayKS: parseFloat(document.getElementById('soNgayKS').value) || 0,
-    ctpNgay: parseFloat(document.getElementById('ctpNgay').value) || 0,
-    ksNgay: parseFloat(document.getElementById('ksNgay').value) || 0,
-    cpXang: parseFloat(document.getElementById('cpXang').value) || 0,
-    cpVe: parseFloat(document.getElementById('cpVe').value) || 0,
-    noteVe: document.getElementById('noteVe').value.trim(),
-    totalCTP: (parseFloat(document.getElementById('soNgayCTP').value)||0) * (parseFloat(document.getElementById('ctpNgay').value)||0),
-    totalKS: (parseFloat(document.getElementById('soNgayKS').value)||0) * (parseFloat(document.getElementById('ksNgay').value)||0),
-    tongCP: parseFloat(document.getElementById('calcTotal').textContent.replace(/,/g,'')) || 0,
-    lyDo: document.getElementById('lyDo').value,
-    phanNhom: document.getElementById('phanNhom').value,
-    ptDiChuyen: document.getElementById('ptDiChuyen').value,
-    ngoaiKHCT: document.getElementById('ngoaiKHCT').value,
-    ghiChu: document.getElementById('ghiChu').value.trim(),
-    status: 'pending'
-  };
-}
-
-function resetForm() {
-  ['ngayDi','ngayVe','route','soDiemCT','soNgayCTP','soNgayKS','ctpNgay','ksNgay','litXang','cpXang','cpVe','noteVe','ghiChu'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el.tagName === 'SELECT') el.selectedIndex = 0;
-    else el.value = '';
-  });
-  document.getElementById('soDiemCT').value = '1';
-  document.getElementById('soNgayCTP').value = '1';
-  document.getElementById('soNgayKS').value = '0';
-  const cv = document.getElementById('chucVuCT').value;
-  const rate = DM_BY_CHUCVU[cv] || DM_BY_CHUCVU['CHT-NVCH'];
-  document.getElementById('ctpNgay').value = rate.ctp;
-  document.getElementById('ksNgay').value = rate.ks;
-  document.getElementById('selMien').selectedIndex = 0; document.getElementById('selGDV').innerHTML = '<option value="">-- Chọn GĐV --</option>'; document.getElementById('selCH').innerHTML = '<option value="">-- Chọn CH --</option>';
-  document.getElementById('maNV').value = '';
-  document.getElementById('hoTenCT').value = '';
-  document.getElementById('chucVuCT').selectedIndex = 0;
-  document.getElementById('lyDo').value = '';
-  document.getElementById('phanNhom').selectedIndex = 0;
-  document.getElementById('resultCalc').style.display = 'none';
-  document.getElementById('dmInfo').style.display = 'none';
-}
-
-function saveData() {
-  localStorage.setItem('ctp_data', JSON.stringify(ctpData));
-  localStorage.setItem('ctp_dm', JSON.stringify(dmData));
-}
-
-// ========== HISTORY ==========
-function renderHistory() {
-  const tbody = document.getElementById('historyBody');
-  const filterThang = document.getElementById('filterThang')?.value || 'all';
-  const filterStatus = document.getElementById('filterStatus')?.value || 'all';
-
-  let filtered = ctpData;
-  if (currentUser.role === 'nv') {
-    filtered = filtered.filter(r => r.createdBy === currentUser.maNV);
-  }
-  if (filterThang !== 'all') filtered = filtered.filter(r => r.thangPS === filterThang);
-  if (filterStatus !== 'all') filtered = filtered.filter(r => r.status === filterStatus);
-
-  document.getElementById('historyCount').textContent = filtered.length + ' chuyến';
-
-  tbody.innerHTML = filtered.map(r => `
-    <tr>
-      <td>${r.maCH || '-'}</td>
-      <td>${r.hoTenCT || r.createdName || '-'}</td>
-      <td>${r.ngayDi || '-'}</td>
-      <td>${r.route || '-'}</td>
-      <td class="text-right"><strong>${(r.tongCP||0).toLocaleString()}đ</strong></td>
-      <td><span class="status ${r.status}">${statusLabel(r.status)}</span></td>
-      <td><button class="btn btn-xs btn-outline" onclick="viewDetail('${r.id}')">👁</button></td>
-    </tr>
-  `).join('') || '<tr><td colspan="7" class="text-center text-muted">Chưa có chuyến công tác nào</td></tr>';
-}
-
-// ========== APPROVE ==========
-function renderApprove() {
-  const tbody = document.getElementById('approveBody');
-  if (!['gdm','gdv'].includes(currentUser.role)) return;
-
-  const pending = ctpData.filter(r => r.status === 'pending');
-  tbody.innerHTML = pending.map(r => `
-    <tr>
-      <td>${r.createdName} <span class="text-sm text-muted">(${r.createdBy})</span></td>
-      <td>${r.ngayDi}</td>
-      <td>${r.route || '-'}</td>
-      <td class="text-right"><strong>${(r.tongCP||0).toLocaleString()}đ</strong></td>
-      <td>${r.thangPS}</td>
-      <td>
-        <div class="flex-row" style="gap:4px">
-          <button class="btn btn-xs btn-success" onclick="approveCTP('${r.id}')">✓ Duyệt</button>
-          <button class="btn btn-xs btn-danger" onclick="rejectCTP('${r.id}')">✗ Từ chối</button>
-          <button class="btn btn-xs btn-outline" onclick="viewDetail('${r.id}')">👁</button>
-        </div>
-      </td>
-    </tr>
-  `).join('') || '<tr><td colspan="6" class="text-center text-muted">Không có yêu cầu chờ duyệt</td></tr>';
-}
-
-function approveCTP(id) {
-  const idx = ctpData.findIndex(r => r.id === id);
-  if (idx < 0) return;
-  ctpData[idx].status = 'approved';
-  ctpData[idx].approvedBy = currentUser.hoTen;
-  ctpData[idx].approvedAt = new Date().toISOString();
-  ctpData[idx].approvals = ctpData[idx].approvals || [];
-  ctpData[idx].approvals.push({ by: currentUser.hoTen, role: currentUser.role, at: new Date().toISOString(), action: 'approved' });
-  saveData();
-  renderApprove();
-  renderHistory();
-  updatePendingBadge();
-  toast('✅ Đã duyệt!', 'success');
-}
-
-function rejectCTP(id) {
-  const reason = prompt('Lý do từ chối:');
-  if (reason === null) return;
-  const idx = ctpData.findIndex(r => r.id === id);
-  if (idx < 0) return;
-  ctpData[idx].status = 'rejected';
-  ctpData[idx].rejectedBy = currentUser.hoTen;
-  ctpData[idx].rejectedAt = new Date().toISOString();
-  ctpData[idx].rejectReason = reason;
-  saveData();
-  renderApprove();
-  renderHistory();
-  updatePendingBadge();
-  toast('Đã từ chối', 'error');
-}
-
-function updatePendingBadge() {
-  const count = ctpData.filter(r => r.status === 'pending').length;
-  document.getElementById('pendingBadge').textContent = count;
-}
-
-// ========== DETAIL MODAL ==========
-function viewDetail(id) {
-  const r = ctpData.find(x => x.id === id);
-  if (!r) return;
-  document.getElementById('detailContent').innerHTML = `
-    <h3>🧾 Chi tiết CTP #${r.id}</h3>
-    <div style="font-size:13px;line-height:1.8">
-      <div><strong>Người tạo:</strong> ${r.createdName} (${r.createdBy})</div>
-      <div><strong>Ngày đi:</strong> ${r.ngayDi} → <strong>Ngày về:</strong> ${r.ngayVe}</div>
-      <div><strong>Hành trình:</strong> ${r.route}</div>
-      <div><strong>Tỉnh đến:</strong> ${r.tinhDen || '-'}</div>
-      <div><strong>Tháng:</strong> ${r.thangPS} | <strong>Điểm CT:</strong> ${r.soDiemCT}</div>
-      <hr>
-      <div>📐 <strong>Định mức:</strong> CTP ${(r.ctpNgay||0).toLocaleString()}đ/ngày · KS ${(r.ksNgay||0).toLocaleString()}đ/ngày</div>
-      <div>📅 Ngày CTP: ${r.soNgayCTP} · Ngày KS: ${r.soNgayKS}</div>
-      <div>💰 CTP: ${(r.totalCTP||0).toLocaleString()}đ · KS: ${(r.totalKS||0).toLocaleString()}đ · Xăng: ${(r.cpXang||0).toLocaleString()}đ · Vé: ${(r.cpVe||0).toLocaleString()}đ</div>
-      <div style="font-size:16px;color:#2e7d32;font-weight:700">TỔNG: ${(r.tongCP||0).toLocaleString()}đ</div>
-      <hr>
-      <div><strong>Lý do:</strong> ${r.lyDo || '-'}</div>
-      <div><strong>Phân nhóm:</strong> ${r.phanNhom || '-'}</div>
-      <div><strong>Phương tiện:</strong> ${r.ptDiChuyen} | <strong>Ngoài KHCT:</strong> ${r.ngoaiKHCT || '-'}</div>
-      <div><strong>Trạng thái:</strong> <span class="status ${r.status}">${statusLabel(r.status)}</span></div>
-      ${r.approvals ? r.approvals.map(a => `<div>✅ ${a.by} (${a.role}) duyệt lúc ${new Date(a.at).toLocaleString('vi-VN')}</div>`).join('') : ''}
-      ${r.rejectReason ? `<div style="color:#c62828">❌ Từ chối: ${r.rejectReason}</div>` : ''}
-      <div><strong>Ghi chú:</strong> ${r.ghiChu || '-'}</div>
-    </div>
-    <div class="flex-row" style="justify-content:flex-end;margin-top:12px">
-      ${r.status === 'draft' ? `<button class="btn btn-sm btn-primary" onclick="resubmitCTP('${r.id}')">📤 Gửi duyệt</button>` : ''}
-      <button class="btn btn-sm btn-outline" onclick="closeModal()">Đóng</button>
-    </div>
-  `;
-  document.getElementById('detailModal').classList.add('show');
-}
-
-function resubmitCTP(id) {
-  const idx = ctpData.findIndex(r => r.id === id);
-  if (idx < 0) return;
-  ctpData[idx].status = 'pending';
-  saveData();
-  closeModal();
-  renderHistory();
-  renderApprove();
-  updatePendingBadge();
-  toast('✅ Đã gửi duyệt!', 'success');
-}
-
-function closeModal() {
-  document.getElementById('detailModal').classList.remove('show');
-}
-
-// ========== ĐỊNH MỨC ==========
-function renderDinhMuc() {
-  const search = (document.getElementById('dmSearch')?.value || '').toLowerCase();
-  let filtered = dmData;
-  if (search) {
-    filtered = dmData.filter(d =>
-      d.tinh.toLowerCase().includes(search) ||
-      (d.note && d.note.toLowerCase().includes(search))
-    );
-  }
-
-  document.getElementById('dmBody').innerHTML = filtered.map((d, i) => `
-    <tr class="dm-table" onclick="editDinhMuc(${i})">
-      <td><strong>${d.tinh}</strong></td>
-      <td class="text-right">${(d.ctp||0).toLocaleString()}</td>
-      <td class="text-right">${(d.ks||0).toLocaleString()}</td>
-      <td class="text-center text-sm text-muted">${d.note || ''}</td>
-    </tr>
-  `).join('');
-}
-
-function editDinhMuc(idx) {
-  const d = dmData[idx];
-  const newCtp = prompt(`CTP/ngày cho "${d.tinh}":`, d.ctp);
-  if (newCtp === null) return;
-  const newKs = prompt(`KS/ngày cho "${d.tinh}":`, d.ks);
-  if (newKs === null) return;
-  dmData[idx].ctp = parseInt(newCtp) || d.ctp;
-  dmData[idx].ks = parseInt(newKs) || d.ks;
-  saveData();
-  renderDinhMuc();
-  toast('✅ Đã cập nhật định mức!', 'success');
-}
-
-// ========== UTILS ==========
-function statusLabel(s) {
-  const map = { draft: 'Nháp', pending: 'Chờ duyệt', approved: 'Đã duyệt', rejected: 'Từ chối' };
-  return map[s] || s;
-}
-
-
-// ========== STORELIST CASCADE: Miền → GĐV → CH ==========
-const STORELIST_SHEET = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:csv&gid=900581387';
-let storeData = [];
-let miensSet = new Set();
-let gdvMap = {}; // miền -> Set of GĐV
-
+// =================== STORELIST LOAD ===================
 async function loadStorelist() {
   try {
-    const resp = await fetch(STORELIST_SHEET);
+    const resp = await fetch(STORELIST_URL);
     const csv = await resp.text();
     const lines = csv.split('\n');
     const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
-    const idxMaCH = headers.findIndex(h => h.includes('Mã SAP') || h.includes('SAP'));
-    const idxTenCH = headers.findIndex(h => (h.includes('Tên') && (h.includes('CH') || h.includes('cửa'))) || h.includes('Tên cửa hàng'));
-    const idxGDV = headers.findIndex(h => h === 'GĐV' || h.includes('GĐV'));
-    const idxQLKV = headers.findIndex(h => h === 'QLKV' || h.includes('QLKV'));
-    const idxTinh = headers.findIndex(h => h.includes('Tỉnh'));
-    const idxMien = headers.findIndex(h => h === 'Miền' || h.includes('Miền'));
-    const idxTrangThai = headers.findIndex(h => h.includes('Tình Trạng') || h.includes('Tình trạng') || h.includes('Trạng thái'));
-    
-    storeData = [];
+    const iMa = headers.findIndex(h => h.includes('Mã SAP') || h.includes('SAP'));
+    const iTen = headers.findIndex(h => (h.includes('Tên') && (h.includes('CH') || h.includes('cửa'))) || h.includes('Tên cửa hàng'));
+    const iGDV = headers.findIndex(h => h === 'GĐV' || h.includes('GĐV'));
+    const iQL = headers.findIndex(h => h === 'QLKV' || h.includes('QLKV'));
+    const iTinh = headers.findIndex(h => h.includes('Tỉnh'));
+    const iMien = headers.findIndex(h => h === 'Miền' || h.includes('Miền'));
+    const iLat = headers.findIndex(h => h.toLowerCase().includes('vĩ độ') || h.toLowerCase().includes('lat'));
+    const iLng = headers.findIndex(h => h.toLowerCase().includes('kinh độ') || h.toLowerCase().includes('lng') || h.toLowerCase().includes('lon'));
+    const iTT = headers.findIndex(h => h.includes('Tình Trạng') || h.includes('Tình trạng') || h.includes('Trạng thái'));
+
+    STORELIST = [];
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split(',').map(c => c.replace(/"/g, '').trim());
       if (cols.length < 5) continue;
-      // Filter active stores only
-      if (idxTrangThai >= 0 && cols[idxTrangThai] && !cols[idxTrangThai].includes('Đang hoạt động') && !cols[idxTrangThai].includes('đang hoạt động')) continue;
-      
+      if (iTT >= 0 && cols[iTT] && !cols[iTT].includes('Đang hoạt động') && !cols[iTT].includes('đang hoạt động')) continue;
       const s = {
-        maCH: cols[idxMaCH] || '',
-        tenCH: cols[idxTenCH] || '',
-        gdv: cols[idxGDV] || '',
-        qlkv: cols[idxQLKV] || '',
-        tinh: cols[idxTinh] || '',
-        mien: cols[idxMien] || ''
+        ma: cols[iMa] || '', ten: cols[iTen] || '', gdv: cols[iGDV] || '',
+        qlkv: cols[iQL] || '', tinh: cols[iTinh] || '', mien: cols[iMien] || '',
+        lat: iLat >= 0 ? parseFloat(cols[iLat]) : null, lng: iLng >= 0 ? parseFloat(cols[iLng]) : null
       };
-      if (!s.maCH) continue;
-      storeData.push(s);
-      
-      // Determine miền
-      let mien = s.mien;
-      if (!mien || mien === 'None') {
-        // Derive from GĐV or region
-        if (s.tinh) mien = 'Miền Bắc'; // default
-      }
-      miensSet.add(mien);
-      if (!gdvMap[mien]) gdvMap[mien] = new Set();
-      if (s.gdv) gdvMap[mien].add(s.gdv);
+      if (!s.ma) continue;
+      STORELIST.push(s);
     }
-    console.log('Storelist loaded:', storeData.length, 'stores,', miensSet.size, 'miền');
-    populateMienDropdown();
+    console.log('Storelist loaded:', STORELIST.length, 'stores');
   } catch(e) {
-    console.log('Storelist load error:', e.message);
+    console.log('Storelist error:', e.message);
   }
 }
 loadStorelist();
 
-function populateMienDropdown() {
-  const sel = document.getElementById('selMien');
-  sel.innerHTML = '<option value="">-- Chọn Miền --</option>';
-  [...miensSet].sort().forEach(m => {
-    if (m && m !== 'None') {
-      const count = storeData.filter(s => s.mien === m).length;
-      sel.innerHTML += `<option value="${m}">${m} (${count} CH)</option>`;
-    }
-  });
+// =================== AUTOCOMPLETE ===================
+function acCH(v) {
+  v = v.trim().toLowerCase();
+  const box = $('chSug');
+  if (!v || !STORELIST.length) { box.classList.add('hidden'); return; }
+  const hits = STORELIST.filter(s => s.ma.toLowerCase().includes(v) || s.ten.toLowerCase().includes(v)).slice(0, 25);
+  if (!hits.length) { box.classList.add('hidden'); return; }
+  box.innerHTML = hits.map(s =>
+    `<div class="sg" onclick="pickCH('${s.ma}')"><span class="st">${s.ma}</span> · ${s.ten}<div class="sub">${s.gdv||'—'} · ${s.mien||'—'} · ${s.tinh||'—'}</div></div>`
+  ).join('');
+  box.classList.remove('hidden');
+}
+function pickCH(ma) {
+  selCH = STORELIST.find(s => s.ma === ma);
+  if (!selCH) return;
+  $('f-mach').value = ma;
+  $('chSug').classList.add('hidden');
+  $('chInfo').classList.remove('hidden');
+  $('chInfo').innerHTML = `<b>${selCH.ten}</b><br>GĐV: <b>${selCH.gdv||'—'}</b> · Miền: <b>${selCH.mien||'—'}</b><br>Tỉnh: ${selCH.tinh||'—'} · QLKV: ${selCH.qlkv||'—'}`;
+  autoDistance();
+}
+function acNV(v) {
+  v = v.trim().toLowerCase();
+  const box = $('nvSug');
+  if (!v) { box.classList.add('hidden'); return; }
+  const hits = NVDB.filter(u => u.maNV.toLowerCase().includes(v) || u.ten.toLowerCase().includes(v)).slice(0, 20);
+  if (!hits.length) { box.classList.add('hidden'); return; }
+  box.innerHTML = hits.map(u =>
+    `<div class="sg" onclick="pickNV('${u.maNV}')"><span class="st">${u.maNV}</span> · ${u.ten}<div class="sub">Chức vụ: ${u.chucVu} · GĐV: ${u.gdv||'—'}</div></div>`
+  ).join('');
+  box.classList.remove('hidden');
+}
+function pickNV(ma) {
+  $('f-manv').value = ma;
+  $('nvSug').classList.add('hidden');
+  const u = findNV(ma);
+  if (u) {
+    $('f-hoten').value = u.ten;
+    $('f-chucvu').value = u.chucVu;
+    onChucVuChange();
+  }
+}
+function acDen(v) {
+  v = v.trim().toLowerCase();
+  const box = $('denSug');
+  if (!v || !STORELIST.length) { box.classList.add('hidden'); return; }
+  const hits = STORELIST.filter(s => s.ma.toLowerCase().includes(v) || s.ten.toLowerCase().includes(v)).slice(0, 25);
+  if (!hits.length) { box.classList.add('hidden'); return; }
+  box.innerHTML = hits.map(s =>
+    `<div class="sg" onclick="pickDen('${s.ma}')"><span class="st">${s.ma}</span> · ${s.ten}<div class="sub">${s.gdv||'—'} · ${s.mien||'—'} · ${s.tinh||'—'}</div></div>`
+  ).join('');
+  box.classList.remove('hidden');
+}
+function pickDen(ma) {
+  selDen = STORELIST.find(x => x.ma === ma);
+  if (!selDen) return;
+  $('f-den').value = selDen.ten;
+  $('denSug').classList.add('hidden');
+  autoDistance();
 }
 
-function onMienChange() {
-  const mien = document.getElementById('selMien').value;
-  const selGDV = document.getElementById('selGDV');
-  const selCH = document.getElementById('selCH');
-  selGDV.innerHTML = '<option value="">-- Chọn GĐV --</option>';
-  selCH.innerHTML = '<option value="">-- Chọn CH --</option>';
-  if (!mien) return;
-  
-  const gdvs = gdvMap[mien] || new Set();
-  [...gdvs].sort().forEach(g => {
-    const count = storeData.filter(s => s.mien === mien && s.gdv === g).length;
-    selGDV.innerHTML += `<option value="${g}">${g} (${count} CH)</option>`;
-  });
+// =================== DISTANCE ===================
+function hav(lat1, lng1, lat2, lng2) {
+  const R = 6371, rad = x => x * Math.PI / 180;
+  const dLat = rad(lat2 - lat1), dLng = rad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 10) / 10;
 }
-
-function onGDVChange() {
-  const mien = document.getElementById('selMien').value;
-  const gdv = document.getElementById('selGDV').value;
-  const selCH = document.getElementById('selCH');
-  selCH.innerHTML = '<option value="">-- Chọn CH --</option>';
-  if (!gdv) return;
-  
-  const stores = storeData.filter(s => s.mien === mien && s.gdv === gdv);
-  stores.forEach(s => {
-    selCH.innerHTML += `<option value="${s.maCH}">${s.maCH} — ${s.tenCH}</option>`;
-  });
-}
-
-function onCHChange() {
-  const maCH = document.getElementById('selCH').value;
-  if (!maCH) return;
-  const s = storeData.find(x => x.maCH === maCH);
-  if (s) {
-    // Auto-fill tinhDen if possible
-    if (s.tinh && s.tinh !== 'None') {
-      const selTinh = document.getElementById('tinhDen');
-      for (let i = 0; i < selTinh.options.length; i++) {
-        if (selTinh.options[i].value.toLowerCase().includes(s.tinh.toLowerCase())) {
-          selTinh.selectedIndex = i;
-          break;
-        }
-      }
-      autoDetectDM();
-    }
+function autoDistance() {
+  if (selCH && selDen && selCH.lat != null && selCH.lng != null && selDen.lat != null && selDen.lng != null) {
+    $('f-km').value = hav(selCH.lat, selCH.lng, selDen.lat, selDen.lng);
+    liveValid();
   }
 }
 
-function toast(msg, type) {
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 2500);
+// =================== ĐỊNH MỨC AUTO ===================
+function onChucVuChange() {
+  const cv = $('f-chucvu').value;
+  const rate = DM_BY_CHUCVU[cv] || DM_BY_CHUCVU['CHT-NVCH'];
+  $('f-ctp').value = rate.ctp.toLocaleString('vi-VN');
+  $('f-ks').value = rate.ks.toLocaleString('vi-VN');
+  updateDMInfo();
+  autoCalc();
 }
+function updateDMInfo() {
+  const route = $('f-route').value.trim();
+  const den = $('f-den').value.trim();
+  const cv = $('f-chucvu').value;
+  const rate = DM_BY_CHUCVU[cv] || DM_BY_CHUCVU['CHT-NVCH'];
+  const search = route || den;
+
+  if (!search || !selCH) {
+    $('dmInfoBox').classList.add('hidden');
+    return;
+  }
+
+  // Try to match vùng from DM_DATA
+  let matched = null;
+  const searchLower = search.toLowerCase();
+  for (const dm of DM_DATA) {
+    if (dm.note && dm.note.toLowerCase().includes(searchLower)) matched = dm;
+    if (dm.vung.toLowerCase().includes(searchLower)) matched = dm;
+    if (matched) break;
+  }
+  // Try via CH's tỉnh
+  if (!matched && selCH.tinh) {
+    for (const dm of DM_DATA) {
+      if (dm.note && dm.note.toLowerCase().includes(selCH.tinh.toLowerCase())) {
+        matched = dm; break;
+      }
+    }
+  }
+
+  if (matched) {
+    $('dmInfoBox').classList.remove('hidden');
+    $('dmInfoText').innerHTML = `${matched.vung}: CTP <strong>${rate.ctp.toLocaleString()}đ/ngày</strong> · KS <strong>${rate.ks.toLocaleString()}đ/ngày</strong> <span style="color:var(--muted)">[${cv}]</span>`;
+  }
+}
+
+// =================== AUTO CALC ===================
+function autoCalc() {
+  const ngayCTP = +($('f-ngayctp').value) || 0;
+  const ngayKS = +($('f-ngayks').value) || 0;
+  const ctp = money($('f-ctp'));
+  const ks = money($('f-ks'));
+  const xang = money($('f-xang'));
+  const ve = money($('f-ve'));
+
+  $('calcCTP').textContent = (ngayCTP * ctp).toLocaleString();
+  $('calcKS').textContent = (ngayKS * ks).toLocaleString();
+  $('calcXang').textContent = xang.toLocaleString();
+  $('calcVe').textContent = ve.toLocaleString();
+  const total = ngayCTP * ctp + ngayKS * ks + xang + ve;
+  $('calcTotal').textContent = total.toLocaleString();
+}
+
+function autoDays() {
+  const di = $('f-ngaydi').value, ve = $('f-ngayve').value;
+  if (di && ve) {
+    const a = new Date(di), b = new Date(ve), diff = Math.round((b - a) / 86400000);
+    if (diff < 0) { $('f-ngayctp').value = ''; $('f-ngayks').value = ''; toast('Ngày về phải ≥ ngày đi', 'error'); }
+    else { $('f-ngayctp').value = diff + 1; $('f-ngayks').value = diff; }
+  } else { $('f-ngayctp').value = ''; $('f-ngayks').value = ''; }
+  autoCalc(); liveValid();
+}
+
+// =================== VALIDATION ===================
+function gdvBudget(name) { return GDV_BUDGET.find(g => g.ten === name); }
+function usedBudget(gdvName) {
+  return RECORDS.filter(r => r.gdv === gdvName && r.trangThai === 'done').reduce((s, r) => s + (r.tong || 0), 0);
+}
+
+function liveValid() {
+  const box = $('validBox');
+  const km = +($('f-km').value) || 0;
+  const soNgay = +($('f-ngayctp').value) || 0;
+  const loai = $('f-loai').value;
+  const cv = $('f-chucvu').value;
+  const total = +(($('calcTotal').textContent || '').replace(/,/g, '')) || 0;
+  const gdvName = selCH ? selCH.gdv : null;
+
+  if (!km) { box.classList.add('hidden'); return; }
+
+  const w = [];
+  let pass = true;
+  const isNV = cv === 'CHT-NVCH';
+
+  if (loai === 'Hỗ trợ NSO' && km <= 30) {
+    w.push('⚠️ ≤ 30km → KHÔNG hỗ trợ CP (NVCH tự túc).');
+    pass = false;
+  }
+  if (km > 80 && isNV) {
+    w.push('⚠️ > 80km → chỉ QLKV/đội NSO chuyên trách, không điều động NVCH.');
+    pass = false;
+  }
+  if (soNgay > 2) {
+    w.push('⚠️ > 2 ngày → cần GĐM duyệt.');
+  }
+
+  if (gdvName) {
+    const b = gdvBudget(gdvName);
+    if (b) {
+      const used = usedBudget(gdvName);
+      const rem = b.budget * 1e6 - used;
+      if (total > rem) {
+        w.push('🔴 Vượt ngân sách GĐV còn lại (' + fmtTr(rem / 1e6) + ' tr). Cần duyệt ngoại lệ.');
+      }
+    }
+  }
+
+  box.classList.remove('hidden');
+  if (!pass) {
+    box.className = 'valid-box fail';
+    box.innerHTML = '<b>⚠️ Cần lưu ý:</b><br>• ' + w.join('<br>• ');
+  } else if (w.length) {
+    box.className = 'valid-box warn';
+    box.innerHTML = '• ' + w.join('<br>• ');
+  } else {
+    box.className = 'valid-box pass';
+    box.innerHTML = '✅ Hợp lệ — sẵn sàng gửi duyệt.';
+  }
+}
+
+// =================== SUBMIT ===================
+function saveDraft() {
+  const rec = buildRecord();
+  rec.trangThai = 'draft';
+  rec.id = Date.now();
+  RECORDS.unshift(rec);
+  save();
+  toast('✅ Đã lưu nháp!', 'success');
+  resetForm();
+  renderAll();
+}
+
+function submitKB() {
+  const mach = $('f-mach').value.trim();
+  const manv = $('f-manv').value.trim();
+  const route = $('f-route').value.trim();
+  const ngaydi = $('f-ngaydi').value;
+  const km = +($('f-km').value) || 0;
+  const soNgay = +($('f-ngayctp').value) || 0;
+
+  if (!mach || !selCH) { toast('⚠️ Bước 1: Chọn Mã CH trước', 'error'); return; }
+  if (!manv) { toast('⚠️ Bước 2: Nhập Mã NV người công tác', 'error'); return; }
+  if (!ngaydi) { toast('⚠️ Bước 3: Nhập Ngày đi', 'error'); return; }
+  if (!route) { toast('⚠️ Vui lòng nhập Nơi đi - Nơi đến', 'error'); return; }
+  if (!km) { toast('⚠️ Vui lòng nhập Khoảng cách', 'error'); return; }
+
+  const rec = buildRecord();
+  const total = +(($('calcTotal').textContent || '').replace(/,/g, '')) || 0;
+  if (!total) { toast('⚠️ Vui lòng nhập chi phí', 'error'); return; }
+
+  // Determine status based on submitter role
+  const cv = ME.chucVu;
+  let status = 'cho_gdv';
+  if (cv === 'GĐV') status = (km > 80 || soNgay > 2) ? 'cho_gdm' : 'done';
+  if (['GĐM', 'ADMIN'].includes(cv)) status = 'done';
+
+  rec.trangThai = status;
+  rec.id = Date.now();
+  rec.nguoiTao = ME.maNV;
+  rec.ngayTao = new Date().toISOString().slice(0, 16).replace('T', ' ');
+
+  RECORDS.unshift(rec);
+  save();
+  toast('✅ Đã gửi duyệt! (' + ST_LABEL[status] + ')', 'success');
+  resetForm();
+  renderAll();
+}
+
+function buildRecord() {
+  const ngayCTP = +($('f-ngayctp').value) || 0;
+  const ngayKS = +($('f-ngayks').value) || 0;
+  const ctp = money($('f-ctp'));
+  const ks = money($('f-ks'));
+  const xang = money($('f-xang'));
+  const ve = money($('f-ve'));
+  const total = ngayCTP * ctp + ngayKS * ks + xang + ve;
+
+  // Auto tháng from ngày đi
+  let thang = $('f-thang').value;
+  if (!thang) {
+    const di = $('f-ngaydi').value;
+    if (di) { const m = new Date(di).getMonth() + 1; thang = 'T' + m; }
+  }
+
+  return {
+    maCH: selCH ? selCH.ma : '',
+    tenCH: selCH ? selCH.ten : '',
+    gdv: selCH ? selCH.gdv : '',
+    mien: selCH ? selCH.mien : '',
+    tinh: selCH ? selCH.tinh : '',
+    qlkv: selCH ? selCH.qlkv : '',
+    maNV: $('f-manv').value.trim(),
+    ten: $('f-hoten').value.trim(),
+    chucVu: $('f-chucvu').value,
+    loai: $('f-loai').value,
+    phanNhom: $('f-phannhom').value,
+    route: $('f-route').value.trim(),
+    den: $('f-den').value.trim(),
+    km: +($('f-km').value) || 0,
+    pt: $('f-pt').value,
+    ngayDi: $('f-ngaydi').value,
+    ngayVe: $('f-ngayve').value,
+    soNgay: ngayCTP,
+    soNgayKS: ngayKS,
+    ctp: ctp,
+    ks: ks,
+    xang: xang,
+    ve: ve,
+    tong: total,
+    ghiChu: $('f-ghichu').value.trim(),
+    thang: thang || '',
+  };
+}
+
+function resetForm() {
+  ['f-mach','f-manv','f-hoten','f-route','f-den','f-km','f-ngaydi','f-ngayve','f-ngayctp','f-ngayks','f-xang','f-ve','f-ghichu'].forEach(id => $(id).value = '');
+  $('f-ctp').value = '150.000'; $('f-ks').value = '300.000';
+  $('f-loai').value = 'Hỗ trợ NSO'; $('f-chucvu').value = 'CHT-NVCH';
+  $('f-phannhom').selectedIndex = 0; $('f-thang').selectedIndex = 0; $('f-pt').selectedIndex = 0;
+  $('chInfo').classList.add('hidden'); $('dmInfoBox').classList.add('hidden');
+  $('validBox').classList.add('hidden');
+  $('calcCTP').textContent = '0'; $('calcKS').textContent = '0';
+  $('calcXang').textContent = '0'; $('calcVe').textContent = '0'; $('calcTotal').textContent = '0';
+  selCH = null; selDen = null;
+}
+
+// =================== APPROVE ===================
+function approve(id) {
+  const r = RECORDS.find(x => x.id === id);
+  if (!r) return;
+  if (ME.chucVu === 'GĐV') {
+    if (r.km > 80 || r.soNgay > 2 || (r.validWarn && r.validWarn.length)) {
+      r.trangThai = 'cho_gdm';
+      toast('✅ Đã chuyển GĐM duyệt (cần duyệt cấp cao hơn)');
+    } else {
+      r.trangThai = 'done';
+      toast('✅ Đã duyệt hoàn tất');
+    }
+  } else {
+    r.trangThai = 'done';
+    toast('✅ Đã duyệt hoàn tất');
+  }
+  r.approvedBy = ME.ten;
+  r.approvedAt = new Date().toISOString();
+  save();
+  renderAll();
+}
+
+function reject(id) {
+  const reason = prompt('Lý do từ chối:', '');
+  if (reason === null) return;
+  const r = RECORDS.find(x => x.id === id);
+  if (!r) return;
+  r.trangThai = 'tu_choi';
+  r.lyDo = reason;
+  r.rejectedBy = ME.ten;
+  r.rejectedAt = new Date().toISOString();
+  save();
+  toast('Đã từ chối', 'error');
+  renderAll();
+}
+
+// =================== RENDER ===================
+function renderAll() { renderValid(); renderPD(); }
+
+function renderValid() {
+  // KPI
+  const mine = RECORDS.filter(r => ME.chucVu === 'GĐV' ? r.gdv === ME.ten : true);
+  const pending = mine.filter(r => ['cho_gdv', 'gdv_duyet', 'cho_gdm'].includes(r.trangThai)).length;
+  const doneCount = mine.filter(r => r.trangThai === 'done').length;
+  const doneTotal = mine.filter(r => r.trangThai === 'done').reduce((s, r) => s + (r.tong || 0), 0);
+
+  $('validKpis').innerHTML = `
+    <div class="kpi"><div class="v">${mine.length}</div><div class="l">Tổng khai báo</div></div>
+    <div class="kpi danger"><div class="v">${pending}</div><div class="l">Chờ duyệt</div></div>
+    <div class="kpi ok"><div class="v">${fmtTr(doneTotal/1e6)}<small>tr</small></div><div class="l">Đã duyệt</div></div>
+  `;
+
+  // Budget
+  $('budgetList').innerHTML = GDV_BUDGET.map(g => {
+    const used = usedBudget(g.ten);
+    const rem = g.budget * 1e6 - used;
+    const pct = used / (g.budget * 1e6) * 100;
+    const over = pct > 100;
+    return `<div class="item">
+      <div class="top"><div>
+        <div class="name">${g.ten}</div>
+        <div class="meta">${g.CH} CH · ${g.NSO} NSO · K=${g.K}</div>
+      </div>
+      <div class="money">${fmtTr(g.budget)} tr</div></div>
+      <div class="prog ${over ? 'over' : ''}" style="margin-top:4px"><div style="width:${Math.min(pct,100)}%"></div></div>
+      <div class="meta" style="margin-top:3px">Đã dùng ${fmtTr(used/1e6)} tr · Còn ${fmtTr(Math.max(0,rem/1e6))} tr</div>
+    </div>`;
+  }).join('');
+
+  // Định mức
+  renderDM();
+}
+
+function renderDM() {
+  const q = ($('dmSearch')?.value || '').toLowerCase();
+  let data = DM_DATA;
+  if (q) data = DM_DATA.filter(d => d.vung.toLowerCase().includes(q) || (d.note && d.note.toLowerCase().includes(q)));
+
+  $('dmBody').innerHTML = data.map((d, i) => `
+    <tr style="cursor:pointer" onclick="editDM(${DM_DATA.indexOf(d)})">
+      <td><strong>${d.vung}</strong></td>
+      <td class="text-right">${(d.ctpNV||0).toLocaleString()} / ${(d.ksNV||0).toLocaleString()}</td>
+      <td class="text-right">${(d.ctpQL||0).toLocaleString()} / ${(d.ksQL||0).toLocaleString()}</td>
+      <td class="text-right">${(d.ctpHC||0).toLocaleString()} / ${(d.ksHC||0).toLocaleString()}</td>
+      <td class="text-right">${(d.ctpGDV||0).toLocaleString()} / ${(d.ksGDV||0).toLocaleString()}</td>
+      <td class="text-right">${(d.ctpGDM||0).toLocaleString()} / ${(d.ksGDM||0).toLocaleString()}</td>
+      <td style="font-size:11px;color:var(--muted)">${d.note||''}</td>
+    </tr>
+  `).join('');
+}
+
+function editDM(idx) {
+  if (!['GĐM','ADMIN'].includes(ME.chucVu)) { toast('⚠️ Chỉ GĐM/Admin mới được sửa định mức', 'error'); return; }
+  const d = DM_DATA[idx];
+  const newCtpNV = prompt(`CTP/ngày cho CHT-NVCH (${d.vung}):`, d.ctpNV);
+  if (newCtpNV === null) return;
+  const newKsNV = prompt(`KS/ngày cho CHT-NVCH (${d.vung}):`, d.ksNV);
+  if (newKsNV === null) return;
+  DM_DATA[idx].ctpNV = parseInt(newCtpNV) || d.ctpNV;
+  DM_DATA[idx].ksNV = parseInt(newKsNV) || d.ksNV;
+  // Also update higher levels proportionally
+  saveDM();
+  renderDM();
+  toast('✅ Đã cập nhật định mức!', 'success');
+}
+
+function renderPD() {
+  updatePDBadge();
+
+  // Pending approvals
+  let pool = RECORDS;
+  if (ME.chucVu === 'GĐV') {
+    pool = pool.filter(r => r.gdv === ME.ten && r.trangThai === 'cho_gdv');
+  } else if (ME.chucVu === 'GĐM' || ME.chucVu === 'ADMIN') {
+    pool = pool.filter(r => ['cho_gdv', 'cho_gdm'].includes(r.trangThai));
+  } else {
+    pool = [];
+  }
+
+  $('pendingList').innerHTML = pool.length ? pool.map(r => itemHtml(r, true)).join('') :
+    '<div class="empty">✅ Không có phiếu nào chờ duyệt</div>';
+
+  // History
+  const filterStatus = $('pdFilterStatus')?.value || 'all';
+  const filterThang = $('pdFilterThang')?.value || 'all';
+  let hist = RECORDS;
+  if (ME.chucVu === 'GĐV') hist = hist.filter(r => r.gdv === ME.ten);
+  if (ME.chucVu === 'CHT-NVCH' || ME.chucVu === 'QLKV' || ME.chucVu === 'HCV') {
+    hist = hist.filter(r => r.maNV === ME.maNV || r.nguoiTao === ME.maNV);
+  }
+  if (filterStatus !== 'all') hist = hist.filter(r => r.trangThai === filterStatus);
+  if (filterThang !== 'all') hist = hist.filter(r => r.thang === filterThang);
+
+  $('historyList').innerHTML = hist.length ? hist.map(r => itemHtml(r, false)).join('') :
+    '<div class="empty">Chưa có khai báo nào</div>';
+}
+
+function itemHtml(r, showActs) {
+  const st = ST_LABEL[r.trangThai] || r.trangThai;
+  const cls = ST_CLASS[r.trangThai] || 'b-wait';
+  return `<div class="item">
+    <div class="top"><div>
+      <div class="name">${r.ten || r.maNV} <span style="font-weight:400;font-size:12px;color:var(--muted)">(${r.chucVu||'—'})</span></div>
+      <div class="meta">${r.loai||'—'} · ${r.tenCH||r.maCH||'—'} → ${r.den||r.route||'—'} · ${r.km||0}km · ${r.soNgay||0} ngày</div>
+      <div class="meta">GĐV: ${r.gdv||'—'} · ${r.ngayDi||'—'} → ${r.ngayVe||'—'} · ${r.ngayTao||''}</div>
+    </div>
+    <div style="text-align:right"><div class="money">${fmt(r.tong||0)}</div><span class="badge ${cls}">${st}</span></div></div>
+    <div class="body">${r.ghiChu||''}${r.lyDo ? '<div style="color:var(--err);margin-top:4px">↳ Từ chối: ' + r.lyDo + '</div>' : ''}
+    ${r.approvedBy ? '<div style="color:var(--ok);margin-top:2px">✅ Duyệt bởi: ' + r.approvedBy + '</div>' : ''}</div>
+    ${showActs ? `<div class="acts"><button class="btn btn-ok btn-sm" onclick="approve(${r.id})">✓ Duyệt</button><button class="btn btn-danger btn-sm" onclick="reject(${r.id})">✗ Từ chối</button></div>` : ''}
+  </div>`;
+}
+
+function updatePDBadge() {
+  let count = 0;
+  if (ME) {
+    if (ME.chucVu === 'GĐV') count = RECORDS.filter(r => r.gdv === ME.ten && r.trangThai === 'cho_gdv').length;
+    else if (['GĐM','ADMIN'].includes(ME.chucVu)) count = RECORDS.filter(r => ['cho_gdv','cho_gdm'].includes(r.trangThai)).length;
+  }
+  const badge = $('pdBadge');
+  if (count > 0) { badge.style.display = 'inline-block'; badge.textContent = count; }
+  else { badge.style.display = 'none'; }
+}
+
+// Click outside → close suggest
+document.addEventListener('click', e => {
+  if (!e.target.closest('.auto-wrap')) {
+    $$('.suggest').forEach(s => s.classList.add('hidden'));
+  }
+});
+
+// Init ĐM display
+if (!localStorage.getItem(K_DM)) saveDM();
 </script>
 </body>
 </html>
