@@ -629,8 +629,6 @@ function pickCH(ma) {
   if (!selCH) return;
   $('f-mach').value = selCH.ma + ' — ' + selCH.ten;
   $('chSug').classList.add('hidden');
-  $('chInfo').classList.remove('hidden');
-  $('chInfo').innerHTML = `<b>${selCH.ma} — ${selCH.ten}</b><br>Miền: <b>${selCH.mien||'—'}</b> · GĐV: <b>${selCH.gdv||'—'}</b> · QLKV: <b>${selCH.qlkv||'—'}</b>`;
   autoDistance();
   showRouteSummary();
 }
@@ -664,8 +662,6 @@ function pickNV(ma) {
       if (st) {
         selCH = st;
         $('f-mach').value = st.ma + ' — ' + st.ten;
-        $('chInfo').classList.remove('hidden');
-        $('chInfo').innerHTML = `<b>${st.ma} — ${st.ten}</b><br>Miền: <b>${st.mien||'—'}</b> · GĐV: <b>${st.gdv||'—'}</b> · QLKV: <b>${st.qlkv||'—'}</b>`;
         autoDistance();
         showRouteSummary();
       }
@@ -688,9 +684,6 @@ function pickDen(ma) {
   if (!selDen) return;
   $('f-den').value = selDen.ma + ' — ' + selDen.ten;
   $('denSug').classList.add('hidden');
-  // Show den info box
-  $('denInfo').classList.remove('hidden');
-  $('denInfo').innerHTML = `<b>${selDen.ten}</b><br>Tỉnh: <b>${selDen.tinh||'—'}</b> · GĐV: <b>${selDen.gdv||'—'}</b> · QLKV: ${selDen.qlkv||'—'}`;
   autoDistance();
   updateDMInfo();
   showRouteSummary();
@@ -725,16 +718,12 @@ function toggleFromWorkplace() {
       if (st) {
         selCH = st;
         $('f-mach').value = st.ma + ' — ' + st.ten;
-        $('chInfo').classList.remove('hidden');
-        $('chInfo').innerHTML = `<b>${st.ma} — ${st.ten}</b><br>Miền: <b>${st.mien||'—'}</b> · GĐV: <b>${st.gdv||'—'}</b> · QLKV: <b>${st.qlkv||'—'}</b>`;
         autoDistance();
         showRouteSummary();
       } else {
         // Store not in STORELIST, use NV data directly
         selCH = { ma: u.maCH, ten: u.tenCH, tinh: u.tinh, gdv: u.gdv, qlkv: u.qlkv, lat: null, lng: null };
         $('f-mach').value = u.maCH + ' — ' + u.tenCH;
-        $('chInfo').classList.remove('hidden');
-        $('chInfo').innerHTML = `<b>${u.maCH} — ${u.tenCH}</b><br>📍 ${u.tinh||'—'} / ${u.huyen||'—'} · GĐV: <b>${u.gdv||'—'}</b> · QLKV: <b>${u.qlkv||'—'}</b>`;
         showRouteSummary();
       }
       toast('📍 Đã điền Địa điểm đi từ nơi làm việc', 'success');
@@ -749,7 +738,6 @@ function toggleFromWorkplace() {
     // Uncheck = clear departure & allow manual
     $('f-mach').value = '';
     selCH = null;
-    $('chInfo').classList.add('hidden');
     $('routeSummary').classList.add('hidden');
     $('f-km').value = '';
   }
@@ -760,10 +748,8 @@ function showRouteSummary() {
   if (!selCH || !selDen) { $('routeSummary').classList.add('hidden'); return; }
   $('routeSummary').classList.remove('hidden');
   const chTinh = selCH.tinh || '—';
-  const chHuyen = selCH.huyen || (selCH.qlkv ? '' : '');
   const denTinh = selDen.tinh || '—';
-  const denHuyen = selDen.huyen || '';
-  $('routeSummary').innerHTML = `📍 <b>CH xuất phát:</b> ${selCH.ten} (${chTinh}) → <b>CH đến:</b> ${selDen.ten} (${denTinh}) · <b>${$('f-km').value||'—'} km</b>`;
+  $('routeSummary').innerHTML = `📍 ${selCH.ma} ${selCH.ten} (${chTinh}) → ${selDen.ma} ${selDen.ten} (${denTinh}) · <b>${$('f-km').value||'—'} km</b>`;
 }
 
 // =================== ĐỊNH MỨC AUTO ===================
