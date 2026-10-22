@@ -242,13 +242,6 @@ tr:hover td{background:#f8f9ff}
         </div>
         <div class="fld"><label>Loại CT *</label>
           <select id="f-loai" onchange="liveValid()">
-            <option>Hỗ trợ NSO</option><option>Hỗ trợ CH</option><option>Checklist CH</option>
-            <option>Họp / Đào tạo</option><option>Khác</option>
-          </select>
-        </div>
-        <div class="fld"><label>Phân nhóm</label>
-          <select id="f-phannhom">
-            <option value="">-- Chọn --</option>
             <option>1. Checklist CH</option>
             <option>2. Họp / Đào tạo</option>
             <option>3. Hỗ trợ CH</option>
@@ -778,7 +771,7 @@ function liveValid() {
   let pass = true;
   const isNV = cv === 'CHT-NVCH';
 
-  if (loai === 'Hỗ trợ NSO' && km <= 30) {
+  if (loai.includes('NSO') && km <= 30) {
     w.push('⚠️ ≤ 30km → KHÔNG hỗ trợ CP (NVCH tự túc).');
     pass = false;
   }
@@ -891,7 +884,6 @@ function buildRecord() {
     ten: $('f-hoten').value.trim(),
     chucVu: $('f-chucvu').value,
     loai: $('f-loai').value,
-    phanNhom: $('f-phannhom').value,
     route: $('f-route').value.trim(),
     den: $('f-den').value.trim(),
     km: +($('f-km').value) || 0,
@@ -913,8 +905,8 @@ function buildRecord() {
 function resetForm() {
   ['f-mach','f-manv','f-hoten','f-route','f-den','f-km','f-ngaydi','f-ngayve','f-ngayctp','f-ngayks','f-xang','f-ve','f-ghichu'].forEach(id => $(id).value = '');
   $('f-ctp').value = '150.000'; $('f-ks').value = '300.000';
-  $('f-loai').value = 'Hỗ trợ NSO'; $('f-chucvu').value = 'CHT-NVCH';
-  $('f-phannhom').selectedIndex = 0; $('f-thang').selectedIndex = 0; $('f-pt').selectedIndex = 0;
+  $('f-loai').value = '4. Hỗ trợ NSO'; $('f-chucvu').value = 'CHT-NVCH';
+  $('f-thang').selectedIndex = 0; $('f-pt').selectedIndex = 0;
   $('chInfo').classList.add('hidden'); $('dmInfoBox').classList.add('hidden');
   $('validBox').classList.add('hidden');
   $('calcCTP').textContent = '0'; $('calcKS').textContent = '0';
