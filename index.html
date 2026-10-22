@@ -197,7 +197,7 @@ tr:hover td{background:#f8f9ff}
 <!-- ========== MAIN APP ========== -->
 <div id="app">
   <header>
-    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v1.15</span></div>
+    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v1.16</span></div>
     <div class="user" id="userLine"></div>
     <button class="logout-btn" id="headerLoginBtn" onclick="showLogin()">📊 Dashboard</button>
   </header>
@@ -287,15 +287,11 @@ tr:hover td{background:#f8f9ff}
       </div>
 
       <div class="sec-label">💵 Chi phí</div>
-      <div class="row col3">
-        <div class="fld"><label>CTP/ngày</label><input id="f-ctp" type="text" inputmode="numeric" placeholder="150.000" oninput="moneyInput(this);autoCalc()"></div>
-        <div class="fld"><label>KS/ngày</label><input id="f-ks" type="text" inputmode="numeric" placeholder="300.000" oninput="moneyInput(this);autoCalc()"></div>
-        <div class="fld">
-          <div style="display:flex;gap:8px">
-            <div style="flex:1"><label>Xăng</label><input id="f-xang" type="text" inputmode="numeric" placeholder="200.000" oninput="moneyInput(this);autoCalc()"></div>
-            <div style="flex:1"><label>Vé</label><input id="f-ve" type="text" inputmode="numeric" placeholder="0" oninput="moneyInput(this);autoCalc()"></div>
-          </div>
-        </div>
+      <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <div class="fld"><label>CTP/ngày</label><input id="f-ctp" type="text" inputmode="numeric" placeholder="150k" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>KS/ngày</label><input id="f-ks" type="text" inputmode="numeric" placeholder="300k" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>Xăng</label><input id="f-xang" type="text" inputmode="numeric" placeholder="200k" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>Vé</label><input id="f-ve" type="text" inputmode="numeric" placeholder="0" oninput="moneyInput(this);autoCalc()"></div>
       </div>
 
       <div class="result-box calc" style="font-size:12px;padding:8px 10px">
