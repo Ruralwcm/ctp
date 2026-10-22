@@ -199,7 +199,7 @@ tr:hover td{background:#f8f9ff}
 <!-- ========== MAIN APP ========== -->
 <div id="app">
   <header>
-    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v2.0</span></div>
+    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v2.7</span></div>
     <div class="user" id="userLine"></div>
     <button class="logout-btn" id="headerLoginBtn" onclick="showLogin()">📊 Dashboard</button>
   </header>
@@ -244,9 +244,14 @@ tr:hover td{background:#f8f9ff}
           </select>
         </div>
       </div>
+      <div class="ch-info hidden" id="nvFullInfo"></div>
 
       <!-- SECTION 2: ĐỊA ĐIỂM & THÔNG TIN CÔNG TÁC -->
       <h3 style="margin-top:12px">🧭 Địa điểm &amp; Thông tin công tác</h3>
+      <div style="margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <input type="checkbox" id="f-fromWorkplace" onchange="toggleFromWorkplace()" style="width:16px;height:16px;cursor:pointer">
+        <label for="f-fromWorkplace" style="display:inline;font-size:13px;font-weight:500;color:var(--blue);cursor:pointer">☑ Xuất phát từ nơi làm việc (Địa điểm đi = Site của NV)</label>
+      </div>
       <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
         <div class="fld auto-wrap">
           <label>Địa điểm đi *</label>
@@ -267,6 +272,7 @@ tr:hover td{background:#f8f9ff}
       </div>
       <div class="ch-info hidden" id="chInfo"></div>
       <div class="ch-info hidden" id="denInfo"></div>
+      <div class="ch-info hidden" id="routeSummary" style="background:#e8f0fe;border:1px solid #a5c8e8;font-weight:500"></div>
       <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
         <div class="fld"><label>Ngày bắt đầu *</label><input id="f-ngaydi" type="date" onchange="autoDays()"></div>
         <div class="fld"><label>Ngày kết thúc *</label><input id="f-ngayve" type="date" onchange="autoDays()"></div>
@@ -438,12 +444,12 @@ const GDV_BUDGET = [
 ];
 
 const DEFAULT_NV = [
-  {maNV:"NV001",ten:"Nguyễn Văn A",chucVu:"CHT-NVCH",gdv:"Hồ Nam"},
-  {maNV:"NV002",ten:"Trần Thị B",chucVu:"CHT-NVCH",gdv:"Nguyễn Mạnh Sơn"},
-  {maNV:"QLKV001",ten:"Lê Văn C",chucVu:"QLKV",gdv:"Nguyễn Mạnh Sơn"},
-  {maNV:"GDV001",ten:"Hồ Nam",chucVu:"GĐV",gdv:"Hồ Nam"},
-  {maNV:"GDV002",ten:"Nguyễn Mạnh Sơn",chucVu:"GĐV",gdv:"Nguyễn Mạnh Sơn"},
-  {maNV:"GDM001",ten:"Trần Đăng Hảo",chucVu:"GĐM",gdv:"*"},
+  {maNV:"NV001",ten:"Nguyễn Văn A",chucVu:"CHT-NVCH",gdv:"Hồ Nam",maCH:"2797",tenCH:"WM+ HN 2797",tinh:"Hà Nội",huyen:"Hoàn Kiếm",qlkv:"Nguyễn Văn QL1"},
+  {maNV:"NV002",ten:"Trần Thị B",chucVu:"CHT-NVCH",gdv:"Nguyễn Mạnh Sơn",maCH:"6647",tenCH:"WM+ YBI 6647",tinh:"Yên Bái",huyen:"TP Yên Bái",qlkv:"Bùi Anh Vũ"},
+  {maNV:"QLKV001",ten:"Lê Văn C",chucVu:"QLKV",gdv:"Nguyễn Mạnh Sơn",maCH:"6647",tenCH:"WM+ YBI 6647",tinh:"Yên Bái",huyen:"TP Yên Bái",qlkv:"Bùi Anh Vũ"},
+  {maNV:"GDV001",ten:"Hồ Nam",chucVu:"GĐV",gdv:"Hồ Nam",maCH:"",tenCH:"",tinh:"",huyen:"",qlkv:""},
+  {maNV:"GDV002",ten:"Nguyễn Mạnh Sơn",chucVu:"GĐV",gdv:"Nguyễn Mạnh Sơn",maCH:"",tenCH:"",tinh:"",huyen:"",qlkv:""},
+  {maNV:"GDM001",ten:"Trần Đăng Hảo",chucVu:"GĐM",gdv:"*",maCH:"",tenCH:"",tinh:"",huyen:"",qlkv:""},
 ];
 
 const STORELIST_URL = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:csv&gid=900581387';
@@ -626,6 +632,7 @@ function pickCH(ma) {
   $('chInfo').classList.remove('hidden');
   $('chInfo').innerHTML = `<b>${selCH.ma} — ${selCH.ten}</b><br>Miền: <b>${selCH.mien||'—'}</b> · GĐV: <b>${selCH.gdv||'—'}</b> · QLKV: <b>${selCH.qlkv||'—'}</b>`;
   autoDistance();
+  showRouteSummary();
 }
 function acNV(v) {
   v = v.trim().toLowerCase();
@@ -634,7 +641,7 @@ function acNV(v) {
   const hits = NVDB.filter(u => u.maNV.toLowerCase().includes(v) || u.ten.toLowerCase().includes(v)).slice(0, 20);
   if (!hits.length) { box.classList.add('hidden'); return; }
   box.innerHTML = hits.map(u =>
-    `<div class="sg" onclick="pickNV('${u.maNV}')"><span class="st">${u.maNV}</span> · ${u.ten}<div class="sub">Chức vụ: ${u.chucVu} · GĐV: ${u.gdv||'—'}</div></div>`
+    `<div class="sg" onclick="pickNV('${u.maNV}')"><span class="st">${u.maNV}</span> · ${u.ten}<div class="sub">Chức vụ: ${u.chucVu} · GĐV: ${u.gdv||'—'} · Site: ${u.maCH||'—'} — ${u.tenCH||'—'} (${u.tinh||'—'})</div></div>`
   ).join('');
   box.classList.remove('hidden');
 }
@@ -646,6 +653,23 @@ function pickNV(ma) {
     $('f-hoten').value = u.ten;
     $('f-chucvu').value = u.chucVu;
     onChucVuChange();
+    // Show full personnel info
+    $('nvFullInfo').classList.remove('hidden');
+    $('nvFullInfo').innerHTML = `<b>👤 ${u.maNV} — ${u.ten}</b> · Chức vụ: <b>${u.chucVu}</b><br>
+      🏪 Site: <b>${u.maCH||'—'}</b> — ${u.tenCH||'—'}<br>
+      📍 ${u.tinh||'—'} / ${u.huyen||'—'} · GĐV: <b>${u.gdv||'—'}</b> · QLKV: <b>${u.qlkv||'—'}</b>`;
+    // Auto-fill departure if checkbox is on
+    if ($('f-fromWorkplace').checked && u.maCH) {
+      const st = STORELIST.find(s => s.ma === u.maCH);
+      if (st) {
+        selCH = st;
+        $('f-mach').value = st.ma + ' — ' + st.ten;
+        $('chInfo').classList.remove('hidden');
+        $('chInfo').innerHTML = `<b>${st.ma} — ${st.ten}</b><br>Miền: <b>${st.mien||'—'}</b> · GĐV: <b>${st.gdv||'—'}</b> · QLKV: <b>${st.qlkv||'—'}</b>`;
+        autoDistance();
+        showRouteSummary();
+      }
+    }
   }
 }
 function acDen(v) {
@@ -669,6 +693,7 @@ function pickDen(ma) {
   $('denInfo').innerHTML = `<b>${selDen.ten}</b><br>Tỉnh: <b>${selDen.tinh||'—'}</b> · GĐV: <b>${selDen.gdv||'—'}</b> · QLKV: ${selDen.qlkv||'—'}`;
   autoDistance();
   updateDMInfo();
+  showRouteSummary();
 }
 
 // =================== DISTANCE ===================
@@ -686,6 +711,59 @@ function autoDistance() {
   } else {
     $('f-km').value = '';
   }
+}
+
+// =================== WORKPLACE CHECKBOX ===================
+function toggleFromWorkplace() {
+  const checked = $('f-fromWorkplace').checked;
+  if (checked) {
+    const maNV = $('f-manv').value.trim();
+    const u = findNV(maNV);
+    if (u && u.maCH) {
+      // Try to find store from STORELIST
+      const st = STORELIST.find(s => s.ma === u.maCH);
+      if (st) {
+        selCH = st;
+        $('f-mach').value = st.ma + ' — ' + st.ten;
+        $('chInfo').classList.remove('hidden');
+        $('chInfo').innerHTML = `<b>${st.ma} — ${st.ten}</b><br>Miền: <b>${st.mien||'—'}</b> · GĐV: <b>${st.gdv||'—'}</b> · QLKV: <b>${st.qlkv||'—'}</b>`;
+        autoDistance();
+        showRouteSummary();
+      } else {
+        // Store not in STORELIST, use NV data directly
+        selCH = { ma: u.maCH, ten: u.tenCH, tinh: u.tinh, gdv: u.gdv, qlkv: u.qlkv, lat: null, lng: null };
+        $('f-mach').value = u.maCH + ' — ' + u.tenCH;
+        $('chInfo').classList.remove('hidden');
+        $('chInfo').innerHTML = `<b>${u.maCH} — ${u.tenCH}</b><br>📍 ${u.tinh||'—'} / ${u.huyen||'—'} · GĐV: <b>${u.gdv||'—'}</b> · QLKV: <b>${u.qlkv||'—'}</b>`;
+        showRouteSummary();
+      }
+      toast('📍 Đã điền Địa điểm đi từ nơi làm việc', 'success');
+    } else if (u && !u.maCH) {
+      toast('⚠️ NV này chưa có thông tin Site (Mã CH) trong hồ sơ. Vui lòng nhập tay.', 'error');
+      $('f-fromWorkplace').checked = false;
+    } else {
+      toast('⚠️ Vui lòng nhập Mã NV trước', 'error');
+      $('f-fromWorkplace').checked = false;
+    }
+  } else {
+    // Uncheck = clear departure & allow manual
+    $('f-mach').value = '';
+    selCH = null;
+    $('chInfo').classList.add('hidden');
+    $('routeSummary').classList.add('hidden');
+    $('f-km').value = '';
+  }
+}
+
+// =================== ROUTE SUMMARY ===================
+function showRouteSummary() {
+  if (!selCH || !selDen) { $('routeSummary').classList.add('hidden'); return; }
+  $('routeSummary').classList.remove('hidden');
+  const chTinh = selCH.tinh || '—';
+  const chHuyen = selCH.huyen || (selCH.qlkv ? '' : '');
+  const denTinh = selDen.tinh || '—';
+  const denHuyen = selDen.huyen || '';
+  $('routeSummary').innerHTML = `📍 <b>CH xuất phát:</b> ${selCH.ten} (${chTinh}) → <b>CH đến:</b> ${selDen.ten} (${denTinh}) · <b>${$('f-km').value||'—'} km</b>`;
 }
 
 // =================== ĐỊNH MỨC AUTO ===================
@@ -927,8 +1005,11 @@ function resetForm() {
   $('f-chucvu').value = 'CHT-NVCH';
   $('f-lydo').selectedIndex = 0; $('lydoKhacBox').classList.add('hidden');
   $('f-thang').selectedIndex = 0; $('f-pt').selectedIndex = 0;
-  $('chInfo').classList.add('hidden'); $('dmInfoBox').classList.add('hidden');
+  $('chInfo').classList.add('hidden'); $('denInfo').classList.add('hidden');
+  $('dmInfoBox').classList.add('hidden'); $('routeSummary').classList.add('hidden');
+  $('nvFullInfo').classList.add('hidden');
   $('validBox').classList.add('hidden');
+  $('f-fromWorkplace').checked = false;
   $('calcCTP').textContent = '0'; $('calcKS').textContent = '0';
   $('calcXang').textContent = '0'; $('calcVe').textContent = '0'; $('calcTotal').textContent = '0';
   selCH = null; selDen = null;
