@@ -308,7 +308,7 @@ tr:hover td{background:#f8f9ff}
       <!-- SECTION 3: CHI PHÍ -->
       <h3 style="margin-top:12px">💵 Chi phí</h3>
       <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        <div class="fld"><label>CTP thực tế <span style="font-size:10px;color:var(--muted);font-weight:400" id="ctpMaxLabel"></span></label><input id="f-ctp" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>CTP thực tế 🔒 <span style="font-size:10px;color:var(--ok);font-weight:500" id="ctpMaxLabel"></span></label><input id="f-ctp" type="text" inputmode="numeric" readonly style="background:#e8f5e9;color:#2e7d32;font-weight:700"></div>
         <div class="fld"><label>Khách sạn thực tế <span style="font-size:10px;color:var(--muted);font-weight:400" id="ksMaxLabel"></span></label><input id="f-ks" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
         <div class="fld"><label>Xăng</label><input id="f-xang" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
         <div class="fld"><label>Vé</label><input id="f-ve" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
@@ -839,12 +839,14 @@ function showRouteSummary() {
   $('routeSummary').innerHTML = `📍 ${selCH.ma} ${selCH.ten} (${chTinh}) → ${selDen.ma} ${selDen.ten} (${denTinh}) · <b>${$('f-km').value||'—'} km</b>${tag}`;
   applyTravelLogic();
   updateDMInfo();
+  autoFillCTP();
   autoCalc();
 }
 
 // =================== ĐỊNH MỨC AUTO ===================
 function onChucVuChange() {
   updateDMInfo();
+  autoFillCTP();
   autoCalc();
   liveValid();
 }
@@ -891,6 +893,23 @@ function updateDMInfo() {
 }
 
 // =================== AUTO CALC ===================
+function autoFillCTP() {
+  const ngayCTP = +($('f-ngayctp').value) || 0;
+  const cv = $('f-chucvu').value;
+  const rate = DM_BY_CHUCVU[cv] || DM_BY_CHUCVU['CHT-NVCH'];
+  const isSameProvince = selCH && selDen && selCH.tinh && selDen.tinh && selCH.tinh === selDen.tinh;
+  const di = $('f-ngaydi').value, ve = $('f-ngayve').value;
+  const sameDay = di && ve && di === ve;
+
+  if (isSameProvince || sameDay) {
+    $('f-ctp').value = '0';
+  } else {
+    const ctpTotal = ngayCTP * rate.ctp;
+    $('f-ctp').value = ctpTotal ? ctpTotal.toLocaleString('vi-VN') : '';
+  }
+  $('ctpMaxLabel').textContent = '(auto: ' + rate.ctp.toLocaleString() + 'đ/ngày)';
+}
+
 function autoCalc() {
   const ctp = money($('f-ctp'));
   const ks = money($('f-ks'));
@@ -956,6 +975,7 @@ function autoDays() {
     if (diff < 0) { $('f-ngayctp').value = ''; $('f-ngayks').value = ''; toast('Ngày về phải ≥ ngày đi', 'error'); }
     else { $('f-ngayctp').value = diff + 1; $('f-ngayks').value = diff; }
   } else { $('f-ngayctp').value = ''; $('f-ngayks').value = ''; }
+  autoFillCTP();
   autoCalc(); liveValid(); applyTravelLogic();
   // Update max labels after days change
   checkCTPMax(); checkKSMax();
@@ -963,24 +983,9 @@ function autoDays() {
 
 // =================== TRAVEL LOGIC ===================
 function applyTravelLogic() {
-  if (!selCH || !selDen) return;
-  const sameProvince = selCH.tinh && selDen.tinh && selCH.tinh === selDen.tinh;
-  const ngayDi = $('f-ngaydi').value, ngayVe = $('f-ngayve').value;
-  const sameDay = ngayDi && ngayVe && ngayDi === ngayVe;
-
-  if (sameProvince || sameDay) {
-    $('f-ctp').value = '0';
-    $('f-ctp').readOnly = true;
-    $('f-ctp').style.background = '#fffde7';
-    $('f-ctp').title = sameProvince ? 'Nội tỉnh → không CTP, chỉ xăng xe' : 'Trong ngày → không CTP';
-    document.querySelector('label[for="f-ctp"]')?.closest('.fld')?.querySelector('label')?.setAttribute('data-hint', sameProvince ? '⚠️ Nội tỉnh → CTP=0' : '⚠️ Trong ngày → CTP=0');
-    // Update the calc
-    autoCalc();
-  } else {
-    $('f-ctp').readOnly = false;
-    $('f-ctp').style.background = '';
-    $('f-ctp').title = '';
-  }
+  // CTP is now always auto-filled & locked — no manual override
+  // Same-province or same-day = CTP auto 0 (handled by autoFillCTP)
+  autoFillCTP();
 }
 
 // =================== VALIDATION ===================
@@ -1182,7 +1187,6 @@ function resetForm() {
   $('f-chucvu').value = 'CHT-NVCH';
   $('f-lydo').selectedIndex = 0; $('lydoKhacBox').classList.add('hidden');
   $('f-thang').selectedIndex = 0; $('f-pt').selectedIndex = 0;
-  $('f-ctp').readOnly = false; $('f-ctp').style.background = '';
   $('chInfo').classList.add('hidden'); $('denInfo').classList.add('hidden');
   $('dmInfoBox').classList.add('hidden'); $('routeSummary').classList.add('hidden');
   $('nvFullInfo').classList.add('hidden');
@@ -1375,7 +1379,7 @@ document.addEventListener('click', e => {
 
 // Init
 if (!localStorage.getItem(K_DM)) saveDM();
-setTimeout(() => { onChucVuChange(); }, 300);
+setTimeout(() => { onChucVuChange(); autoFillCTP(); }, 300);
 </script>
 </body>
 </html>
