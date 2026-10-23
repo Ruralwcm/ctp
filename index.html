@@ -308,14 +308,14 @@ tr:hover td{background:#f8f9ff}
       <!-- SECTION 3: CHI PHÍ -->
       <h3 style="margin-top:12px">💵 Chi phí</h3>
       <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        <div class="fld"><label>CTP/ngày</label><input id="f-ctp" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
-        <div class="fld"><label>KS/ngày</label><input id="f-ks" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>CTP thực tế <span style="font-size:10px;color:var(--muted);font-weight:400" id="ctpMaxLabel"></span></label><input id="f-ctp" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>Khách sạn thực tế <span style="font-size:10px;color:var(--muted);font-weight:400" id="ksMaxLabel"></span></label><input id="f-ks" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
         <div class="fld"><label>Xăng</label><input id="f-xang" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
         <div class="fld"><label>Vé</label><input id="f-ve" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
       </div>
 
       <div class="result-box calc" style="font-size:12px;padding:8px 10px">
-        📊 CTP <b id="calcCTP">0</b>đ · KS <b id="calcKS">0</b>đ · Xăng <b id="calcXang">0</b>đ · Vé <b id="calcVe">0</b>đ · <strong style="font-size:15px;color:var(--blue)">TỔNG <span id="calcTotal">0</span>đ</strong>
+        📊 CTP thực tế <b id="calcCTP">0</b>đ · KS thực tế <b id="calcKS">0</b>đ · Xăng <b id="calcXang">0</b>đ · Vé <b id="calcVe">0</b>đ · <strong style="font-size:15px;color:var(--blue)">TỔNG <span id="calcTotal">0</span>đ</strong>
       </div>
 
       <div class="valid-box pass hidden" id="validBox"></div>
@@ -838,13 +838,15 @@ function showRouteSummary() {
   const tag = sameProvince ? ' 🏠 Nội tỉnh' : '';
   $('routeSummary').innerHTML = `📍 ${selCH.ma} ${selCH.ten} (${chTinh}) → ${selDen.ma} ${selDen.ten} (${denTinh}) · <b>${$('f-km').value||'—'} km</b>${tag}`;
   applyTravelLogic();
+  updateDMInfo();
+  autoCalc();
 }
 
 // =================== ĐỊNH MỨC AUTO ===================
 function onChucVuChange() {
-  // Không auto-fill CTP/KS nữa — user tự điền thực tế
-  // Chỉ hiển thị định mức tham khảo qua updateDMInfo
   updateDMInfo();
+  autoCalc();
+  liveValid();
 }
 function onLyDoChange() {
   const v = $('f-lydo').value;
@@ -864,6 +866,8 @@ function updateMucDichCount() {
 function updateDMInfo() {
   const cv = $('f-chucvu').value;
   const rate = DM_BY_CHUCVU[cv] || DM_BY_CHUCVU['CHT-NVCH'];
+  const ngayCTP = +($('f-ngayctp').value) || 0;
+  const ngayKS = +($('f-ngayks').value) || 0;
 
   if (!selDen) {
     $('dmInfoBox').classList.add('hidden');
@@ -880,7 +884,7 @@ function updateDMInfo() {
 
   if (matched) {
     $('dmInfoBox').classList.remove('hidden');
-    $('dmInfoText').innerHTML = `${matched.vung}: CTP <strong>${rate.ctp.toLocaleString()}đ/ngày</strong> · KS <strong>${rate.ks.toLocaleString()}đ/ngày</strong> <span style="color:var(--muted)">[${cv}]</span>`;
+    $('dmInfoText').innerHTML = `${matched.vung}: CTP <strong>${rate.ctp.toLocaleString()}đ/ngày</strong> · KS <strong>${rate.ks.toLocaleString()}đ/ngày</strong> · Tối đa: <strong>${(ngayCTP * rate.ctp).toLocaleString()}đ CTP</strong> / <strong>${(ngayKS * rate.ks).toLocaleString()}đ KS</strong> <span style="color:var(--muted)">[${cv}]</span>`;
   } else {
     $('dmInfoBox').classList.add('hidden');
   }
@@ -888,19 +892,61 @@ function updateDMInfo() {
 
 // =================== AUTO CALC ===================
 function autoCalc() {
-  const ngayCTP = +($('f-ngayctp').value) || 1;
-  const ngayKS = +($('f-ngayks').value) || 0;
   const ctp = money($('f-ctp'));
   const ks = money($('f-ks'));
   const xang = money($('f-xang'));
   const ve = money($('f-ve'));
 
-  $('calcCTP').textContent = (ngayCTP * ctp).toLocaleString();
-  $('calcKS').textContent = (ngayKS * ks).toLocaleString();
+  // Check max caps & warn
+  checkCTPMax();
+  checkKSMax();
+
+  $('calcCTP').textContent = ctp.toLocaleString();
+  $('calcKS').textContent = ks.toLocaleString();
   $('calcXang').textContent = xang.toLocaleString();
   $('calcVe').textContent = ve.toLocaleString();
-  const total = ngayCTP * ctp + ngayKS * ks + xang + ve;
+  const total = ctp + ks + xang + ve;
   $('calcTotal').textContent = total.toLocaleString();
+}
+
+function getDMMax() {
+  const cv = $('f-chucvu').value;
+  const ngayCTP = +($('f-ngayctp').value) || 0;
+  const ngayKS = +($('f-ngayks').value) || 0;
+  const rate = DM_BY_CHUCVU[cv] || DM_BY_CHUCVU['CHT-NVCH'];
+  return { maxCTP: ngayCTP * rate.ctp, maxKS: ngayKS * rate.ks, rate: rate };
+}
+
+function checkCTPMax() {
+  const { maxCTP } = getDMMax();
+  const ctp = money($('f-ctp'));
+  const el = $('calcCTP');
+  const label = $('ctpMaxLabel');
+  if (maxCTP > 0) label.textContent = '(tối đa ' + maxCTP.toLocaleString() + 'đ)';
+  else label.textContent = '';
+  if (ctp > maxCTP && maxCTP > 0) {
+    el.style.color = 'var(--err)';
+    el.title = '⚠️ Vượt định mức tối đa ' + maxCTP.toLocaleString() + 'đ';
+  } else {
+    el.style.color = '';
+    el.title = '';
+  }
+}
+
+function checkKSMax() {
+  const { maxKS } = getDMMax();
+  const ks = money($('f-ks'));
+  const el = $('calcKS');
+  const label = $('ksMaxLabel');
+  if (maxKS > 0) label.textContent = '(tối đa ' + maxKS.toLocaleString() + 'đ)';
+  else label.textContent = '';
+  if (ks > maxKS && maxKS > 0) {
+    el.style.color = 'var(--err)';
+    el.title = '⚠️ Vượt định mức tối đa ' + maxKS.toLocaleString() + 'đ';
+  } else {
+    el.style.color = '';
+    el.title = '';
+  }
 }
 
 function autoDays() {
@@ -911,6 +957,8 @@ function autoDays() {
     else { $('f-ngayctp').value = diff + 1; $('f-ngayks').value = diff; }
   } else { $('f-ngayctp').value = ''; $('f-ngayks').value = ''; }
   autoCalc(); liveValid(); applyTravelLogic();
+  // Update max labels after days change
+  checkCTPMax(); checkKSMax();
 }
 
 // =================== TRAVEL LOGIC ===================
@@ -942,13 +990,11 @@ function usedBudget(gdvName) {
 }
 
 function currentTotal() {
-  const ngayCTP = +($('f-ngayctp').value) || 0;
-  const ngayKS = +($('f-ngayks').value) || 0;
   const ctp = money($('f-ctp'));
   const ks = money($('f-ks'));
   const xang = money($('f-xang'));
   const ve = money($('f-ve'));
-  return ngayCTP * ctp + ngayKS * ks + xang + ve;
+  return ctp + ks + xang + ve;
 }
 
 function liveValid() {
@@ -975,6 +1021,17 @@ function liveValid() {
   }
   if (soNgay > 2) {
     w.push('⚠️ > 2 ngày → cần GĐM duyệt.');
+  }
+
+  // Check max caps
+  const { maxCTP, maxKS } = getDMMax();
+  const ctpActual = money($('f-ctp'));
+  const ksActual = money($('f-ks'));
+  if (ctpActual > maxCTP && maxCTP > 0) {
+    w.push('🔴 CTP thực tế ' + ctpActual.toLocaleString() + 'đ vượt định mức ' + maxCTP.toLocaleString() + 'đ (' + soNgay + ' ngày × ' + (DM_BY_CHUCVU[cv]||DM_BY_CHUCVU['CHT-NVCH']).ctp.toLocaleString() + 'đ/ngày). Cần duyệt ngoại lệ.');
+  }
+  if (ksActual > maxKS && maxKS > 0) {
+    w.push('🔴 KS thực tế ' + ksActual.toLocaleString() + 'đ vượt định mức ' + maxKS.toLocaleString() + 'đ (tối đa ' + (+($('f-ngayks').value)||0) + ' ngày × ' + (DM_BY_CHUCVU[cv]||DM_BY_CHUCVU['CHT-NVCH']).ks.toLocaleString() + 'đ/ngày). Cần duyệt ngoại lệ.');
   }
 
   if (gdvName) {
@@ -1075,7 +1132,7 @@ function buildRecord() {
   const ks = money($('f-ks'));
   const xang = money($('f-xang'));
   const ve = money($('f-ve'));
-  const total = ngayCTP * ctp + ngayKS * ks + xang + ve;
+  const total = ctp + ks + xang + ve;
 
   // Auto tháng from ngày đi
   let thang = $('f-thang').value;
