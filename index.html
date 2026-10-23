@@ -199,7 +199,7 @@ tr:hover td{background:#f8f9ff}
 <!-- ========== MAIN APP ========== -->
 <div id="app">
   <header>
-    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v2.8</span></div>
+    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v2.9</span></div>
     <div class="user" id="userLine"></div>
     <button class="logout-btn" id="headerLoginBtn" onclick="showLogin()">📊 Dashboard</button>
   </header>
@@ -478,9 +478,11 @@ const isManager = () => ME && ['GĐV','GĐM','ADMIN'].includes(ME.chucVu);
 
 // =================== UTILS ===================
 function toast(msg, type='') {
-  const t = $('toast'); t.textContent = msg;
+  const t = $('toast');
+  t.textContent = msg;
   t.className = 'toast ' + type + ' show';
-  setTimeout(() => t.classList.remove('show'), 2200);
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3200);
 }
 function fmt(n) { return (n || 0).toLocaleString('vi-VN') + 'đ'; }
 function fmtTr(n) { return n.toLocaleString('vi-VN', { maximumFractionDigits: 1 }); }
