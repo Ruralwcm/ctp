@@ -974,16 +974,18 @@ function saveDraft() {
 function submitKB() {
   const mach = $('f-mach').value.trim();
   const manv = $('f-manv').value.trim();
+  const hoten = $('f-hoten').value.trim();
   const denVal = $('f-den').value.trim();
   const ngaydi = $('f-ngaydi').value;
   const km = +($('f-km').value) || 0;
   const soNgay = +($('f-ngayctp').value) || 0;
 
-  if (!mach || !selCH) { toast('⚠️ Chọn Địa điểm đi', 'error'); return; }
-  if (!manv) { toast('⚠️ Bước 2: Nhập Mã NV người công tác', 'error'); return; }
-  if (!selDen) { toast('⚠️ Chọn Địa điểm đến', 'error'); return; }
+  if (!manv) { toast('⚠️ Vui lòng nhập Mã NV', 'error'); return; }
+  if (!hoten) { toast('⚠️ Vui lòng nhập Họ và tên', 'error'); return; }
+  if (!mach || !selCH) { toast('⚠️ Vui lòng chọn Địa điểm đi', 'error'); return; }
+  if (!selDen) { toast('⚠️ Vui lòng chọn Địa điểm đến', 'error'); return; }
   if (!ngaydi) { toast('⚠️ Vui lòng nhập Ngày bắt đầu', 'error'); return; }
-  if (!km) { toast('⚠️ Chọn Địa điểm đến để tự tính khoảng cách', 'error'); return; }
+  if (!km) { toast('⚠️ Vui lòng chọn Địa điểm đến để tự tính khoảng cách', 'error'); return; }
   const lydo = $('f-lydo').value;
   if (!lydo) { toast('⚠️ Vui lòng chọn Lý do công tác', 'error'); return; }
   if (lydo === 'Khác' && !$('f-lydo-khac').value.trim()) {
@@ -994,7 +996,7 @@ function submitKB() {
   const total = +(($('calcTotal').textContent || '').replace(/,/g, '')) || 0;
   if (!total) { toast('⚠️ Vui lòng nhập chi phí', 'error'); return; }
 
-  // Determine status: if logged in as manager, auto-approve; otherwise pending
+  // Determine status
   let status = 'cho_gdv';
   if (ME) {
     const cv = ME.chucVu;
@@ -1009,8 +1011,12 @@ function submitKB() {
 
   RECORDS.unshift(rec);
   save();
-  // Push to GAS async
-  gasPost('submit', rec).then(() => console.log('GAS submit OK'));
+  // Push to GAS
+  if (USE_GAS && GAS_URL) {
+    gasPost('submit', rec).then(r => {
+      if (r) console.log('☁️ GAS OK'); else console.warn('⚠️ GAS lỗi, đã lưu local');
+    });
+  }
   toast('✅ Đã gửi duyệt! (' + ST_LABEL[status] + ')' + (USE_GAS ? ' ☁️' : ''), 'success');
   resetForm();
   renderAll();
