@@ -228,6 +228,7 @@ tr:hover td{background:#f8f9ff}
       <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="fld"><label>Chức vụ *</label>
           <select id="f-chucvu" onchange="onChucVuChange()">
+            <option value="">-- Chọn --</option>
             <option value="CHT-NVCH">CHT-NVCH</option>
             <option value="QLKV">QLKV</option>
             <option value="HCV">HCV</option>
@@ -265,6 +266,7 @@ tr:hover td{background:#f8f9ff}
         </div>
         <div class="fld"><label>PT</label>
           <select id="f-pt" onchange="liveValid()">
+            <option value="">-- Chọn --</option>
             <option>Xe máy</option><option>Ô tô</option><option>Máy bay</option><option>Xe khách</option>
           </select>
         </div>
@@ -308,14 +310,14 @@ tr:hover td{background:#f8f9ff}
       <!-- SECTION 3: CHI PHÍ -->
       <h3 style="margin-top:12px">💵 Chi phí</h3>
       <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        <div class="fld"><label>CTP thực tế 🔒 <span style="font-size:10px;color:var(--ok);font-weight:500" id="ctpMaxLabel"></span></label><input id="f-ctp" type="text" inputmode="numeric" readonly style="background:#e8f5e9;color:#2e7d32;font-weight:700"></div>
+        <div class="fld"><label>CTP - định mức 🔒</label><input id="f-ctp" type="text" inputmode="numeric" readonly style="background:#e8f5e9;color:#2e7d32;font-weight:700"></div>
         <div class="fld"><label>Khách sạn thực tế <span style="font-size:10px;color:var(--muted);font-weight:400" id="ksMaxLabel"></span></label><input id="f-ks" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
         <div class="fld"><label>Xăng</label><input id="f-xang" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
         <div class="fld"><label>Vé</label><input id="f-ve" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
       </div>
 
       <div class="result-box calc" style="font-size:12px;padding:8px 10px">
-        📊 CTP thực tế <b id="calcCTP">0</b>đ · KS thực tế <b id="calcKS">0</b>đ · Xăng <b id="calcXang">0</b>đ · Vé <b id="calcVe">0</b>đ · <strong style="font-size:15px;color:var(--blue)">TỔNG <span id="calcTotal">0</span>đ</strong>
+        📊 CTP định mức <b id="calcCTP">0</b>đ · KS thực tế <b id="calcKS">0</b>đ · Xăng <b id="calcXang">0</b>đ · Vé <b id="calcVe">0</b>đ · <strong style="font-size:15px;color:var(--blue)">TỔNG <span id="calcTotal">0</span>đ</strong>
       </div>
 
       <div class="valid-box pass hidden" id="validBox"></div>
@@ -907,7 +909,7 @@ function autoFillCTP() {
     const ctpTotal = ngayCTP * rate.ctp;
     $('f-ctp').value = ctpTotal ? ctpTotal.toLocaleString('vi-VN') : '';
   }
-  $('ctpMaxLabel').textContent = '(auto: ' + rate.ctp.toLocaleString() + 'đ/ngày)';
+  // No label text — keep it clean
 }
 
 function autoCalc() {
@@ -1184,9 +1186,9 @@ function buildRecord() {
 function resetForm() {
   ['f-mach','f-manv','f-hoten','f-den','f-km','f-ngaydi','f-ngayve','f-ngayctp','f-ngayks','f-xang','f-ve','f-lydo-khac','f-ctp','f-ks','f-mucdich'].forEach(id => $(id).value = '');
   $('mucdichCount').textContent = '0';
-  $('f-chucvu').value = 'CHT-NVCH';
+  $('f-chucvu').value = '';
   $('f-lydo').selectedIndex = 0; $('lydoKhacBox').classList.add('hidden');
-  $('f-thang').selectedIndex = 0; $('f-pt').selectedIndex = 0;
+  $('f-thang').selectedIndex = 0; $('f-pt').value = '';
   $('chInfo').classList.add('hidden'); $('denInfo').classList.add('hidden');
   $('dmInfoBox').classList.add('hidden'); $('routeSummary').classList.add('hidden');
   $('nvFullInfo').classList.add('hidden');
