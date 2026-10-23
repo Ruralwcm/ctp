@@ -199,7 +199,7 @@ tr:hover td{background:#f8f9ff}
 <!-- ========== MAIN APP ========== -->
 <div id="app">
   <header>
-    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v2.9</span></div>
+    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v2.9.1</span></div>
     <div class="user" id="userLine"></div>
     <button class="logout-btn" id="headerLoginBtn" onclick="showLogin()">📊 Dashboard</button>
   </header>
@@ -909,12 +909,22 @@ function usedBudget(gdvName) {
   return RECORDS.filter(r => r.gdv === gdvName && r.trangThai === 'done').reduce((s, r) => s + (r.tong || 0), 0);
 }
 
+function currentTotal() {
+  const ngayCTP = +($('f-ngayctp').value) || 0;
+  const ngayKS = +($('f-ngayks').value) || 0;
+  const ctp = money($('f-ctp'));
+  const ks = money($('f-ks'));
+  const xang = money($('f-xang'));
+  const ve = money($('f-ve'));
+  return ngayCTP * ctp + ngayKS * ks + xang + ve;
+}
+
 function liveValid() {
   const box = $('validBox');
   const km = +($('f-km').value) || 0;
   const soNgay = +($('f-ngayctp').value) || 0;
   const cv = $('f-chucvu').value;
-  const total = +(($('calcTotal').textContent || '').replace(/,/g, '')) || 0;
+  const total = currentTotal();
   const gdvName = selCH ? selCH.gdv : null;
 
   if (!km) { box.classList.add('hidden'); return; }
@@ -995,7 +1005,7 @@ function submitKB() {
   }
 
   const rec = buildRecord();
-  const total = +(($('calcTotal').textContent || '').replace(/,/g, '')) || 0;
+  const total = rec.tong;
   if (!total) { toast('⚠️ Vui lòng nhập chi phí', 'error'); return; }
 
   // Determine status
