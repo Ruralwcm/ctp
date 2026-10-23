@@ -199,7 +199,7 @@ tr:hover td{background:#f8f9ff}
 <!-- ========== MAIN APP ========== -->
 <div id="app">
   <header>
-    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v2.7</span></div>
+    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v2.8</span></div>
     <div class="user" id="userLine"></div>
     <button class="logout-btn" id="headerLoginBtn" onclick="showLogin()">📊 Dashboard</button>
   </header>
@@ -403,6 +403,11 @@ tr:hover td{background:#f8f9ff}
 <div class="toast" id="toast"></div>
 
 <script>
+// =================== GAS BACKEND CONFIG ===================
+// ⚠️ Paste Web App URL here after deploying Code.gs
+const GAS_URL = '';
+const USE_GAS = false; // Set to true after GAS deployed
+
 // =================== DATA ===================
 const DM_BY_CHUCVU = {
   'CHT-NVCH': { ctp: 150000, ks: 300000 },
@@ -611,6 +616,78 @@ async function loadStorelist() {
   }
 }
 loadStorelist();
+
+// =================== GAS BACKEND HELPERS ===================
+async function gasPost(action, data) {
+  if (!USE_GAS || !GAS_URL) return null;
+  try {
+    const formData = new URLSearchParams();
+    formData.append('action', action);
+    formData.append('data', JSON.stringify(data));
+    const resp = await fetch(GAS_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+    const json = await resp.json();
+    if (!json.success) { console.warn('GAS error:', json.error); return null; }
+    return json.data;
+  } catch(e) { console.warn('GAS post failed:', e.message); return null; }
+}
+
+async function gasGet(action, params = {}) {
+  if (!USE_GAS || !GAS_URL) return null;
+  try {
+    const qs = new URLSearchParams({ action, ...params });
+    const resp = await fetch(GAS_URL + '?' + qs.toString());
+    const json = await resp.json();
+    if (!json.success) { console.warn('GAS error:', json.error); return null; }
+    return json.data;
+  } catch(e) { console.warn('GAS get failed:', e.message); return null; }
+}
+
+async function loadFromGAS() {
+  if (!USE_GAS || !GAS_URL) return;
+
+  // Load NVDB from sheet
+  const nvData = await gasGet('nhanSu');
+  if (nvData && nvData.length) {
+    NVDB = nvData;
+    saveNV();
+    console.log('NVDB loaded from GAS:', NVDB.length);
+  }
+
+  // Load DM from sheet
+  const dmData = await gasGet('dinhMuc');
+  if (dmData && dmData.length) {
+    DM_DATA = dmData;
+    saveDM();
+    console.log('DM loaded from GAS:', DM_DATA.length);
+  }
+
+  // Load records from sheet
+  let params = {};
+  if (ME) {
+    if (ME.chucVu === 'GĐV') params.gdv = ME.ten;
+    if (['CHT-NVCH','QLKV','HCV'].includes(ME.chucVu)) params.maNV = ME.maNV;
+  }
+  const records = await gasGet('records', params);
+  if (records && records.length) {
+    // Merge with local: prefer GAS for existing IDs, keep local-only records
+    const localIds = new Set(RECORDS.map(r => String(r.id)));
+    const gasIds = new Set(records.map(r => String(r.id)));
+    // Remove local records that exist in GAS (GAS is source of truth)
+    RECORDS = RECORDS.filter(r => !gasIds.has(String(r.id)));
+    // Add GAS records
+    records.forEach(r => {
+      r.id = Number(r.id) || Date.now();
+      r.km = Number(r.km) || 0;
+      r.tong = Number(r.tong) || 0;
+    });
+    RECORDS = [...records, ...RECORDS];
+    save();
+    console.log('Records loaded from GAS:', records.length, 'total:', RECORDS.length);
+  }
+}
+
+// Auto-load GAS data on startup
+setTimeout(() => loadFromGAS().then(() => renderAll()), 1500);
 
 // =================== AUTOCOMPLETE ===================
 function acCH(v) {
@@ -887,7 +964,9 @@ function saveDraft() {
   rec.id = Date.now();
   RECORDS.unshift(rec);
   save();
-  toast('✅ Đã lưu nháp!', 'success');
+  // Push to GAS async (fire & forget)
+  gasPost('submit', rec);
+  toast('✅ Đã lưu nháp!' + (USE_GAS ? ' ☁️' : ' 💾'), 'success');
   resetForm();
   renderAll();
 }
@@ -930,7 +1009,9 @@ function submitKB() {
 
   RECORDS.unshift(rec);
   save();
-  toast('✅ Đã gửi duyệt! (' + ST_LABEL[status] + ')', 'success');
+  // Push to GAS async
+  gasPost('submit', rec).then(() => console.log('GAS submit OK'));
+  toast('✅ Đã gửi duyệt! (' + ST_LABEL[status] + ')' + (USE_GAS ? ' ☁️' : ''), 'success');
   resetForm();
   renderAll();
 }
@@ -1005,21 +1086,24 @@ function resetForm() {
 function approve(id) {
   const r = RECORDS.find(x => x.id === id);
   if (!r) return;
+  let newStatus;
   if (ME.chucVu === 'GĐV') {
     if (r.km > 80 || r.soNgay > 2 || (r.validWarn && r.validWarn.length)) {
-      r.trangThai = 'cho_gdm';
+      newStatus = 'cho_gdm';
       toast('✅ Đã chuyển GĐM duyệt (cần duyệt cấp cao hơn)');
     } else {
-      r.trangThai = 'done';
+      newStatus = 'done';
       toast('✅ Đã duyệt hoàn tất');
     }
   } else {
-    r.trangThai = 'done';
+    newStatus = 'done';
     toast('✅ Đã duyệt hoàn tất');
   }
+  r.trangThai = newStatus;
   r.approvedBy = ME.ten;
   r.approvedAt = new Date().toISOString();
   save();
+  gasPost('approve', { id: r.id, approvedBy: ME.ten, newStatus });
   renderAll();
 }
 
@@ -1033,6 +1117,7 @@ function reject(id) {
   r.rejectedBy = ME.ten;
   r.rejectedAt = new Date().toISOString();
   save();
+  gasPost('reject', { id: r.id, rejectedBy: ME.ten, lyDo: reason });
   toast('Đã từ chối', 'error');
   renderAll();
 }
