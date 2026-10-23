@@ -294,10 +294,6 @@ tr:hover td{background:#f8f9ff}
           <input id="f-lydo-khac">
         </div>
       </div>
-      <div class="fld"><label>Mục đích công tác chi tiết *</label>
-        <textarea id="f-mucdich" placeholder="Ghi rõ nội dung công tác..."></textarea>
-      </div>
-
       <div class="dm-info hidden" id="dmInfoBox">
         📐 <strong>Định mức:</strong> <span id="dmInfoText">---</span>
       </div>
@@ -1028,8 +1024,6 @@ function submitKB() {
   if (lydo === 'Khác' && !$('f-lydo-khac').value.trim()) {
     toast('⚠️ Vui lòng nhập lý do cụ thể', 'error'); return;
   }
-  const mucdich = $('f-mucdich').value.trim();
-  if (!mucdich) { toast('⚠️ Vui lòng nhập Mục đích công tác chi tiết', 'error'); return; }
 
   const rec = buildRecord();
   const total = rec.tong;
@@ -1107,13 +1101,12 @@ function buildRecord() {
     ve: ve,
     tong: total,
     ghiChu: $('f-lydo').value === 'Khác' ? $('f-lydo-khac').value.trim() : $('f-lydo').value,
-    mucDich: $('f-mucdich').value.trim(),
     thang: thang || '',
   };
 }
 
 function resetForm() {
-  ['f-mach','f-manv','f-hoten','f-den','f-km','f-ngaydi','f-ngayve','f-ngayctp','f-ngayks','f-xang','f-ve','f-lydo-khac','f-ctp','f-ks','f-mucdich'].forEach(id => $(id).value = '');
+  ['f-mach','f-manv','f-hoten','f-den','f-km','f-ngaydi','f-ngayve','f-ngayctp','f-ngayks','f-xang','f-ve','f-lydo-khac','f-ctp','f-ks'].forEach(id => $(id).value = '');
   $('f-chucvu').value = 'CHT-NVCH';
   $('f-lydo').selectedIndex = 0; $('lydoKhacBox').classList.add('hidden');
   $('f-thang').selectedIndex = 0; $('f-pt').selectedIndex = 0;
