@@ -308,16 +308,16 @@ tr:hover td{background:#f8f9ff}
       </div>
 
       <!-- SECTION 3: CHI PHÍ -->
-      <h3 style="margin-top:12px">💵 Chi phí</h3>
+      <h3 style="margin-top:12px">💵 CTP - Khách sạn - Xăng - Vé xe/cầu đường</h3>
       <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        <div class="fld"><label>CTP - định mức 🔒</label><input id="f-ctp" type="text" inputmode="numeric" readonly style="background:#e8f5e9;color:#2e7d32;font-weight:700"></div>
-        <div class="fld"><label>Khách sạn thực tế <span style="font-size:10px;color:var(--muted);font-weight:400" id="ksMaxLabel"></span></label><input id="f-ks" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>CTP 🔒</label><input id="f-ctp" type="text" inputmode="numeric" readonly style="background:#e8f5e9;color:#2e7d32;font-weight:700"></div>
+        <div class="fld"><label>Khách sạn <span style="font-size:10px;color:var(--muted);font-weight:400" id="ksMaxLabel"></span></label><input id="f-ks" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
         <div class="fld"><label>Xăng</label><input id="f-xang" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
-        <div class="fld"><label>Vé</label><input id="f-ve" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
+        <div class="fld"><label>Vé xe/cầu đường</label><input id="f-ve" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
       </div>
 
       <div class="result-box calc" style="font-size:12px;padding:8px 10px">
-        📊 CTP định mức <b id="calcCTP">0</b>đ · KS thực tế <b id="calcKS">0</b>đ · Xăng <b id="calcXang">0</b>đ · Vé <b id="calcVe">0</b>đ · <strong style="font-size:15px;color:var(--blue)">TỔNG <span id="calcTotal">0</span>đ</strong>
+        📊 CTP <b id="calcCTP">0</b>đ · KS <b id="calcKS">0</b>đ · Xăng <b id="calcXang">0</b>đ · Vé <b id="calcVe">0</b>đ · <strong style="font-size:15px;color:var(--blue)">TỔNG <span id="calcTotal">0</span>đ</strong>
       </div>
 
       <div class="valid-box pass hidden" id="validBox"></div>
