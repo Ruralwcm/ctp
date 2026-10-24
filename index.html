@@ -1532,7 +1532,7 @@ function repaintDashboard() {
     moMap[k].sl++;
   });
   const ORDER = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
-  const moRows = Object.values(moMap).sort((a,b) => ORDER.indexOf(a.thang) - ORDER.indexOf(b.thang));
+  const moRows = Object.values(moMap).sort((a,b) => ORDER.indexOf(a.thang) - ORDER.indexOf(b.thang));
   if ($('dashByMonth')) $('dashByMonth').innerHTML = moRows.map(m =>
     `<tr><td><strong>${m.thang}</strong></td><td class="text-right">${m.ctp.toLocaleString()}đ</td><td class="text-right">${m.ks.toLocaleString()}đ</td><td class="text-right">${m.xang.toLocaleString()}đ</td><td class="text-right">${m.ve.toLocaleString()}đ</td><td class="text-right" style="font-weight:700">${m.tong.toLocaleString()}đ</td><td class="text-right">${m.sl}</td></tr>`
   ).join('');
