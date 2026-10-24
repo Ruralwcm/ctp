@@ -1043,16 +1043,36 @@ function checkKSMax() {
   }
 }
 
+function lockDateRange() {
+  const today = new Date();
+  const minD = new Date(today); minD.setDate(minD.getDate() - 180);
+  const maxD = new Date(today); maxD.setDate(maxD.getDate() + 30);
+  const fmt = d => d.toISOString().slice(0,10);
+  $('f-ngaydi').setAttribute('min', fmt(minD));
+  $('f-ngaydi').setAttribute('max', fmt(maxD));
+  // Lock ngày kết thúc >= ngày bắt đầu
+  const di = $('f-ngaydi').value;
+  if (di) {
+    $('f-ngayve').setAttribute('min', di);
+    // Ngày kết thúc max = ngày bắt đầu + 90 ngày
+    const maxVe = new Date(di); maxVe.setDate(maxVe.getDate() + 90);
+    $('f-ngayve').setAttribute('max', fmt(maxVe));
+  } else {
+    $('f-ngayve').removeAttribute('min');
+    $('f-ngayve').removeAttribute('max');
+  }
+}
+
 function autoDays() {
+  lockDateRange(); // re-lock when date changes
   const di = $('f-ngaydi').value, ve = $('f-ngayve').value;
   if (di && ve) {
     const a = new Date(di), b = new Date(ve), diff = Math.round((b - a) / 86400000);
-    if (diff < 0) { $('f-ngayctp').value = ''; $('f-ngayks').value = ''; toast('Ngày về phải ≥ ngày đi', 'error'); }
+    if (diff < 0) { $('f-ngayve').value = ''; $('f-ngayctp').value = ''; $('f-ngayks').value = ''; toast('⚠️ Ngày kết thúc phải ≥ ngày bắt đầu', 'error'); return; }
     else { $('f-ngayctp').value = diff + 1; $('f-ngayks').value = diff; }
   } else { $('f-ngayctp').value = ''; $('f-ngayks').value = ''; }
   autoFillCTP();
   autoCalc(); liveValid(); applyTravelLogic();
-  // Update max labels after days change
   checkCTPMax(); checkKSMax();
 }
 
@@ -1548,6 +1568,7 @@ document.addEventListener('click', e => {
 
 // Init
 if (!localStorage.getItem(K_DM)) saveDM();
+lockDateRange();
 setTimeout(() => { onChucVuChange(); autoFillCTP(); }, 300);
 </script>
 </body>
