@@ -104,6 +104,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th{background:#f5f7fa;color:#555;font-weight:700;padding:10px 8px;text-align:left;border-bottom:2px solid #e0e0e0;white-space:nowrap}
 td{padding:8px;border-bottom:1px solid #eee}
 tr:hover td{background:#f8f9ff}
+.ns-mien-header:hover td{background:var(--blue)!important;color:#fff!important}
 
 /* STATUS BADGES */
 .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
@@ -209,9 +210,8 @@ tr:hover td{background:#f8f9ff}
   <div class="tabs hidden" id="adminTabs">
     <div class="tab" data-tab="khaibao" onclick="switchAdminTab('khaibao')">📝 Khai báo</div>
     <div class="tab" data-tab="dashboard" onclick="switchAdminTab('dashboard')">📊 Tổng kết</div>
-    <div class="tab" data-tab="ngansach" onclick="switchAdminTab('ngansach')">💰 Ngân sách CTP</div>
     <div class="tab" data-tab="pd" onclick="switchAdminTab('pd')">✅ Phê duyệt <span class="badge-count" id="pdBadge" style="display:none">0</span></div>
-    <div class="tab" data-tab="dinhmuc" onclick="switchAdminTab('dinhmuc')">📐 Định mức</div>
+    <div class="tab" data-tab="ngansach" onclick="switchAdminTab('ngansach')">💰 Ngân sách CTP</div>
   </div>
 
   <!-- ========== TAB: KHAI BÁO ========== -->
@@ -366,8 +366,6 @@ tr:hover td{background:#f8f9ff}
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">💡 Click vào vùng để sửa định mức (GĐM/Admin)</div>
     </div>
   </div>
-
-  <!-- ========== TAB: PHÊ DUYỆT ========== -->
   <div id="tab-pd" class="hidden">
     <!-- PENDING APPROVALS -->
     <div class="card">
@@ -378,7 +376,7 @@ tr:hover td{background:#f8f9ff}
     <!-- HISTORY -->
     <div class="card">
       <h3>📋 Lịch sử phê duyệt</h3>
-      <div style="margin-bottom:10px" class="row">
+      <div style="margin-bottom:10px" class="row" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
         <div class="fld">
           <select id="pdFilterStatus" onchange="renderAll()">
             <option value="all">Tất cả trạng thái</option>
@@ -398,6 +396,17 @@ tr:hover td{background:#f8f9ff}
             <option>T9</option><option>T10</option><option>T11</option><option>T12</option>
           </select>
         </div>
+        <div class="fld">
+          <select id="pdFilterMien" onchange="renderAll()">
+            <option value="all">Tất cả Miền</option>
+          </select>
+        </div>
+        <div class="fld">
+          <select id="pdFilterGDV" onchange="renderAll()">
+            <option value="all">Tất cả GĐV</option>
+          </select>
+        </div>
+        <div class="fld"><input id="pdSearch" placeholder="🔍 Tìm mã/người..." oninput="renderAll()" style="padding:8px 10px"></div>
       </div>
       <div id="historyList"></div>
     </div>
@@ -484,6 +493,21 @@ tr:hover td{background:#f8f9ff}
       <strong>Công thức:</strong> Ngân sách = (Số CH × Hệ số K × 150k × 2 ngày) + (Số NSO × 1.5tr/tháng)<br>
       📌 Hệ số K: 1.0–1.5 tùy vùng (miền núi, xa xôi cao hơn). Click để sửa K.<br>
       📌 Cập nhật tự động khi Storelist thay đổi.
+    </div>
+
+    <!-- ĐỊNH MỨC (section trong Ngân sách) -->
+    <div class="card" style="margin-top:12px">
+      <h3>📐 Bảng định mức CTP theo vùng & chức vụ</h3>
+      <div class="row" style="margin-bottom:10px">
+        <div class="fld"><input id="dmSearch" placeholder="🔍 Tìm tỉnh/vùng..." oninput="renderDM()"></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Vùng / Tỉnh</th><th>CHT-NVCH</th><th>QLKV</th><th>HCV</th><th>GĐV</th><th>GĐM</th><th>Ghi chú</th></tr></thead>
+          <tbody id="dmBody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">💡 Click vào vùng để sửa định mức (GĐM/Admin)</div>
     </div>
   </div>
 </div>
@@ -1243,9 +1267,9 @@ function saveDraft() {
   const rec = buildRecord();
   rec.trangThai = 'draft';
   rec.id = Date.now();
+  rec.ctpId = 'CTP_' + new Date().toISOString().slice(2,4) + new Date().toISOString().slice(5,7) + '_' + String(rec.id).slice(-4);
   RECORDS.unshift(rec);
   save();
-  // Push to GAS async (fire & forget)
   gasPost('submit', rec);
   toast('✅ Đã lưu nháp!' + (USE_GAS ? ' ☁️' : ' 💾'), 'success');
   resetForm();
@@ -1289,6 +1313,7 @@ function submitKB() {
 
   rec.trangThai = status;
   rec.id = Date.now();
+  rec.ctpId = 'CTP_' + new Date().toISOString().slice(2,4) + new Date().toISOString().slice(5,7) + '_' + String(rec.id).slice(-4);
   rec.nguoiTao = ME ? ME.maNV : manv;
   rec.ngayTao = new Date().toISOString().slice(0, 16).replace('T', ' ');
   rec.tracklog = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
@@ -1505,7 +1530,7 @@ function renderNganSach() {
         const mPct = mTotalBudget > 0 ? (mUsed / (mTotalBudget * 1e6)) * 100 : 0;
         const mienId = 'ns-mien-' + g.mien.replace(/[^a-zA-Z]/g,'');
         rowsHtml += `<tr class="ns-mien-header" onclick="toggleMien('${mienId}')" style="background:var(--blue);color:#fff;font-weight:700;white-space:nowrap;cursor:pointer">
-          <td>▶ ${g.mien} (${mienRows.length} GĐV)</td>
+          <td>▼ ${g.mien} (${mienRows.length} GĐV)</td>
           <td class="text-right">${mienRows.reduce((s,r)=>s+r.liveCH,0)}</td>
           <td class="text-right">${mienRows.reduce((s,r)=>s+r.NSO,0)}</td>
           <td class="text-right">—</td>
@@ -1601,32 +1626,39 @@ function editDM(idx) {
 function renderPD() {
   updatePDBadge();
 
-  // Pending approvals - only for logged-in managers
+  // Pending approvals
   let pool = [];
   if (ME) {
-    if (ME.chucVu === 'GĐV') {
-      pool = RECORDS.filter(r => r.gdv === ME.ten && r.trangThai === 'cho_gdv');
-    } else if (ME.chucVu === 'GĐM' || ME.chucVu === 'ADMIN') {
-      pool = RECORDS.filter(r => ['cho_gdv', 'cho_gdm'].includes(r.trangThai));
-    }
+    if (ME.chucVu === 'GĐV') pool = RECORDS.filter(r => r.gdv === ME.ten && r.trangThai === 'cho_gdv');
+    else if (['GĐM','ADMIN'].includes(ME.chucVu)) pool = RECORDS.filter(r => ['cho_gdv','cho_gdm'].includes(r.trangThai));
   }
-
   $('pendingList').innerHTML = pool.length
     ? pool.map(r => itemHtml(r, true)).join('')
     : '<div class="empty">✅ Không có phiếu nào chờ duyệt</div>';
 
-  // History - show all for guest, filtered for logged-in
+  // Populate filter dropdowns
+  const miens = [...new Set(RECORDS.map(r => r.mien).filter(Boolean))].sort();
+  const gdvs = [...new Set(RECORDS.map(r => r.gdv).filter(Boolean))].sort();
+  if ($('pdFilterMien')) $('pdFilterMien').innerHTML = '<option value="all">Tất cả Miền</option>' + miens.map(m => '<option value="'+m+'">'+m+'</option>').join('');
+  if ($('pdFilterGDV')) $('pdFilterGDV').innerHTML = '<option value="all">Tất cả GĐV</option>' + gdvs.map(g => '<option value="'+g+'">'+g+'</option>').join('');
+
+  // History with full filters
   const filterStatus = $('pdFilterStatus')?.value || 'all';
   const filterThang = $('pdFilterThang')?.value || 'all';
+  const filterMien = $('pdFilterMien')?.value || 'all';
+  const filterGDV = $('pdFilterGDV')?.value || 'all';
+  const searchQ = ($('pdSearch')?.value || '').toLowerCase();
+
   let hist = RECORDS;
   if (ME) {
     if (ME.chucVu === 'GĐV') hist = hist.filter(r => r.gdv === ME.ten);
-    if (ME.chucVu === 'CHT-NVCH' || ME.chucVu === 'QLKV' || ME.chucVu === 'HCV') {
-      hist = hist.filter(r => r.maNV === ME.maNV || r.nguoiTao === ME.maNV);
-    }
+    if (['CHT-NVCH','QLKV','HCV'].includes(ME.chucVu)) hist = hist.filter(r => r.maNV === ME.maNV || r.nguoiTao === ME.maNV);
   }
   if (filterStatus !== 'all') hist = hist.filter(r => r.trangThai === filterStatus);
   if (filterThang !== 'all') hist = hist.filter(r => r.thang === filterThang);
+  if (filterMien !== 'all') hist = hist.filter(r => r.mien === filterMien);
+  if (filterGDV !== 'all') hist = hist.filter(r => r.gdv === filterGDV);
+  if (searchQ) hist = hist.filter(r => (r.ctpId||'').toLowerCase().includes(searchQ) || (r.ten||'').toLowerCase().includes(searchQ) || (r.maNV||'').toLowerCase().includes(searchQ));
 
   $('historyList').innerHTML = hist.length
     ? hist.map(r => itemHtml(r, false)).join('')
@@ -1636,16 +1668,18 @@ function renderPD() {
 function itemHtml(r, showActs) {
   const st = ST_LABEL[r.trangThai] || r.trangThai;
   const cls = ST_CLASS[r.trangThai] || 'b-wait';
-  return `<div class="item">
-    <div class="top"><div>
-      <div class="name">${r.ten || r.maNV} <span style="font-weight:400;font-size:12px;color:var(--muted)">(${r.chucVu||'—'})</span></div>
-      <div class="meta">${r.tenCH||r.maCH||'—'} → ${r.den||r.route||'—'} · ${r.km||0}km · ${r.soNgay||0} ngày</div>
-      <div class="meta">GĐV: ${r.gdv||'—'} · ${r.ngayDi||'—'} → ${r.ngayVe||'—'} · ${r.ngayTao||''}</div>
+  return `<div class="item" style="padding:8px 12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;white-space:nowrap;overflow:hidden">
+      <span style="font-size:11px;color:var(--blue);font-weight:700;min-width:90px">${r.ctpId||'CTP_'+String(r.id).slice(-8)}</span>
+      <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis">${r.ten||r.maNV||'—'}</span>
+      <span style="font-size:11px;color:var(--muted)">${r.chucVu||'—'}</span>
+      <span style="font-size:11px;overflow:hidden;text-overflow:ellipsis">${r.maCH||'—'}→${r.denMA||r.den||'—'}</span>
+      <span style="font-size:11px;color:var(--muted)">${r.ngayDi||'—'}→${r.ngayVe||'—'} · ${r.km||0}km · ${r.soNgay||0}n</span>
+      <span style="font-weight:700;color:var(--blue)">${fmt(r.tong||0)}</span>
+      <span class="badge ${cls}" style="flex-shrink:0">${st}</span>
+      ${showActs ? `<span style="flex-shrink:0;display:flex;gap:4px"><button class="btn btn-ok btn-xs" onclick="approve(${r.id})">✓</button><button class="btn btn-danger btn-xs" onclick="reject(${r.id})">✗</button></span>` : ''}
     </div>
-    <div style="text-align:right"><div class="money">${fmt(r.tong||0)}</div><span class="badge ${cls}">${st}</span></div></div>
-    <div class="body">${r.ghiChu||''}${r.lyDo ? '<div style="color:var(--err);margin-top:4px">↳ Từ chối: ' + r.lyDo + '</div>' : ''}
-    ${r.approvedBy ? '<div style="color:var(--ok);margin-top:2px">✅ Duyệt bởi: ' + r.approvedBy + '</div>' : ''}</div>
-    ${showActs ? `<div class="acts"><button class="btn btn-ok btn-sm" onclick="approve(${r.id})">✓ Duyệt</button><button class="btn btn-danger btn-sm" onclick="reject(${r.id})">✗ Từ chối</button></div>` : ''}
+    ${r.lyDo ? `<div style="font-size:11px;color:var(--err);margin-top:2px">↳ ${r.lyDo}</div>` : ''}
   </div>`;
 }
 
