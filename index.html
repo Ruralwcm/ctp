@@ -1435,47 +1435,50 @@ function renderTienDo() {
 };
 
 function renderNganSach() {
-  // Auto-generate từ Storelist: đếm CH + Miền theo GĐV
   const norm = s => (s||'').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g,'d')
     .replace(/[^a-z0-9 ]/g, '').replace(/\s+/g,' ').trim();
 
-  // Đếm CH và lấy Miền (majority) từ Storelist
-  const gdvData = {}; // key: norm tên → { gdv, ch, mien (majority), miens: {} }
+  // Đếm CH theo (GĐV + Miền) từ Storelist — giữ nguyên Miền trong sheet
+  const gdvMien = {}; // key: norm(gdv)|mien → { gdv, mien, ch }
   STORELIST.forEach(s => {
     const key = norm(s.gdv || '');
     if (key.length <= 2) return;
-    if (!gdvData[key]) gdvData[key] = { gdv: s.gdv, ch: 0, miens: {} };
-    gdvData[key].ch++;
     const m = s.mien || '—';
-    gdvData[key].miens[m] = (gdvData[key].miens[m] || 0) + 1;
+    const mk = key + '|' + m;
+    if (!gdvMien[mk]) gdvMien[mk] = { gdv: s.gdv, mien: m, ch: 0 };
+    gdvMien[mk].ch++;
   });
 
-  // Tạo rows từ GDV_BUDGET_K, match với Storelist
-  const nsRows = [];
-  Object.entries(GDV_BUDGET_K).forEach(([ten, v]) => {
-    const key = norm(ten);
-    const live = gdvData[key];
-    const liveCH = live ? live.ch : 0;
-    // Majority Miền
-    let mien = '—';
-    if (live) {
-      const sorted = Object.entries(live.miens).sort((a,b) => b[1] - a[1]);
-      mien = sorted.length > 0 ? sorted[0][0] : '—';
+  // Map norm(GĐV) → GDV_BUDGET_K data
+  const nsRows = Object.values(gdvMien).map(d => {
+    const gKey = norm(d.gdv);
+    const bk = GDV_BUDGET_K[d.gdv] || Object.values(GDV_BUDGET_K).find((v,i) => {
+      const kk = norm(Object.keys(GDV_BUDGET_K)[i]);
+      return kk === gKey;
+    });
+    // Fallback: find by fuzzy
+    let kv = GDV_BUDGET_K[d.gdv];
+    if (!kv) {
+      for (const [name, v] of Object.entries(GDV_BUDGET_K)) {
+        if (norm(name) === gKey) { kv = v; break; }
+      }
     }
-    const baseBudget = liveCH * v.K * 150000 * 2;
-    const nsoBudget = (v.NSO || 0) * 1500000;
+    if (!kv) kv = { NSO: 0, K: 1.0 }; // unknown GĐV
+    
+    const baseBudget = d.ch * kv.K * 150000 * 2;
+    const nsoBudget = (kv.NSO || 0) * 1500000;
     const totalBudget = Math.round((baseBudget + nsoBudget) / 1e6 * 10) / 10;
-    const used = usedBudget(ten);
+    const used = usedBudget(d.gdv);
     const rem = Math.max(0, totalBudget * 1e6 - used);
     const pct = totalBudget > 0 ? Math.min(100, (used / (totalBudget * 1e6)) * 100) : 0;
-    nsRows.push({ ten, ...v, liveCH, mien, totalBudget, used, rem, pct, over: pct >= 100 });
+    return { ten: d.gdv, mien: d.mien, liveCH: d.ch, NSO: kv.NSO, K: kv.K, totalBudget, used, rem, pct, over: pct >= 100 };
   });
 
-  // Sort: Miền → ngân sách giảm dần
+  // Sort: Miền → tên GĐV
   nsRows.sort((a, b) => {
     if (a.mien !== b.mien) return (a.mien||'').localeCompare(b.mien||'');
-    return b.totalBudget - a.totalBudget;
+    return (a.ten||'').localeCompare(b.ten||'');
   });
 
   const totalBudget = nsRows.reduce((s, r) => s + r.totalBudget, 0);
