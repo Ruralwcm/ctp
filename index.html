@@ -571,22 +571,22 @@ const DEFAULT_DM = [
 ];
 
 const GDV_BUDGET_K = {
-  'Nguyễn Đức Chung': {NSO:10,K:1.2,mien:'Miền Trung'},
-  'Hồ Nam': {NSO:13,K:1.3,mien:'Miền Bắc'},
-  'Lê Thị Hồng Thu': {NSO:13,K:1.1,mien:'Miền Bắc'},
-  'Tạ Công Nhận': {NSO:4,K:1.0,mien:'Miền Bắc'},
-  'Phạm Minh Thu': {NSO:4,K:1.0,mien:'Miền Bắc'},
-  'Bùi Anh Tuấn': {NSO:2,K:1.2,mien:'Miền Trung'},
-  'Nguyễn Mạnh Sơn': {NSO:20,K:1.5,mien:'Miền Bắc'},
-  'Tạ Quốc Huy': {NSO:8,K:1.0,mien:'Miền Bắc'},
-  'Nguyễn Duy Đoàn': {NSO:10,K:1.0,mien:'Miền Bắc'},
-  'Nguyễn Thị Thu': {NSO:12,K:1.2,mien:'Miền Trung'},
-  'Đặng Văn Dũng': {NSO:9,K:1.0,mien:'Miền Bắc'},
-  'Dương Tùng': {NSO:15,K:1.5,mien:'Miền Bắc'},
-  'Bùi Thị Thu Nhài': {NSO:6,K:1.0,mien:'Miền Bắc'},
-  'Lạc Nhật Minh': {NSO:0,K:1.1,mien:'Miền Nam'},
-  'Nguyễn Năng Toản': {NSO:6,K:1.2,mien:'Miền Nam'},
-  'Nguyễn Thị Yến': {NSO:0,K:1.1,mien:'Miền Nam'},
+  'Nguyễn Đức Chung': {NSO:10,K:1.2},
+  'Hồ Nam': {NSO:13,K:1.3},
+  'Lê Thị Hồng Thu': {NSO:13,K:1.1},
+  'Tạ Công Nhận': {NSO:4,K:1.0},
+  'Phạm Minh Thu': {NSO:4,K:1.0},
+  'Bùi Anh Tuấn': {NSO:2,K:1.2},
+  'Nguyễn Mạnh Sơn': {NSO:20,K:1.5},
+  'Tạ Quốc Huy': {NSO:8,K:1.0},
+  'Nguyễn Duy Đoàn': {NSO:10,K:1.0},
+  'Nguyễn Thị Thu': {NSO:12,K:1.2},
+  'Đặng Văn Dũng': {NSO:9,K:1.0},
+  'Dương Tùng': {NSO:15,K:1.5},
+  'Bùi Thị Thu Nhài': {NSO:6,K:1.0},
+  'Lạc Nhật Minh': {NSO:0,K:1.1},
+  'Nguyễn Năng Toản': {NSO:6,K:1.2},
+  'Nguyễn Thị Yến': {NSO:0,K:1.1},
 };
 
 const GDV_BUDGET = Object.entries(GDV_BUDGET_K).map(([ten, v]) => ({ten, ...v}));
@@ -787,10 +787,7 @@ async function loadStorelist() {
         tinh: iTinh >= 0 && c[iTinh] ? (c[iTinh].v || '') : '',
         mien: (() => {
           const raw = iMien >= 0 && c[iMien] ? (c[iMien].v || '') : '';
-          // Ghi đè từ GDV_BUDGET_K nếu có
-          const override = (GDV_BUDGET_K[gdv]||{}).mien;
-          if (override) return override;
-          if (raw === 'Miền Tây' || raw === 'Miền Nam') return 'Miền Nam';
+          if (raw === 'Miền Tây') return 'Miền Nam';
           return raw;
         })(),
         lat: iLat >= 0 && c[iLat] ? parseFloat(c[iLat].v) : null,
@@ -821,8 +818,7 @@ async function loadStorelist() {
         if (cols.length < 5) continue;
         if (iTT >= 0 && cols[iTT] && !cols[iTT].includes('Đang hoạt động') && !cols[iTT].includes('đang hoạt động')) continue;
         const s = { ma: cols[iMa]||'', ten: cols[iTen]||'', gdv: fixGDV(cols[iGDV]||''),
-          qlkv: cols[iQL]||'', tinh: cols[iTinh]||'',
-          mien: (GDV_BUDGET_K[fixGDV(cols[iGDV]||'')]||{}).mien || cols[iMien]||'',
+          qlkv: cols[iQL]||'', tinh: cols[iTinh]||'', mien: cols[iMien]||'',
           lat: iLat>=0?parseFloat(cols[iLat]):null, lng: iLng>=0?parseFloat(cols[iLng]):null };
         if (!s.ma) continue;
         STORELIST.push(s);
@@ -886,8 +882,8 @@ async function loadFromGAS() {
     if (['CHT-NVCH','QLKV','HCV'].includes(ME.chucVu)) params.maNV = ME.maNV;
   }
   const records = await gasGet('records', params);
-  if (records && records.length) {
-    // Replace local with GAS data (GAS is source of truth)
+  // Always replace with GAS data (even empty array = user deleted all in sheet)
+  if (Array.isArray(records)) {
     records.forEach(r => {
       r.id = Number(r.id) || Date.now();
       r.km = Number(r.km) || 0;
@@ -1545,7 +1541,7 @@ function renderNganSach() {
     const used = usedBudget(d.gdv);
     const rem = Math.max(0, totalBudget * 1e6 - used);
     const pct = totalBudget > 0 ? Math.min(100, (used / (totalBudget * 1e6)) * 100) : 0;
-    return { ten: d.gdv, mien: (kv.mien || d.mien), liveCH: d.ch, NSO: kv.NSO, K: kv.K, totalBudget, used, rem, pct, over: pct >= 100 };
+    return { ten: d.gdv, mien: d.mien, liveCH: d.ch, NSO: kv.NSO, K: kv.K, totalBudget, used, rem, pct, over: pct >= 100 };
   });
 
   // Sort: Miền → tên GĐV
