@@ -51,8 +51,8 @@ header .user{font-size:11px;opacity:.9;margin-top:2px}
 header .logout-btn{position:absolute;top:10px;right:12px;background:rgba(255,255,255,.18);border:none;color:#fff;padding:6px 10px;border-radius:7px;font-size:12px;cursor:pointer}
 
 /* TABS */
-.tabs{display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px}
-.tab{flex:1;min-width:90px;text-align:center;padding:11px 6px;background:var(--card);border:1px solid var(--line);border-radius:10px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;transition:.15s}
+.tabs{display:flex;gap:4px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;flex-wrap:nowrap}
+.tab{flex:1;min-width:fit-content;text-align:center;padding:11px 10px;background:var(--card);border:1px solid var(--line);border-radius:10px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;transition:.15s}
 .tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .tab .badge-count{display:inline-block;background:var(--err);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;font-weight:700}
 .tab.active .badge-count{background:rgba(255,255,255,.3)}
@@ -880,20 +880,19 @@ async function loadFromGAS() {
   }
   const records = await gasGet('records', params);
   if (records && records.length) {
-    // Merge with local: prefer GAS for existing IDs, keep local-only records
-    const localIds = new Set(RECORDS.map(r => String(r.id)));
-    const gasIds = new Set(records.map(r => String(r.id)));
-    // Remove local records that exist in GAS (GAS is source of truth)
-    RECORDS = RECORDS.filter(r => !gasIds.has(String(r.id)));
-    // Add GAS records
+    // Replace local with GAS data (GAS is source of truth)
     records.forEach(r => {
       r.id = Number(r.id) || Date.now();
       r.km = Number(r.km) || 0;
       r.tong = Number(r.tong) || 0;
+      r.ctp = Number(r.ctp) || 0;
+      r.ks = Number(r.ks) || 0;
+      r.xang = Number(r.xang) || 0;
+      r.ve = Number(r.ve) || 0;
     });
-    RECORDS = [...records, ...RECORDS];
+    RECORDS = records;
     save();
-    console.log('Records loaded from GAS:', records.length, 'total:', RECORDS.length);
+    console.log('Records loaded from GAS:', records.length);
   }
 }
 
