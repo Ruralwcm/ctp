@@ -1825,8 +1825,57 @@ function editRecord(id) {
       const total = mv('editCTP') + mv('editKS') + mv('editXang') + mv('editVe');
       const t = document.getElementById('editCalcTotal');
       if (t) t.textContent = total.toLocaleString('vi-VN') + 'đ';
+      // KS max warning
+      editCheckKSMax();
     });
   });
+  // CTP auto-fill from định mức when CV or days change
+  const editCTPInput = document.getElementById('editCTP');
+  if (editCTPInput) { editCTPInput.readOnly = true; editCTPInput.style.background = '#e8f5e9'; editCTPInput.style.color = '#2e7d32'; editCTPInput.style.fontWeight = '700'; }
+  
+  function editAutoFillCTP() {
+    const cv = document.getElementById('editCV')?.value || 'CHT-NVCH';
+    const ngayCTP = +(document.getElementById('editNgayCTP')?.value) || 0;
+    const rate = DM_BY_CHUCVU[cv] || DM_BY_CHUCVU['CHT-NVCH'];
+    // Check same-province / same-day
+    const machVal = document.getElementById('editMach')?.value.trim() || '';
+    const denVal = document.getElementById('editDen')?.value.trim() || '';
+    const maCH = machVal.split(' — ')[0];
+    const maDen = denVal.split(' — ')[0];
+    const sCH = STORELIST.find(s => s.ma === maCH);
+    const sDen = STORELIST.find(s => s.ma === maDen);
+    const sameProvince = sCH && sDen && sCH.tinh && sDen.tinh && sCH.tinh === sDen.tinh;
+    const di = document.getElementById('editNgayDi')?.value, ve = document.getElementById('editNgayVe')?.value;
+    const sameDay = di && ve && di === ve;
+    const ctpTotal = (sameProvince || sameDay) ? 0 : ngayCTP * rate.ctp;
+    const ctpEl = document.getElementById('editCTP');
+    if (ctpEl) ctpEl.value = ctpTotal ? ctpTotal.toLocaleString('vi-VN') : '0';
+    // Recalc total
+    const mv = eid => +(document.getElementById(eid)?.value.replace(/[^\d]/g, '') || 0);
+    const total = mv('editCTP') + mv('editKS') + mv('editXang') + mv('editVe');
+    const t = document.getElementById('editCalcTotal');
+    if (t) t.textContent = total.toLocaleString('vi-VN') + 'đ';
+  }
+  
+  document.getElementById('editCV')?.addEventListener('change', editAutoFillCTP);
+  // Re-trigger on route change
+  function editCheckKSMax() {
+    const cv = document.getElementById('editCV')?.value || 'CHT-NVCH';
+    const ngayKS = +(document.getElementById('editNgayKS')?.value) || 0;
+    const rate = DM_BY_CHUCVU[cv] || DM_BY_CHUCVU['CHT-NVCH'];
+    const maxKS = ngayKS * rate.ks;
+    const ksVal = +(document.getElementById('editKS')?.value.replace(/[^\d]/g, '') || 0);
+    const ksEl = document.getElementById('editKS');
+    if (ksEl && ksVal > maxKS && maxKS > 0) {
+      ksEl.style.borderColor = 'var(--err)';
+      ksEl.title = '⚠️ Vượt định mức tối đa ' + maxKS.toLocaleString() + 'đ';
+    } else if (ksEl) {
+      ksEl.style.borderColor = '';
+      ksEl.title = '';
+    }
+  }
+  document.getElementById('editKS')?.addEventListener('input', editCheckKSMax);
+  
   // Auto days
   ['editNgayDi','editNgayVe'].forEach(id => {
     const el = document.getElementById(id);
@@ -1835,7 +1884,9 @@ function editRecord(id) {
       if (di && ve) {
         const a = new Date(di), b = new Date(ve), diff = Math.round((b-a)/86400000);
         if (diff >= 0) { document.getElementById('editNgayCTP').value = diff+1; document.getElementById('editNgayKS').value = diff; }
+        else { document.getElementById('editNgayVe').value = ''; toast('⚠️ Ngày kết thúc phải ≥ ngày bắt đầu', 'error'); }
       }
+      editAutoFillCTP(); editCheckKSMax();
     });
   });
   $('editModal').classList.add('show');
@@ -1913,6 +1964,9 @@ function saveEdit() {
   if (!ngayVe) { toast('⚠️ Vui lòng nhập Ngày kết thúc', 'error'); return; }
   const km = +(get('editKm')) || 0;
   if (!km) { toast('⚠️ Vui lòng nhập Km', 'error'); return; }
+  const cv = get('editCV');
+  if (km <= 30) { toast('⚠️ ≤ 30km → không hỗ trợ CP (tự túc). Vui lòng kiểm tra lại.', 'error'); return; }
+  if (km > 80 && cv === 'CHT-NVCH') { toast('⚠️ > 80km → chỉ QLKV/đội NSO chuyên trách. Không điều động NVCH.', 'error'); return; }
 
   const machVal = get('editMach').trim();
   const denVal = get('editDen').trim();
