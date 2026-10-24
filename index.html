@@ -519,7 +519,7 @@ const DEFAULT_DM = [
 ];
 
 const GDV_BUDGET = [
-  {ten:"Nguyễn Đức Chung",CH:319,NSO:10,K:1.2,budget:129.0,mien:"Miền Bắc"},
+  {ten:"Nguyễn Đức Chung",CH:319,NSO:10,K:1.2,budget:129.0,mien:"Miền Trung"},
   {ten:"Hồ Nam",CH:266,NSO:13,K:1.3,budget:132.9,mien:"Miền Bắc"},
   {ten:"Lê Thị Hồng Thu",CH:231,NSO:13,K:1.1,budget:103.4,mien:"Miền Bắc"},
   {ten:"Tạ Công Nhận",CH:217,NSO:4,K:1.0,budget:67.5,mien:"Miền Bắc"},
@@ -532,8 +532,8 @@ const GDV_BUDGET = [
   {ten:"Bùi Thị Thu Nhài",CH:94,NSO:6,K:1.0,budget:41.5,mien:"Miền Bắc"},
   {ten:"Bùi Anh Tuấn",CH:184,NSO:2,K:1.2,budget:65.7,mien:"Miền Trung"},
   {ten:"Nguyễn Thị Thu",CH:146,NSO:12,K:1.2,budget:83.7,mien:"Miền Trung"},
-  {ten:"Nguyễn Năng Toản",CH:85,NSO:6,K:1.2,budget:47.4,mien:"Miền Trung"},
-  {ten:"Nguyễn Thị Yến",CH:66,NSO:0,K:1.1,budget:21.5,mien:"Miền Trung"},
+  {ten:"Nguyễn Năng Toản",CH:85,NSO:6,K:1.2,budget:47.4,mien:"Miền Nam"},
+  {ten:"Nguyễn Thị Yến",CH:66,NSO:0,K:1.1,budget:21.5,mien:"Miền Nam"},
   {ten:"Lạc Nhật Minh",CH:96,NSO:0,K:1.1,budget:30.0,mien:"Miền Nam"},
 ];
 
@@ -724,13 +724,16 @@ async function loadStorelist() {
       if (tt && !tt.includes('Đang hoạt động') && !tt.includes('đang hoạt động')) return;
       const ma = iMa >= 0 && c[iMa] ? String(c[iMa].v || '') : '';
       if (!ma) return;
+      const gdv = fixGDV(iGDV >= 0 && c[iGDV] ? (c[iGDV].v || '') : '');
+      const gdvBudget = GDV_BUDGET.find(g => g.ten === gdv);
+      const mien = gdvBudget ? gdvBudget.mien : (iMien >= 0 && c[iMien] ? (c[iMien].v || '') : '');
       STORELIST.push({
         ma: ma,
         ten: iTen >= 0 && c[iTen] ? (c[iTen].v || '') : '',
-        gdv: fixGDV(iGDV >= 0 && c[iGDV] ? (c[iGDV].v || '') : ''),
+        gdv: gdv,
         qlkv: iQL >= 0 && c[iQL] ? (c[iQL].v || '') : '',
         tinh: iTinh >= 0 && c[iTinh] ? (c[iTinh].v || '') : '',
-        mien: iMien >= 0 && c[iMien] ? (c[iMien].v || '') : '',
+        mien: mien,
         lat: iLat >= 0 && c[iLat] ? parseFloat(c[iLat].v) : null,
         lng: iLng >= 0 && c[iLng] ? parseFloat(c[iLng].v) : null
       });
