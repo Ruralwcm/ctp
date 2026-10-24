@@ -1764,22 +1764,26 @@ function editRecord(id) {
   if (!r) return;
   _editId = id;
   $('editContent').innerHTML = `
-    <label>Họ và tên</label><input id="editTen" value="${r.ten||''}">
-    <label>Chức vụ</label><select id="editCV">
+    <label>Mã NV</label><input id="editMaNV" value="${r.maNV||''}">
+    <label>Họ và tên *</label><input id="editTen" value="${r.ten||''}">
+    <label>Chức vụ *</label><select id="editCV">
       <option value="CHT-NVCH" ${r.chucVu==='CHT-NVCH'?'selected':''}>CHT-NVCH</option>
       <option value="QLKV" ${r.chucVu==='QLKV'?'selected':''}>QLKV</option>
       <option value="HCV" ${r.chucVu==='HCV'?'selected':''}>HCV</option>
       <option value="GĐV" ${r.chucVu==='GĐV'?'selected':''}>GĐV</option>
       <option value="GĐM" ${r.chucVu==='GĐM'?'selected':''}>GĐM</option>
     </select>
-    <label>Ngày đi</label><input id="editNgayDi" type="date" value="${r.ngayDi||''}">
-    <label>Ngày về</label><input id="editNgayVe" type="date" value="${r.ngayVe||''}">
-    <label>Km</label><input id="editKm" type="number" value="${r.km||0}">
+    <label>Mã CH đi</label><input id="editMaCH" value="${r.maCH||''}">
+    <label>Mã CH đến</label><input id="editDenMA" value="${r.denMA||''}">
+    <label>PT</label><input id="editPT" value="${r.pt||''}">
+    <label>Km *</label><input id="editKm" type="number" value="${r.km||0}">
+    <label>Ngày đi *</label><input id="editNgayDi" type="date" value="${r.ngayDi||''}">
+    <label>Ngày về *</label><input id="editNgayVe" type="date" value="${r.ngayVe||''}">
     <label>CTP (tổng)</label><input id="editCTP" type="text" inputmode="numeric" value="${(r.ctp||0).toLocaleString('vi-VN')}">
     <label>KS (tổng)</label><input id="editKS" type="text" inputmode="numeric" value="${(r.ks||0).toLocaleString('vi-VN')}">
     <label>Xăng</label><input id="editXang" type="text" inputmode="numeric" value="${(r.xang||0).toLocaleString('vi-VN')}">
     <label>Vé</label><input id="editVe" type="text" inputmode="numeric" value="${(r.ve||0).toLocaleString('vi-VN')}">
-    <label>Lý do / Ghi chú</label><input id="editGhiChu" value="${r.ghiChu||''}">
+    <label>Lý do</label><input id="editGhiChu" value="${r.ghiChu||''}">
   `;
   $('editModal').classList.add('show');
 }
@@ -1790,24 +1794,38 @@ function saveEdit() {
   const r = RECORDS.find(x => x.id === _editId);
   if (!r) return;
   const moneyVal = el => +(el.value.replace(/[^\d]/g, '')) || 0;
-  r.ten = $('editTen').value.trim();
+
+  const ten = $('editTen').value.trim();
+  if (!ten) { toast('⚠️ Vui lòng nhập Họ và tên', 'error'); return; }
+  const ngayDi = $('editNgayDi').value;
+  if (!ngayDi) { toast('⚠️ Vui lòng nhập Ngày đi', 'error'); return; }
+  const ngayVe = $('editNgayVe').value;
+  if (!ngayVe) { toast('⚠️ Vui lòng nhập Ngày về', 'error'); return; }
+  const km = +($('editKm').value) || 0;
+  if (!km) { toast('⚠️ Vui lòng nhập Km', 'error'); return; }
+
+  r.maNV = $('editMaNV').value.trim();
+  r.ten = ten;
   r.chucVu = $('editCV').value;
-  r.ngayDi = $('editNgayDi').value;
-  r.ngayVe = $('editNgayVe').value;
-  r.km = +($('editKm').value) || 0;
+  r.maCH = $('editMaCH').value.trim();
+  r.denMA = $('editDenMA').value.trim();
+  r.pt = $('editPT').value.trim();
+  r.km = km;
+  r.ngayDi = ngayDi;
+  r.ngayVe = ngayVe;
   r.ctp = moneyVal($('editCTP'));
   r.ks = moneyVal($('editKS'));
   r.xang = moneyVal($('editXang'));
   r.ve = moneyVal($('editVe'));
   r.ghiChu = $('editGhiChu').value.trim();
-  // Recalculate
+
   if (r.ngayDi && r.ngayVe) {
     const a = new Date(r.ngayDi), b = new Date(r.ngayVe);
     r.soNgay = Math.round((b - a) / 86400000) + 1;
     r.soNgayKS = Math.round((b - a) / 86400000);
   }
   r.tong = (r.ctp||0) + (r.ks||0) + (r.xang||0) + (r.ve||0);
-  r.updatedAt = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
+  r.updatedAt = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' })).toISOString().slice(0, 19).replace('T', ' ');
   r.updatedBy = ME ? ME.ten : '';
   save();
   if (USE_GAS && GAS_URL) { gasPost('submit', r); }
