@@ -518,24 +518,26 @@ const DEFAULT_DM = [
   {vung:'Tây Nam Bộ',ctpNV:180000,ksNV:400000,ctpQL:220000,ksQL:500000,ctpHC:270000,ksHC:550000,ctpGDV:270000,ksGDV:600000,ctpGDM:350000,ksGDM:700000,note:'Long An, Tiền Giang, Bến Tre, Trà Vinh, Vĩnh Long, Đồng Tháp, Cần Thơ, Sóc Trăng, Bạc Liêu, Cà Mau, Kiên Giang'},
 ];
 
-const GDV_BUDGET = [
-  {ten:"Nguyễn Đức Chung",CH:319,NSO:10,K:1.2,budget:129.0,mien:"Miền Trung"},
-  {ten:"Hồ Nam",CH:266,NSO:13,K:1.3,budget:132.9,mien:"Miền Bắc"},
-  {ten:"Lê Thị Hồng Thu",CH:231,NSO:13,K:1.1,budget:103.4,mien:"Miền Bắc"},
-  {ten:"Tạ Công Nhận",CH:217,NSO:4,K:1.0,budget:67.5,mien:"Miền Bắc"},
-  {ten:"Phạm Minh Thu",CH:192,NSO:4,K:1.0,budget:61.3,mien:"Miền Bắc"},
-  {ten:"Nguyễn Mạnh Sơn",CH:163,NSO:20,K:1.5,budget:141.4,mien:"Miền Bắc"},
-  {ten:"Tạ Quốc Huy",CH:164,NSO:8,K:1.0,budget:64.3,mien:"Miền Bắc"},
-  {ten:"Nguyễn Duy Đoàn",CH:151,NSO:10,K:1.0,budget:66.5,mien:"Miền Bắc"},
-  {ten:"Đặng Văn Dũng",CH:146,NSO:9,K:1.0,budget:62.0,mien:"Miền Bắc"},
-  {ten:"Dương Tùng",CH:90,NSO:15,K:1.5,budget:94.5,mien:"Miền Bắc"},
-  {ten:"Bùi Thị Thu Nhài",CH:94,NSO:6,K:1.0,budget:41.5,mien:"Miền Bắc"},
-  {ten:"Bùi Anh Tuấn",CH:184,NSO:2,K:1.2,budget:65.7,mien:"Miền Trung"},
-  {ten:"Nguyễn Thị Thu",CH:146,NSO:12,K:1.2,budget:83.7,mien:"Miền Trung"},
-  {ten:"Nguyễn Năng Toản",CH:85,NSO:6,K:1.2,budget:47.4,mien:"Miền Nam"},
-  {ten:"Nguyễn Thị Yến",CH:66,NSO:0,K:1.1,budget:21.5,mien:"Miền Nam"},
-  {ten:"Lạc Nhật Minh",CH:96,NSO:0,K:1.1,budget:30.0,mien:"Miền Nam"},
-];
+const GDV_BUDGET_K = {
+  'Nguyễn Đức Chung': {NSO:10,K:1.2},
+  'Hồ Nam': {NSO:13,K:1.3},
+  'Lê Thị Hồng Thu': {NSO:13,K:1.1},
+  'Tạ Công Nhận': {NSO:4,K:1.0},
+  'Phạm Minh Thu': {NSO:4,K:1.0},
+  'Bùi Anh Tuấn': {NSO:2,K:1.2},
+  'Nguyễn Mạnh Sơn': {NSO:20,K:1.5},
+  'Tạ Quốc Huy': {NSO:8,K:1.0},
+  'Nguyễn Duy Đoàn': {NSO:10,K:1.0},
+  'Nguyễn Thị Thu': {NSO:12,K:1.2},
+  'Đặng Văn Dũng': {NSO:9,K:1.0},
+  'Dương Tùng': {NSO:15,K:1.5},
+  'Bùi Thị Thu Nhài': {NSO:6,K:1.0},
+  'Lạc Nhật Minh': {NSO:0,K:1.1},
+  'Nguyễn Năng Toản': {NSO:6,K:1.2},
+  'Nguyễn Thị Yến': {NSO:0,K:1.1},
+};
+
+const GDV_BUDGET = Object.entries(GDV_BUDGET_K).map(([ten, v]) => ({ten, ...v}));
 
 const DEFAULT_NV = [
   {maNV:"NV001",ten:"Nguyễn Văn A",chucVu:"CHT-NVCH",gdv:"Hồ Nam",maCH:"2797",tenCH:"WM+ HN 2797",tinh:"Hà Nội",huyen:"Hoàn Kiếm",qlkv:"Nguyễn Văn QL1"},
@@ -725,15 +727,13 @@ async function loadStorelist() {
       const ma = iMa >= 0 && c[iMa] ? String(c[iMa].v || '') : '';
       if (!ma) return;
       const gdv = fixGDV(iGDV >= 0 && c[iGDV] ? (c[iGDV].v || '') : '');
-      const gdvBudget = GDV_BUDGET.find(g => g.ten === gdv);
-      const mien = gdvBudget ? gdvBudget.mien : (iMien >= 0 && c[iMien] ? (c[iMien].v || '') : '');
       STORELIST.push({
         ma: ma,
         ten: iTen >= 0 && c[iTen] ? (c[iTen].v || '') : '',
         gdv: gdv,
         qlkv: iQL >= 0 && c[iQL] ? (c[iQL].v || '') : '',
         tinh: iTinh >= 0 && c[iTinh] ? (c[iTinh].v || '') : '',
-        mien: mien,
+        mien: iMien >= 0 && c[iMien] ? (c[iMien].v || '') : '',
         lat: iLat >= 0 && c[iLat] ? parseFloat(c[iLat].v) : null,
         lng: iLng >= 0 && c[iLng] ? parseFloat(c[iLng].v) : null
       });
@@ -1212,8 +1212,13 @@ function liveValid() {
   if (gdvName) {
     const b = gdvBudget(gdvName);
     if (b) {
+      const norm2 = s => (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+      const gKey = norm2(gdvName);
+      let liveCH = 0;
+      STORELIST.forEach(s => { if (norm2(s.gdv) === gKey) liveCH++; });
+      const autoBudget = (liveCH * b.K * 150000 * 2 + (b.NSO||0) * 1500000);
       const used = usedBudget(gdvName);
-      const rem = b.budget * 1e6 - used;
+      const rem = autoBudget - used;
       if (total > rem) {
         w.push('🔴 Vượt ngân sách GĐV còn lại (' + fmtTr(rem / 1e6) + ' tr). Cần duyệt ngoại lệ.');
       }
@@ -1430,30 +1435,45 @@ function renderTienDo() {
 };
 
 function renderNganSach() {
-  // Fuzzy match: bỏ dấu, lowercase, chỉ giữ a-z0-9, bỏ ký tự rác do Storelist lỗi font
+  // Auto-generate từ Storelist: đếm CH + Miền theo GĐV
   const norm = s => (s||'').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g,'d')
     .replace(/[^a-z0-9 ]/g, '').replace(/\s+/g,' ').trim();
-  
-  const gdvCH = {};
+
+  // Đếm CH và lấy Miền (majority) từ Storelist
+  const gdvData = {}; // key: norm tên → { gdv, ch, mien (majority), miens: {} }
   STORELIST.forEach(s => {
     const key = norm(s.gdv || '');
-    if (key.length > 2) gdvCH[key] = (gdvCH[key] || 0) + 1;
+    if (key.length <= 2) return;
+    if (!gdvData[key]) gdvData[key] = { gdv: s.gdv, ch: 0, miens: {} };
+    gdvData[key].ch++;
+    const m = s.mien || '—';
+    gdvData[key].miens[m] = (gdvData[key].miens[m] || 0) + 1;
   });
 
-  const nsRows = GDV_BUDGET.map(g => {
-    const key = norm(g.ten);
-    // Nếu match được >0 thì dùng live count, ko thì fallback hardcode
-    const liveCH = (gdvCH[key] > 0) ? gdvCH[key] : g.CH;
-    const baseBudget = liveCH * g.K * 150000 * 2;
-    const nsoBudget = (g.NSO || 0) * 1500000;
+  // Tạo rows từ GDV_BUDGET_K, match với Storelist
+  const nsRows = [];
+  Object.entries(GDV_BUDGET_K).forEach(([ten, v]) => {
+    const key = norm(ten);
+    const live = gdvData[key];
+    const liveCH = live ? live.ch : 0;
+    // Majority Miền
+    let mien = '—';
+    if (live) {
+      const sorted = Object.entries(live.miens).sort((a,b) => b[1] - a[1]);
+      mien = sorted.length > 0 ? sorted[0][0] : '—';
+    }
+    const baseBudget = liveCH * v.K * 150000 * 2;
+    const nsoBudget = (v.NSO || 0) * 1500000;
     const totalBudget = Math.round((baseBudget + nsoBudget) / 1e6 * 10) / 10;
-    const used = usedBudget(g.ten);
+    const used = usedBudget(ten);
     const rem = Math.max(0, totalBudget * 1e6 - used);
     const pct = totalBudget > 0 ? Math.min(100, (used / (totalBudget * 1e6)) * 100) : 0;
-    const over = pct >= 100;
-    return { ...g, liveCH, totalBudget, used, rem, pct, over };
-  }).sort((a, b) => {
+    nsRows.push({ ten, ...v, liveCH, mien, totalBudget, used, rem, pct, over: pct >= 100 });
+  });
+
+  // Sort: Miền → ngân sách giảm dần
+  nsRows.sort((a, b) => {
     if (a.mien !== b.mien) return (a.mien||'').localeCompare(b.mien||'');
     return b.totalBudget - a.totalBudget;
   });
@@ -1496,7 +1516,7 @@ function renderNganSach() {
       const mienId = 'ns-mien-' + (g.mien||'').replace(/[^a-zA-Z]/g,'');
       rowsHtml += `<tr class="ns-gdv-row ns-mien-${mienId}" style="white-space:nowrap">
         <td style="padding-left:24px">${g.ten}</td>
-        <td class="text-right">${g.liveCH}${g.liveCH !== g.CH ? ' <span style="color:var(--warn);font-size:10px">≠'+g.CH+'</span>' : ''}</td>
+        <td class="text-right">${g.liveCH}</td>
         <td class="text-right">${g.NSO}</td>
         <td class="text-right" style="padding:2px 4px"><input type="number" step="0.1" min="0.5" max="2.0" value="${g.K}" style="width:42px;padding:3px;text-align:center;font-size:12px;font-weight:700;color:var(--blue);border:1px solid var(--line);border-radius:4px" onchange="updateK('${g.ten}', this.value)"></td>
         <td class="text-right" style="font-weight:700">${g.totalBudget.toFixed(1)}</td>
