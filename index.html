@@ -785,7 +785,11 @@ async function loadStorelist() {
         gdv: gdv,
         qlkv: iQL >= 0 && c[iQL] ? (c[iQL].v || '') : '',
         tinh: iTinh >= 0 && c[iTinh] ? (c[iTinh].v || '') : '',
-        mien: iMien >= 0 && c[iMien] ? (c[iMien].v || '') : '',
+        mien: (() => {
+          const raw = iMien >= 0 && c[iMien] ? (c[iMien].v || '') : '';
+          if (raw === 'Miền Tây') return 'Miền Nam';
+          return raw;
+        })(),
         lat: iLat >= 0 && c[iLat] ? parseFloat(c[iLat].v) : null,
         lng: iLng >= 0 && c[iLng] ? parseFloat(c[iLng].v) : null
       });
@@ -814,7 +818,7 @@ async function loadStorelist() {
         if (cols.length < 5) continue;
         if (iTT >= 0 && cols[iTT] && !cols[iTT].includes('Đang hoạt động') && !cols[iTT].includes('đang hoạt động')) continue;
         const s = { ma: cols[iMa]||'', ten: cols[iTen]||'', gdv: fixGDV(cols[iGDV]||''),
-          qlkv: cols[iQL]||'', tinh: cols[iTinh]||'', mien: cols[iMien]||'',
+          qlkv: cols[iQL]||'', tinh: cols[iTinh]||'', mien: (cols[iMien]==='Miền Tây'?'Miền Nam':cols[iMien]||''),
           lat: iLat>=0?parseFloat(cols[iLat]):null, lng: iLng>=0?parseFloat(cols[iLng]):null };
         if (!s.ma) continue;
         STORELIST.push(s);
