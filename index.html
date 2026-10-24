@@ -757,7 +757,11 @@ async function loadStorelist() {
         gdv: gdv,
         qlkv: iQL >= 0 && c[iQL] ? (c[iQL].v || '') : '',
         tinh: iTinh >= 0 && c[iTinh] ? (c[iTinh].v || '') : '',
-        mien: iMien >= 0 && c[iMien] ? (c[iMien].v || '') : '',
+        mien: (() => {
+          const raw = iMien >= 0 && c[iMien] ? (c[iMien].v || '') : '';
+          if (raw === 'Miền Tây' || raw === 'Miền Nam') return 'Miền Nam';
+          return raw;
+        })(),
         lat: iLat >= 0 && c[iLat] ? parseFloat(c[iLat].v) : null,
         lng: iLng >= 0 && c[iLng] ? parseFloat(c[iLng].v) : null
       });
@@ -1572,15 +1576,17 @@ function renderNganSach() {
 }
 
 function toggleMien(mienId) {
-  const rows = $$('.ns-mien-' + mienId.replace(/[^a-zA-Z0-9-]/g,''));
+  const selector = '.ns-mien-' + mienId.replace(/[^a-zA-Z0-9-]/g,'');
+  const rows = document.querySelectorAll(selector);
+  if (rows.length === 0) return;
+  const hidden = rows[0].classList.contains('hidden');
+  rows.forEach(r => r.classList.toggle('hidden', !hidden));
   const header = document.querySelector('[onclick*="toggleMien(\'' + mienId + '\')"]');
-  const hidden = rows.length > 0 && rows[0].classList.toggle('hidden');
   if (header) {
-    header.style.opacity = hidden ? '0.7' : '1';
-    header.querySelector('td').textContent = header.querySelector('td').textContent.replace(/^[▶▼] /, hidden ? '▶ ' : '▼ ');
+    header.style.opacity = hidden ? '1' : '0.7';
+    const td = header.querySelector('td');
+    if (td) td.textContent = td.textContent.replace(/^[▶▼] /, hidden ? '▼ ' : '▶ ');
   }
-  // hide all rows with matching class
-  $$('.ns-mien-' + mienId.replace(/[^a-zA-Z0-9-]/g,'')).forEach(r => r.classList.toggle('hidden'));
 }
 
 function updateK(name, val) {
