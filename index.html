@@ -474,7 +474,7 @@ tr:hover td{background:#f8f9ff}
     <div class="card">
       <h3>💰 Ngân sách CTP theo GĐV <span style="font-size:12px;color:var(--muted);font-weight:400">(tự động từ Storelist — số CH × Hệ số K × ĐM)</span></h3>
       <div class="kpis" id="nsKpis" style="margin-bottom:12px"></div>
-      <div class="table-wrap"><table>
+      <div class="table-wrap"><table id="nganSachTableFull">
         <thead><tr><th>Miền / GĐV</th><th class="text-right">CH</th><th class="text-right">NSO</th><th class="text-right">K</th><th class="text-right">NS (tr)</th><th class="text-right">Đã dùng</th><th class="text-right">Còn</th><th class="text-right">%</th></tr></thead>
         <tbody id="nganSachTable"></tbody>
         <tfoot id="nganSachFoot"></tfoot>
@@ -528,12 +528,12 @@ const GDV_BUDGET = [
   {ten:"Nguyễn Mạnh Sơn",CH:165,NSO:20,K:1.5,budget:141.4,mien:"Miền Bắc"},
   {ten:"Tạ Quốc Huy",CH:165,NSO:8,K:1.0,budget:64.3,mien:"Miền Bắc"},
   {ten:"Nguyễn Duy Đoàn",CH:154,NSO:10,K:1.0,budget:66.5,mien:"Miền Bắc"},
-  {ten:"Nguyễn Thị Thu",CH:147,NSO:12,K:1.2,budget:83.7,mien:"Miền Nam"},
   {ten:"Đặng Văn Dũng",CH:146,NSO:9,K:1.0,budget:62.0,mien:"Miền Bắc"},
   {ten:"Dương Tùng",CH:90,NSO:15,K:1.5,budget:94.5,mien:"Miền Bắc"},
   {ten:"Bùi Thị Thu Nhài",CH:94,NSO:6,K:1.0,budget:41.5,mien:"Miền Bắc"},
+  {ten:"Nguyễn Năng Toản",CH:86,NSO:6,K:1.2,budget:47.4,mien:"Miền Trung"},
+  {ten:"Nguyễn Thị Thu",CH:147,NSO:12,K:1.2,budget:83.7,mien:"Miền Trung"},
   {ten:"Lạc Nhật Minh",CH:97,NSO:0,K:1.1,budget:30.0,mien:"Miền Nam"},
-  {ten:"Nguyễn Năng Toản",CH:86,NSO:6,K:1.2,budget:47.4,mien:"Miền Nam"},
   {ten:"Nguyễn Thị Yến",CH:66,NSO:0,K:1.1,budget:21.5,mien:"Miền Nam"},
 ];
 
@@ -1407,15 +1407,16 @@ function renderNganSach() {
     let rowsHtml = '';
     nsRows.forEach(g => {
       const over = g.pct >= 100;
+      const gdvId = 'ns-' + g.ten.replace(/[^a-zA-Z]/g,'');
       if (g.mien && g.mien !== lastMien) {
-        // Miền header row
         const mienRows = nsRows.filter(r => r.mien === g.mien);
         const mTotalBudget = mienRows.reduce((s,r) => s + r.totalBudget, 0);
         const mUsed = mienRows.reduce((s,r) => s + r.used, 0);
         const mRem = mienRows.reduce((s,r) => s + Math.max(0, r.rem), 0);
         const mPct = mTotalBudget > 0 ? (mUsed / (mTotalBudget * 1e6)) * 100 : 0;
-        rowsHtml += `<tr style="background:var(--blue);color:#fff;font-weight:700;white-space:nowrap">
-          <td>📍 ${g.mien} (${mienRows.length} GĐV)</td>
+        const mienId = 'ns-mien-' + g.mien.replace(/[^a-zA-Z]/g,'');
+        rowsHtml += `<tr class="ns-mien-header" onclick="toggleMien('${mienId}')" style="background:var(--blue);color:#fff;font-weight:700;white-space:nowrap;cursor:pointer">
+          <td>▶ ${g.mien} (${mienRows.length} GĐV)</td>
           <td class="text-right">${mienRows.reduce((s,r)=>s+r.liveCH,0)}</td>
           <td class="text-right">${mienRows.reduce((s,r)=>s+r.NSO,0)}</td>
           <td class="text-right">—</td>
@@ -1426,7 +1427,8 @@ function renderNganSach() {
         </tr>`;
         lastMien = g.mien;
       }
-      rowsHtml += `<tr style="white-space:nowrap">
+      const mienId = 'ns-mien-' + (g.mien||'').replace(/[^a-zA-Z]/g,'');
+      rowsHtml += `<tr class="ns-gdv-row ns-mien-${mienId}" style="white-space:nowrap">
         <td style="padding-left:24px">${g.ten}</td>
         <td class="text-right">${g.liveCH}${g.liveCH !== g.CH ? ' <span style="color:var(--warn);font-size:10px">≠'+g.CH+'</span>' : ''}</td>
         <td class="text-right">${g.NSO}</td>
@@ -1453,6 +1455,18 @@ function renderNganSach() {
     <td class="text-right">${(totalRem/1e6).toFixed(1)}</td>
     <td class="text-right">${totalBudget>0?(totalUsed/(totalBudget*1e6)*100).toFixed(0):0}%</td>
   </tr>`;
+}
+
+function toggleMien(mienId) {
+  const rows = $$('.ns-mien-' + mienId.replace(/[^a-zA-Z0-9-]/g,''));
+  const header = document.querySelector('[onclick*="toggleMien(\'' + mienId + '\')"]');
+  const hidden = rows.length > 0 && rows[0].classList.toggle('hidden');
+  if (header) {
+    header.style.opacity = hidden ? '0.7' : '1';
+    header.querySelector('td').textContent = header.querySelector('td').textContent.replace(/^[▶▼] /, hidden ? '▶ ' : '▼ ');
+  }
+  // hide all rows with matching class
+  $$('.ns-mien-' + mienId.replace(/[^a-zA-Z0-9-]/g,'')).forEach(r => r.classList.toggle('hidden'));
 }
 
 function updateK(name, val) {
