@@ -785,11 +785,7 @@ async function loadStorelist() {
         gdv: gdv,
         qlkv: iQL >= 0 && c[iQL] ? (c[iQL].v || '') : '',
         tinh: iTinh >= 0 && c[iTinh] ? (c[iTinh].v || '') : '',
-        mien: (() => {
-          const raw = iMien >= 0 && c[iMien] ? (c[iMien].v || '') : '';
-          if (raw === 'Miền Tây') return 'Miền Nam';
-          return raw;
-        })(),
+        mien: iMien >= 0 && c[iMien] ? (c[iMien].v || '') : '',
         lat: iLat >= 0 && c[iLat] ? parseFloat(c[iLat].v) : null,
         lng: iLng >= 0 && c[iLng] ? parseFloat(c[iLng].v) : null
       });
