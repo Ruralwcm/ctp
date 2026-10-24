@@ -1370,15 +1370,19 @@ function renderTienDo() {
 };
 
 function renderNganSach() {
-  // Tự động tính ngân sách từ Storelist live: đếm số CH theo GĐV × hệ số K × định mức
+  // Fuzzy match GĐV name: bỏ dấu, lowercase để khớp tên Storelist
+  const norm = s => (s||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g,'d').replace(/[^a-z0-9 ]/g,'').trim();
+  
   const gdvCH = {};
   STORELIST.forEach(s => {
-    const g = s.gdv || '—';
-    gdvCH[g] = (gdvCH[g] || 0) + 1;
+    const key = norm(s.gdv || '—');
+    gdvCH[key] = (gdvCH[key] || 0) + 1;
   });
 
   const nsRows = GDV_BUDGET.map(g => {
-    const liveCH = gdvCH[g.ten] || g.CH;
+    const key = norm(g.ten);
+    const liveCH = gdvCH[key] || g.CH;
     const baseBudget = liveCH * g.K * 150000 * 2;
     const nsoBudget = (g.NSO || 0) * 1500000;
     const totalBudget = Math.round((baseBudget + nsoBudget) / 1e6 * 10) / 10;
