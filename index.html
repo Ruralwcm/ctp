@@ -43,7 +43,7 @@ textarea{resize:vertical;min-height:64px}
 .btn-block{width:100%}
 
 /* APP */
-#app{max-width:720px;margin:0 auto;padding:12px 12px 90px}
+#app{max-width:1100px;margin:0 auto;padding:16px 20px 100px}
 header{background:linear-gradient(135deg,var(--blue),#2f5496);color:#fff;border-radius:0 0 10px 10px;padding:10px 14px;margin-bottom:10px;position:sticky;top:0;z-index:100}
 header .title{font-size:17px;font-weight:800}
 header .user{font-size:11px;opacity:.9;margin-top:2px}
@@ -144,13 +144,14 @@ tr:hover td{background:#f8f9ff}
 .toast.error{background:var(--err)}
 
 /* MOBILE */
-@media(max-width:600px){
+@media(max-width:768px){
   .row{flex-direction:column;gap:0}
   .row.col3{grid-template-columns:1fr 1fr}
   .row [style*="grid-template-columns:repeat(4"]{grid-template-columns:1fr 1fr!important}
+  .row [style*="grid-template-columns:repeat(3"]{grid-template-columns:1fr 1fr!important}
   .tabs{font-size:12px}
   .tab{padding:10px 4px;font-size:12px;min-width:70px}
-  #app{padding:6px 6px 90px}
+  #app{padding:8px 8px 90px;max-width:100%}
   .card{padding:10px;margin-bottom:8px}
   input,select,textarea{font-size:14px;padding:8px 9px}
   label{font-size:10px}
