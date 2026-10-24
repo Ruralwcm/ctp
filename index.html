@@ -207,9 +207,9 @@ tr:hover td{background:#f8f9ff}
   <!-- ADMIN TABS (hidden until login) -->
   <div class="tabs hidden" id="adminTabs">
     <div class="tab" data-tab="khaibao" onclick="switchAdminTab('khaibao')">📝 Khai báo</div>
-    <div class="tab" data-tab="dinhmuc" onclick="switchAdminTab('dinhmuc')">📐 Định mức</div>
-    <div class="tab" data-tab="pd" onclick="switchAdminTab('pd')">✅ Phê duyệt <span class="badge-count" id="pdBadge" style="display:none">0</span></div>
     <div class="tab" data-tab="dashboard" onclick="switchAdminTab('dashboard')">📊 Tổng kết</div>
+    <div class="tab" data-tab="pd" onclick="switchAdminTab('pd')">✅ Phê duyệt <span class="badge-count" id="pdBadge" style="display:none">0</span></div>
+    <div class="tab" data-tab="dinhmuc" onclick="switchAdminTab('dinhmuc')">📐 Định mức</div>
   </div>
 
   <!-- ========== TAB: KHAI BÁO ========== -->
@@ -1055,7 +1055,7 @@ function lockDateRange() {
   if (di) {
     $('f-ngayve').setAttribute('min', di);
     // Ngày kết thúc max = ngày bắt đầu + 90 ngày
-    const maxVe = new Date(di); maxVe.setDate(maxVe.getDate() + 90);
+    const maxVe = new Date(di); maxVe.setDate(maxVe.getDate() + 30);
     $('f-ngayve').setAttribute('max', fmt(maxVe));
   } else {
     $('f-ngayve').removeAttribute('min');
@@ -1211,6 +1211,7 @@ function submitKB() {
   rec.id = Date.now();
   rec.nguoiTao = ME ? ME.maNV : manv;
   rec.ngayTao = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  rec.tracklog = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
 
   RECORDS.unshift(rec);
   save();
