@@ -199,16 +199,10 @@ tr:hover td{background:#f8f9ff}
 <!-- ========== MAIN APP ========== -->
 <div id="app">
   <header>
-    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v2.16</span></div>
+    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v2.15</span></div>
     <div class="user" id="userLine"></div>
-    <button class="logout-btn" id="headerLoginBtn" onclick="toggleView()">📊 Tổng kết</button>
+    <button class="logout-btn" id="headerLoginBtn" onclick="showLogin()">📊 Dashboard</button>
   </header>
-
-  <!-- PUBLIC TABS (no login needed) -->
-  <div class="tabs" id="publicTabs">
-    <div class="tab active" data-tab="khaibao" onclick="switchPublicTab('khaibao')">📝 Khai báo</div>
-    <div class="tab" data-tab="dashboard" onclick="switchPublicTab('dashboard')">📊 Tổng kết</div>
-  </div>
 
   <!-- ADMIN TABS (hidden until login) -->
   <div class="tabs hidden" id="adminTabs">
@@ -620,7 +614,6 @@ function doLogin() {
   $('headerLoginBtn').innerHTML = '↪ Đăng xuất';
   $('headerLoginBtn').onclick = doLogout;
   $('headerLoginBtn').style.background = 'rgba(255,255,255,.18)';
-  $('publicTabs').classList.add('hidden');
   $('adminTabs').classList.remove('hidden');
   $('tab-kb').classList.add('hidden');
   switchAdminTab('khaibao');
@@ -632,14 +625,12 @@ function doLogout() {
   sessionStorage.removeItem(K_SESSION);
   ME = null;
   $('userLine').innerHTML = '';
-  $('headerLoginBtn').innerHTML = '📊 Tổng kết';
-  $('headerLoginBtn').onclick = toggleView;
+  $('headerLoginBtn').innerHTML = '📊 Dashboard';
+  $('headerLoginBtn').onclick = showLogin;
   $('headerLoginBtn').style.background = 'rgba(255,255,255,.18)';
   $('adminTabs').classList.add('hidden');
-  $('publicTabs').classList.remove('hidden');
   hideAllAdminTabs();
   $('tab-kb').classList.remove('hidden');
-  switchPublicTab('khaibao');
   renderAll();
   toast('Đã đăng xuất');
 }
@@ -656,22 +647,11 @@ function doLogout() {
 })();
 
 // =================== TABS ===================
-function switchPublicTab(k) {
-  $$('#publicTabs .tab').forEach(t => t.classList.toggle('active', t.dataset.tab === k));
-  if (k === 'khaibao') { $('tab-kb').classList.remove('hidden'); $('tab-dashboard').classList.add('hidden'); }
-  if (k === 'dashboard') { $('tab-kb').classList.add('hidden'); $('tab-dashboard').classList.remove('hidden'); repaintDashboard(); }
-}
-
-function toggleView() {
-  if (ME) { doLogout(); return; }
-  // Toggle to Dashboard view (no login needed)
-  switchPublicTab('dashboard');
-}
-
 function switchAdminTab(k) {
   if (!ME) { showLogin(); return; }
   $$('#adminTabs .tab').forEach(t => t.classList.toggle('active', t.dataset.tab === k));
   hideAllAdminTabs();
+  // Hide standalone #tab-kb when in admin mode, show only if Khai báo tab selected
   $('tab-kb').classList.toggle('hidden', k !== 'khaibao');
   if (k === 'khaibao') { renderTienDo(); }
   if (k === 'dinhmuc') { $('tab-dinhmuc').classList.remove('hidden'); renderDM(); }
