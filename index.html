@@ -546,7 +546,7 @@ const DEFAULT_NV = [
   {maNV:"GDM001",ten:"Trần Đăng Hảo",chucVu:"GĐM",gdv:"*",maCH:"",tenCH:"",tinh:"",huyen:"",qlkv:""},
 ];
 
-const STORELIST_URL = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:csv&gid=900581387';
+const STORELIST_URL = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:json&gid=900581387';
 
 // =================== STATE ===================
 const K_RECORDS = 'ctp_records_v4', K_SESSION = 'ctp_session_v4', K_NV = 'ctp_nvdb_v2', K_DM = 'ctp_dm_v2';
@@ -681,36 +681,93 @@ function hideAllAdminTabs() {
 // =================== STORELIST LOAD ===================
 async function loadStorelist() {
   try {
-    const resp = await fetch(STORELIST_URL);
-    const csv = await resp.text();
-    const lines = csv.split('\n');
-    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
-    const iMa = headers.findIndex(h => h.includes('Mã SAP') || h.includes('SAP'));
-    const iTen = headers.findIndex(h => (h.includes('Tên') && (h.includes('CH') || h.includes('cửa'))) || h.includes('Tên cửa hàng'));
-    const iGDV = headers.findIndex(h => h === 'GĐV' || h.includes('GĐV'));
-    const iQL = headers.findIndex(h => h === 'QLKV' || h.includes('QLKV'));
-    const iTinh = headers.findIndex(h => h.includes('Tỉnh'));
-    const iMien = headers.findIndex(h => h === 'Miền' || h.includes('Miền'));
-    const iLat = headers.findIndex(h => h.toLowerCase().includes('vĩ độ') || h.toLowerCase().includes('lat'));
-    const iLng = headers.findIndex(h => h.toLowerCase().includes('kinh độ') || h.toLowerCase().includes('lng') || h.toLowerCase().includes('lon'));
-    const iTT = headers.findIndex(h => h.includes('Tình Trạng') || h.includes('Tình trạng') || h.includes('Trạng thái'));
+    // Dùng JSON API để tránh lỗi parse CSV với Unicode
+    const resp = await fetch(STORELIST_URL.replace('out:csv','out:json'));
+    const text = await resp.text();
+    const jsonStart = text.indexOf('{');
+    const jsonEnd = text.lastIndexOf('}');
+    const data = JSON.parse(text.substring(jsonStart, jsonEnd + 1));
+    const cols = data.table.cols.map(c => c.label || c.id || '');
+    
+    const iMa = cols.findIndex(h => h.includes('Mã SAP') || h.includes('Mã SAP') || h.includes('SAP'));
+    const iTen = cols.findIndex(h => (h.includes('Tên') && (h.includes('CH') || h.includes('cửa'))) || h.includes('Tên cửa hàng'));
+    const iGDV = cols.findIndex(h => h === 'GĐV');
+    const iQL = cols.findIndex(h => h === 'QLKV');
+    const iTinh = cols.findIndex(h => h.includes('Tỉnh'));
+    const iMien = cols.findIndex(h => h === 'Miền');
+    const iLat = cols.findIndex(h => h && (h.toLowerCase().includes('vĩ độ') || h.toLowerCase().includes('lat')));
+    const iLng = cols.findIndex(h => h && (h.toLowerCase().includes('kinh độ') || h.toLowerCase().includes('lng')));
+    const iTT = cols.findIndex(h => h && (h.includes('Tình Trạng') || h.includes('Tình trạng')));
+
+    // Map lỗi font → tên chuẩn từ GDV_BUDGET (dùng Levenshtein-like fuzzy)
+    const norm = s => (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+    const gdvNormMap = {};
+    GDV_BUDGET.forEach(g => { gdvNormMap[norm(g.ten)] = g.ten; });
+    
+    function fixGDV(raw) {
+      if (!raw || raw === '—') return raw;
+      const n = norm(raw);
+      if (gdvNormMap[n]) return gdvNormMap[n];
+      // Fuzzy: tìm key có độ dài gần nhất chứa substring
+      for (const [nk, name] of Object.entries(gdvNormMap)) {
+        if (nk.length > 3 && (nk.includes(n.substring(0, Math.min(6, n.length))) || n.includes(nk.substring(0, Math.min(6, nk.length))))) {
+          return name;
+        }
+      }
+      return raw;
+    }
 
     STORELIST = [];
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(',').map(c => c.replace(/"/g, '').trim());
-      if (cols.length < 5) continue;
-      if (iTT >= 0 && cols[iTT] && !cols[iTT].includes('Đang hoạt động') && !cols[iTT].includes('đang hoạt động')) continue;
-      const s = {
-        ma: cols[iMa] || '', ten: cols[iTen] || '', gdv: cols[iGDV] || '',
-        qlkv: cols[iQL] || '', tinh: cols[iTinh] || '', mien: cols[iMien] || '',
-        lat: iLat >= 0 ? parseFloat(cols[iLat]) : null, lng: iLng >= 0 ? parseFloat(cols[iLng]) : null
-      };
-      if (!s.ma) continue;
-      STORELIST.push(s);
-    }
-    console.log('Storelist loaded:', STORELIST.length, 'stores');
+    data.table.rows.forEach(row => {
+      const c = row.c;
+      const tt = iTT >= 0 && c[iTT] ? (c[iTT].v || '') : '';
+      if (tt && !tt.includes('Đang hoạt động') && !tt.includes('đang hoạt động')) return;
+      const ma = iMa >= 0 && c[iMa] ? String(c[iMa].v || '') : '';
+      if (!ma) return;
+      STORELIST.push({
+        ma: ma,
+        ten: iTen >= 0 && c[iTen] ? (c[iTen].v || '') : '',
+        gdv: fixGDV(iGDV >= 0 && c[iGDV] ? (c[iGDV].v || '') : ''),
+        qlkv: iQL >= 0 && c[iQL] ? (c[iQL].v || '') : '',
+        tinh: iTinh >= 0 && c[iTinh] ? (c[iTinh].v || '') : '',
+        mien: iMien >= 0 && c[iMien] ? (c[iMien].v || '') : '',
+        lat: iLat >= 0 && c[iLat] ? parseFloat(c[iLat].v) : null,
+        lng: iLng >= 0 && c[iLng] ? parseFloat(c[iLng].v) : null
+      });
+    });
+    console.log('Storelist loaded via JSON:', STORELIST.length, 'stores');
   } catch(e) {
-    console.log('Storelist error:', e.message);
+    console.log('Storelist JSON error, trying CSV fallback:', e.message);
+    // CSV fallback (original code)
+    try {
+      const resp = await fetch(STORELIST_URL.replace('out:json','out:csv'));
+      const csv = await resp.text();
+      const lines = csv.split('\n');
+      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+      const iMa = headers.findIndex(h => h.includes('Mã SAP') || h.includes('SAP'));
+      const iTen = headers.findIndex(h => (h.includes('Tên') && (h.includes('CH') || h.includes('cửa'))) || h.includes('Tên cửa hàng'));
+      const iGDV = headers.findIndex(h => h === 'GĐV' || h.includes('GĐV'));
+      const iQL = headers.findIndex(h => h === 'QLKV' || h.includes('QLKV'));
+      const iTinh = headers.findIndex(h => h.includes('Tỉnh'));
+      const iMien = headers.findIndex(h => h === 'Miền' || h.includes('Miền'));
+      const iLat = headers.findIndex(h => h.toLowerCase().includes('vĩ độ') || h.toLowerCase().includes('lat'));
+      const iLng = headers.findIndex(h => h.toLowerCase().includes('kinh độ') || h.toLowerCase().includes('lng'));
+      const iTT = headers.findIndex(h => h.includes('Tình Trạng') || h.includes('Tình trạng'));
+      STORELIST = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.replace(/"/g, '').trim());
+        if (cols.length < 5) continue;
+        if (iTT >= 0 && cols[iTT] && !cols[iTT].includes('Đang hoạt động') && !cols[iTT].includes('đang hoạt động')) continue;
+        const s = { ma: cols[iMa]||'', ten: cols[iTen]||'', gdv: fixGDV(cols[iGDV]||''),
+          qlkv: cols[iQL]||'', tinh: cols[iTinh]||'', mien: cols[iMien]||'',
+          lat: iLat>=0?parseFloat(cols[iLat]):null, lng: iLng>=0?parseFloat(cols[iLng]):null };
+        if (!s.ma) continue;
+        STORELIST.push(s);
+      }
+      console.log('Storelist loaded via CSV fallback:', STORELIST.length, 'stores');
+    } catch(e2) {
+      console.log('Storelist error:', e2.message);
+    }
   }
 }
 loadStorelist();
