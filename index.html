@@ -1674,19 +1674,40 @@ function renderPD() {
 function itemHtml(r, showActs) {
   const st = ST_LABEL[r.trangThai] || r.trangThai;
   const cls = ST_CLASS[r.trangThai] || 'b-wait';
-  return `<div class="item" style="padding:8px 12px">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;white-space:nowrap;overflow:hidden">
-      <span style="font-size:11px;color:var(--blue);font-weight:700;min-width:90px">${r.ctpId||'CTP_'+String(r.id).slice(-8)}</span>
+  const rowId = 'ctp-row-' + r.id;
+  return `<div class="item" style="padding:6px 10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;white-space:nowrap;overflow:hidden;font-size:13px" id="${rowId}">
+      <span style="font-size:11px;color:var(--blue);font-weight:700;min-width:95px">${r.ctpId||'CTP_'+String(r.id).slice(-8)}</span>
+      <span style="font-size:11px;color:var(--muted);min-width:55px">${r.chucVu||'—'}</span>
       <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis">${r.ten||r.maNV||'—'}</span>
-      <span style="font-size:11px;color:var(--muted)">${r.chucVu||'—'}</span>
-      <span style="font-size:11px;overflow:hidden;text-overflow:ellipsis">${r.maCH||'—'}→${r.denMA||r.den||'—'}</span>
-      <span style="font-size:11px;color:var(--muted)">${r.ngayDi||'—'}→${r.ngayVe||'—'} · ${r.km||0}km · ${r.soNgay||0}n</span>
-      <span style="font-weight:700;color:var(--blue)">${fmt(r.tong||0)}</span>
+      <span style="font-size:11px;overflow:hidden;text-overflow:ellipsis;min-width:60px">${r.maCH||r.tenCH||'—'}</span>
+      <span style="font-size:11px;color:var(--muted)">${r.tinh||'—'}</span>
+      <span style="font-size:11px;color:var(--muted)">${r.denTinh||'—'}</span>
+      <span style="font-size:11px">${r.ngayDi||'—'}</span>
+      <span style="font-size:11px">${r.ngayVe||'—'}</span>
+      <span style="font-weight:700;color:var(--blue);min-width:80px;text-align:right">${fmt(r.tong||0)}</span>
       <span class="badge ${cls}" style="flex-shrink:0">${st}</span>
-      ${showActs ? `<span style="flex-shrink:0;display:flex;gap:4px"><button class="btn btn-ok btn-xs" onclick="approve(${r.id})">✓</button><button class="btn btn-danger btn-xs" onclick="reject(${r.id})">✗</button></span>` : ''}
+      <span style="flex-shrink:0;display:flex;gap:3px">
+        <button class="btn btn-ghost btn-xs" onclick="toggleDetail('${r.id}')" title="Xem chi tiết">👁</button>
+        ${showActs ? `<button class="btn btn-ok btn-xs" onclick="approve(${r.id})">✓</button><button class="btn btn-danger btn-xs" onclick="reject(${r.id})">✗</button>` : ''}
+      </span>
+    </div>
+    <div class="hidden" id="ctp-detail-${r.id}" style="margin-top:6px;padding:8px 10px;background:#f8f9fc;border-radius:6px;font-size:12px;line-height:1.8">
+      <b>📍 Hành trình:</b> ${r.maCH||'—'} ${r.tenCH||''} → ${r.denMA||'—'} ${r.denTen||''} · ${r.km||0}km · ${r.pt||'—'}<br>
+      <b>💵 Chi tiết:</b> CTP ${fmt(r.ctp||0)} · KS ${fmt(r.ks||0)} · Xăng ${fmt(r.xang||0)} · Vé ${fmt(r.ve||0)}<br>
+      <b>📝 Lý do:</b> ${r.ghiChu||r.mucDich||'—'}<br>
+      <b>👤 GĐV:</b> ${r.gdv||'—'} · <b>QLKV:</b> ${r.qlkv||'—'} · <b>Miền:</b> ${r.mien||'—'}<br>
+      ${r.lyDo ? '<b>❌ Từ chối:</b> <span style=color:var(--err)>' + r.lyDo + '</span><br>' : ''}
+      ${r.approvedBy ? '<b>✅ Duyệt:</b> ' + r.approvedBy + ' · ' + (r.approvedAt||'').slice(0,16) + '<br>' : ''}
+      <b>🕐 Tạo:</b> ${r.ngayTao||''} · <b>Tracklog:</b> ${r.tracklog||''}
     </div>
     ${r.lyDo ? `<div style="font-size:11px;color:var(--err);margin-top:2px">↳ ${r.lyDo}</div>` : ''}
   </div>`;
+}
+
+function toggleDetail(id) {
+  const el = $('ctp-detail-' + id);
+  if (el) el.classList.toggle('hidden');
 }
 
 function updatePDBadge() {
