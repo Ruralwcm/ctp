@@ -199,16 +199,17 @@ tr:hover td{background:#f8f9ff}
 <!-- ========== MAIN APP ========== -->
 <div id="app">
   <header>
-    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v2.10</span></div>
+    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v2.15</span></div>
     <div class="user" id="userLine"></div>
     <button class="logout-btn" id="headerLoginBtn" onclick="showLogin()">📊 Dashboard</button>
   </header>
 
   <!-- ADMIN TABS (hidden until login) -->
   <div class="tabs hidden" id="adminTabs">
-    <div class="tab" data-tab="tiendo" onclick="switchAdminTab('tiendo')">📊 Tiến độ</div>
+    <div class="tab" data-tab="khaibao" onclick="switchAdminTab('khaibao')">📝 Khai báo</div>
     <div class="tab" data-tab="dinhmuc" onclick="switchAdminTab('dinhmuc')">📐 Định mức</div>
     <div class="tab" data-tab="pd" onclick="switchAdminTab('pd')">✅ Phê duyệt <span class="badge-count" id="pdBadge" style="display:none">0</span></div>
+    <div class="tab" data-tab="dashboard" onclick="switchAdminTab('dashboard')">📊 Tổng kết</div>
   </div>
 
   <!-- ========== TAB: KHAI BÁO ========== -->
@@ -405,6 +406,72 @@ tr:hover td{background:#f8f9ff}
       <div id="historyList"></div>
     </div>
   </div>
+
+  <!-- ========== ADMIN TAB: DASHBOARD ========== -->
+  <div id="tab-dashboard" class="hidden">
+    <!-- KPI row -->
+    <div class="kpis" id="dashKpis"></div>
+
+    <!-- Filters -->
+    <div class="card" style="padding:10px 12px">
+      <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <div class="fld"><label>Tháng</label>
+          <select id="dashFilterThang" onchange="repaintDashboard()">
+            <option value="all">Tất cả</option>
+            <option>T1</option><option>T2</option><option>T3</option><option>T4</option>
+            <option>T5</option><option>T6</option><option>T7</option><option>T8</option>
+            <option>T9</option><option>T10</option><option>T11</option><option>T12</option>
+          </select>
+        </div>
+        <div class="fld"><label>Miền</label>
+          <select id="dashFilterMien" onchange="repaintDashboard()">
+            <option value="all">Tất cả</option>
+          </select>
+        </div>
+        <div class="fld"><label>GĐV</label>
+          <select id="dashFilterGDV" onchange="repaintDashboard()">
+            <option value="all">Tất cả</option>
+          </select>
+        </div>
+        <div class="fld"><label>Trạng thái</label>
+          <select id="dashFilterStatus" onchange="repaintDashboard()">
+            <option value="done">Hoàn tất</option>
+            <option value="all">Tất cả</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Theo đầu mục -->
+    <div class="card">
+      <h3>📋 Tổng theo đầu mục</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Đầu mục</th><th class="text-right">Tổng tiền</th><th class="text-right">SL phiếu</th><th class="text-right">BQ/phiếu</th></tr></thead>
+        <tbody id="dashByCategory"></tbody>
+        <tfoot id="dashByCategoryFoot"></tfoot>
+      </table></div>
+    </div>
+
+    <!-- Theo Miền & GĐV -->
+    <div class="card">
+      <h3>🏢 Tổng theo Miền / GĐV</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>GĐV</th><th>Miền</th><th class="text-right">CTP</th><th class="text-right">KS</th><th class="text-right">Xăng</th><th class="text-right">Vé</th><th class="text-right">Tổng</th><th class="text-right">SL</th></tr></thead>
+        <tbody id="dashByGDV"></tbody>
+        <tfoot id="dashByGDVFoot"></tfoot>
+      </table></div>
+    </div>
+
+    <!-- Theo tháng -->
+    <div class="card">
+      <h3>📅 Tổng theo tháng</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Tháng</th><th class="text-right">CTP</th><th class="text-right">KS</th><th class="text-right">Xăng</th><th class="text-right">Vé</th><th class="text-right">Tổng</th><th class="text-right">SL</th></tr></thead>
+        <tbody id="dashByMonth"></tbody>
+        <tfoot id="dashByMonthFoot"></tfoot>
+      </table></div>
+    </div>
+  </div>
 </div>
 
 <!-- TOAST -->
@@ -548,7 +615,7 @@ function doLogin() {
   $('headerLoginBtn').onclick = doLogout;
   $('headerLoginBtn').style.background = 'rgba(255,255,255,.18)';
   $('adminTabs').classList.remove('hidden');
-  switchAdminTab('tiendo');
+  switchAdminTab('khaibao');
   toast('✅ Đã đăng nhập: ' + ME.ten + ' (' + ME.chucVu + ')', 'success');
   renderAll();
 }
@@ -562,6 +629,7 @@ function doLogout() {
   $('headerLoginBtn').style.background = 'rgba(255,255,255,.18)';
   $('adminTabs').classList.add('hidden');
   hideAllAdminTabs();
+  $('tab-kb').classList.remove('hidden');
   renderAll();
   toast('Đã đăng xuất');
 }
@@ -580,14 +648,18 @@ function doLogout() {
 // =================== TABS ===================
 function switchAdminTab(k) {
   if (!ME) { showLogin(); return; }
-  $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === k));
+  $$('#adminTabs .tab').forEach(t => t.classList.toggle('active', t.dataset.tab === k));
   hideAllAdminTabs();
-  if (k === 'tiendo') { $('tab-tiendo').classList.remove('hidden'); renderTienDo(); }
+  // Hide standalone #tab-kb when in admin mode, show only if Khai báo tab selected
+  $('tab-kb').classList.toggle('hidden', k !== 'khaibao');
+  if (k === 'khaibao') { renderTienDo(); }
   if (k === 'dinhmuc') { $('tab-dinhmuc').classList.remove('hidden'); renderDM(); }
   if (k === 'pd') { $('tab-pd').classList.remove('hidden'); renderPD(); }
+  if (k === 'dashboard') { $('tab-dashboard').classList.remove('hidden'); repaintDashboard(); }
 }
 function hideAllAdminTabs() {
-  ['tab-tiendo','tab-dinhmuc','tab-pd'].forEach(x => $(x)?.classList.add('hidden'));
+  ['tab-dinhmuc','tab-pd','tab-dashboard'].forEach(x => $(x)?.classList.add('hidden'));
+  $('tab-kb')?.classList.add('hidden');
 }
 
 // =================== STORELIST LOAD ===================
@@ -1240,7 +1312,7 @@ function reject(id) {
 }
 
 // =================== RENDER ===================
-function renderAll() { renderTienDo(); renderPD(); renderDM(); }
+function renderAll() { renderTienDo(); renderPD(); renderDM(); repaintDashboard(); }
 
 function renderTienDo() {
   // KPI
@@ -1370,6 +1442,100 @@ function updatePDBadge() {
   const badge = $('pdBadge');
   if (count > 0) { badge.style.display = 'inline-block'; badge.textContent = count; }
   else { badge.style.display = 'none'; }
+}
+
+// =================== DASHBOARD ===================
+function repaintDashboard() {
+  const fThang = $('dashFilterThang')?.value || 'all';
+  const fMien = $('dashFilterMien')?.value || 'all';
+  const fGDV = $('dashFilterGDV')?.value || 'all';
+  const fStatus = $('dashFilterStatus')?.value || 'done';
+
+  // Filter data
+  let data = RECORDS;
+  if (ME && ME.chucVu === 'GĐV') data = data.filter(r => r.gdv === ME.ten);
+  if (fThang !== 'all') data = data.filter(r => r.thang === fThang);
+  if (fMien !== 'all') data = data.filter(r => r.mien === fMien);
+  if (fGDV !== 'all') data = data.filter(r => r.gdv === fGDV);
+  if (fStatus !== 'all') data = data.filter(r => r.trangThai === fStatus);
+
+  // Populate filter dropdowns
+  const miens = [...new Set(RECORDS.map(r => r.mien).filter(Boolean))].sort();
+  const gdvs = [...new Set(RECORDS.map(r => r.gdv).filter(Boolean))].sort();
+  const selMien = $('dashFilterMien')?.value || 'all';
+  const selGDV = $('dashFilterGDV')?.value || 'all';
+  if ($('dashFilterMien')) $('dashFilterMien').innerHTML = '<option value="all">Tất cả</option>' + miens.map(m => `<option value="${m}" ${selMien===m?'selected':''}>${m}</option>`).join('');
+  if ($('dashFilterGDV')) $('dashFilterGDV').innerHTML = '<option value="all">Tất cả</option>' + gdvs.map(g => `<option value="${g}" ${selGDV===g?'selected':''}>${g}</option>`).join('');
+
+  // KPI
+  const totalDone = data.reduce((s,r) => s + (r.tong||0), 0);
+  const countDone = data.length;
+  const avgDone = countDone ? Math.round(totalDone / countDone) : 0;
+  const tripsDayAvg = countDone ? (countDone / Math.max(1, [...new Set(data.map(r => r.ngayDi).filter(Boolean))].length)).toFixed(1) : 0;
+
+  if ($('dashKpis')) $('dashKpis').innerHTML = `
+    <div class="kpi"><div class="v">${countDone}</div><div class="l">Phiếu</div></div>
+    <div class="kpi ok"><div class="v">${(totalDone/1e6).toFixed(1)}<small>tr</small></div><div class="l">Tổng tiền</div></div>
+    <div class="kpi"><div class="v">${avgDone.toLocaleString()}<small>đ</small></div><div class="l">BQ / phiếu</div></div>
+  `;
+  // Fix malformed kpi HTML above
+  setTimeout(() => {
+    if ($('dashKpis')) $('dashKpis').innerHTML = `
+    <div class="kpi"><div class="v">${countDone}</div><div class="l">Phiếu</div></div>
+    <div class="kpi ok"><div class="v">${(totalDone/1e6).toFixed(1)}<small>tr</small></div><div class="l">Tổng tiền</div></div>
+    <div class="kpi"><div class="v">${avgDone.toLocaleString()}<small>đ</small></div><div class="l">BQ / phiếu</div></div>
+  `; },10);
+
+  // Theo đầu mục
+  const catMap = {};
+  data.forEach(r => {
+    catMap.CTP = (catMap.CTP||0) + (r.ctp||0);
+    catMap.KS = (catMap.KS||0) + (r.ks||0);
+    catMap.Xăng = (catMap.Xăng||0) + (r.xang||0);
+    catMap.Vé = (catMap.Vé||0) + (r.ve||0);
+  });
+  const cats = ['CTP','KS','Xăng','Vé'];
+  if ($('dashByCategory')) $('dashByCategory').innerHTML = cats.map(c =>
+    `<tr><td><strong>${c}</strong></td><td class="text-right">${(catMap[c]||0).toLocaleString()}đ</td><td class="text-right">—</td><td class="text-right">—</td></tr>`
+  ).join('');
+  if ($('dashByCategoryFoot')) $('dashByCategoryFoot').innerHTML = `<tr style="font-weight:700;background:#f0f4fa"><td>Tổng</td><td class="text-right">${totalDone.toLocaleString()}đ</td><td class="text-right">${countDone}</td><td class="text-right">${avgDone.toLocaleString()}đ</td></tr>`;
+
+  // Theo GĐV
+  const gdvMap = {};
+  data.forEach(r => {
+    const k = r.gdv || '—';
+    if (!gdvMap[k]) gdvMap[k] = { gdv: k, mien: r.mien||'', ctp:0, ks:0, xang:0, ve:0, tong:0, sl:0 };
+    gdvMap[k].ctp += (r.ctp||0);
+    gdvMap[k].ks += (r.ks||0);
+    gdvMap[k].xang += (r.xang||0);
+    gdvMap[k].ve += (r.ve||0);
+    gdvMap[k].tong += (r.tong||0);
+    gdvMap[k].sl++;
+  });
+  const gdvRows = Object.values(gdvMap).sort((a,b) => b.tong - a.tong);
+  if ($('dashByGDV')) $('dashByGDV').innerHTML = gdvRows.map(g =>
+    `<tr><td><strong>${g.gdv}</strong></td><td>${g.mien}</td><td class="text-right">${g.ctp.toLocaleString()}đ</td><td class="text-right">${g.ks.toLocaleString()}đ</td><td class="text-right">${g.xang.toLocaleString()}đ</td><td class="text-right">${g.ve.toLocaleString()}đ</td><td class="text-right" style="font-weight:700">${g.tong.toLocaleString()}đ</td><td class="text-right">${g.sl}</td></tr>`
+  ).join('');
+  if ($('dashByGDVFoot')) $('dashByGDVFoot').innerHTML = `<tr style="font-weight:700;background:#f0f4fa"><td colspan="2">Tổng</td><td class="text-right">${gdvRows.reduce((s,g)=>s+g.ctp,0).toLocaleString()}đ</td><td class="text-right">${gdvRows.reduce((s,g)=>s+g.ks,0).toLocaleString()}đ</td><td class="text-right">${gdvRows.reduce((s,g)=>s+g.xang,0).toLocaleString()}đ</td><td class="text-right">${gdvRows.reduce((s,g)=>s+g.ve,0).toLocaleString()}đ</td><td class="text-right">${totalDone.toLocaleString()}đ</td><td class="text-right">${countDone}</td></tr>`;
+
+  // Theo tháng
+  const moMap = {};
+  data.forEach(r => {
+    const k = r.thang || '—';
+    if (!moMap[k]) moMap[k] = { thang: k, ctp:0, ks:0, xang:0, ve:0, tong:0, sl:0 };
+    moMap[k].ctp += (r.ctp||0);
+    moMap[k].ks += (r.ks||0);
+    moMap[k].xang += (r.xang||0);
+    moMap[k].ve += (r.ve||0);
+    moMap[k].tong += (r.tong||0);
+    moMap[k].sl++;
+  });
+  const ORDER = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  const moRows = Object.values(moMap).sort((a,b) => ORDER.indexOf(a.thang) - ORDER.indexOf(b.thang));
+  if ($('dashByMonth')) $('dashByMonth').innerHTML = moRows.map(m =>
+    `<tr><td><strong>${m.thang}</strong></td><td class="text-right">${m.ctp.toLocaleString()}đ</td><td class="text-right">${m.ks.toLocaleString()}đ</td><td class="text-right">${m.xang.toLocaleString()}đ</td><td class="text-right">${m.ve.toLocaleString()}đ</td><td class="text-right" style="font-weight:700">${m.tong.toLocaleString()}đ</td><td class="text-right">${m.sl}</td></tr>`
+  ).join('');
+  if ($('dashByMonthFoot')) $('dashByMonthFoot').innerHTML = `<tr style="font-weight:700;background:#f0f4fa"><td>Tổng</td><td class="text-right">${moRows.reduce((s,m)=>s+m.ctp,0).toLocaleString()}đ</td><td class="text-right">${moRows.reduce((s,m)=>s+m.ks,0).toLocaleString()}đ</td><td class="text-right">${moRows.reduce((s,m)=>s+m.xang,0).toLocaleString()}đ</td><td class="text-right">${moRows.reduce((s,m)=>s+m.ve,0).toLocaleString()}đ</td><td class="text-right">${totalDone.toLocaleString()}đ</td><td class="text-right">${countDone}</td></tr>`;
 }
 
 // Click outside → close suggest
