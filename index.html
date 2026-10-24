@@ -202,8 +202,9 @@ tr:hover td{background:#f8f9ff}
 <!-- ========== MAIN APP ========== -->
 <div id="app">
   <header>
-    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v2.15</span></div>
+    <div class="title">🧾 Công tác phí <span style="font-size:11px;opacity:.7;font-weight:400">v3.0</span></div>
     <div class="user" id="userLine"></div>
+    <button class="logout-btn" style="right:auto;right:100px" onclick="refreshData()" title="Đồng bộ dữ liệu từ Google Sheets">🔄</button>
     <button class="logout-btn" id="headerLoginBtn" onclick="showLogin()">📊 Dashboard</button>
   </header>
 
@@ -1746,6 +1747,15 @@ function itemHtml(r, showActs) {
 function toggleDetail(id) {
   const el = $('ctp-detail-' + id);
   if (el) el.classList.toggle('hidden');
+}
+
+async function refreshData() {
+  const btn = document.querySelector('[onclick=\"refreshData()\"]');
+  if (btn) { btn.textContent = '⏳'; btn.style.pointerEvents = 'none'; }
+  await loadFromGAS();
+  renderAll();
+  if (btn) { btn.textContent = '🔄'; btn.style.pointerEvents = ''; }
+  toast('✅ Đã đồng bộ dữ liệu từ Google Sheets', 'success');
 }
 
 let _editId = null;
