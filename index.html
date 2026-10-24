@@ -332,6 +332,30 @@ tr:hover td{background:#f8f9ff}
     </div>
   </div>
 
+  <!-- CONFIRMATION MODAL -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal" style="max-width:550px">
+      <h3>📋 Xác nhận nội dung trình duyệt</h3>
+      <div id="confirmContent" style="font-size:13px;line-height:2;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="closeConfirm()">Hủy</button>
+        <button class="btn btn-primary btn-sm" id="confirmSubmitBtn" onclick="doSubmit()">✅ Xác nhận & Gửi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal" style="max-width:550px">
+      <h3>✏️ Chỉnh sửa phiếu</h3>
+      <div id="editContent" style="font-size:13px;line-height:1.8;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="closeEdit()">Hủy</button>
+        <button class="btn btn-ok btn-sm" onclick="saveEdit()">💾 Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== ADMIN TAB: TIẾN ĐỘ ========== -->
   <div id="tab-tiendo" class="hidden">
     <!-- KPI -->
@@ -1297,15 +1321,12 @@ function submitKB() {
   if (!km) { toast('⚠️ Vui lòng chọn Địa điểm đến để tự tính khoảng cách', 'error'); return; }
   const lydo = $('f-lydo').value;
   if (!lydo) { toast('⚠️ Vui lòng chọn Lý do công tác', 'error'); return; }
-  if (lydo === 'Khác' && !$('f-lydo-khac').value.trim()) {
-    toast('⚠️ Vui lòng nhập lý do cụ thể', 'error'); return;
-  }
+  if (lydo === 'Khác' && !$('f-lydo-khac').value.trim()) { toast('⚠️ Vui lòng nhập lý do cụ thể', 'error'); return; }
   const mucdich = $('f-mucdich').value.trim();
   if (!mucdich) { toast('⚠️ Vui lòng nhập Mục đích công tác chi tiết', 'error'); return; }
 
   const rec = buildRecord();
-  const total = rec.tong;
-  if (!total) { toast('⚠️ Vui lòng nhập chi phí', 'error'); return; }
+  if (!rec.tong) { toast('⚠️ Vui lòng nhập chi phí', 'error'); return; }
 
   // Determine status
   let status = 'cho_gdv';
@@ -1314,23 +1335,35 @@ function submitKB() {
     if (cv === 'GĐV') status = (km > 80 || soNgay > 2) ? 'cho_gdm' : 'done';
     if (['GĐM','ADMIN'].includes(cv)) status = 'done';
   }
+  rec._status = status;
 
-  rec.trangThai = status;
+  // Show confirmation modal
+  $('confirmContent').innerHTML = `
+    <b>👤 Người CT:</b> ${rec.ten} · ${rec.chucVu}<br>
+    <b>📍 Hành trình:</b> ${rec.maCH} ${rec.tenCH||''} → ${rec.denMA||''} ${rec.denTen||''} · ${rec.km}km · ${rec.pt}<br>
+    <b>📅 Thời gian:</b> ${rec.ngayDi} → ${rec.ngayVe} · ${rec.soNgay} ngày CTP · ${rec.soNgayKS} ngày KS<br>
+    <b>💵 CTP:</b> ${fmt(rec.ctp)} · <b>KS:</b> ${fmt(rec.ks)} · <b>Xăng:</b> ${fmt(rec.xang)} · <b>Vé:</b> ${fmt(rec.ve)}<br>
+    <b>💰 Tổng:</b> <span style="font-size:16px;color:var(--blue);font-weight:800">${fmt(rec.tong)}</span> · Trạng thái: <b>${ST_LABEL[status]}</b>
+  `;
+  $('confirmSubmitBtn').onclick = () => doSubmit(rec);
+  $('confirmModal').classList.add('show');
+}
+function closeConfirm() { $('confirmModal').classList.remove('show'); }
+
+async function doSubmit(rec) {
+  closeConfirm();
   rec.id = Date.now();
   rec.ctpId = 'CTP_' + new Date().toISOString().slice(2,4) + new Date().toISOString().slice(5,7) + '_' + String(rec.id).slice(-4);
-  rec.nguoiTao = ME ? ME.maNV : manv;
+  rec.trangThai = rec._status; delete rec._status;
+  rec.nguoiTao = ME ? ME.maNV : rec.maNV;
   rec.ngayTao = new Date().toISOString().slice(0, 16).replace('T', ' ');
   rec.tracklog = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
-
   RECORDS.unshift(rec);
   save();
-  // Push to GAS
   if (USE_GAS && GAS_URL) {
-    gasPost('submit', rec).then(r => {
-      if (r) console.log('☁️ GAS OK'); else console.warn('⚠️ GAS lỗi, đã lưu local');
-    });
+    try { await gasPost('submit', rec); } catch(e) {}
   }
-  toast('✅ Đã gửi duyệt! (' + ST_LABEL[status] + ')' + (USE_GAS ? ' ☁️' : ''), 'success');
+  toast('✅ Đã hoàn thành! ' + rec.ctpId + ' (' + ST_LABEL[rec.trangThai] + ')' + (USE_GAS ? ' ☁️' : ''), 'success');
   resetForm();
   renderAll();
 }
@@ -1689,6 +1722,7 @@ function itemHtml(r, showActs) {
       <span class="badge ${cls}" style="flex-shrink:0">${st}</span>
       <span style="flex-shrink:0;display:flex;gap:3px">
         <button class="btn btn-ghost btn-xs" onclick="toggleDetail('${r.id}')" title="Xem chi tiết">👁</button>
+        <button class="btn btn-ghost btn-xs" onclick="editRecord(${r.id})" title="Chỉnh sửa">✏️</button>
         ${showActs ? `<button class="btn btn-ok btn-xs" onclick="approve(${r.id})">✓</button><button class="btn btn-danger btn-xs" onclick="reject(${r.id})">✗</button>` : ''}
       </span>
     </div>
@@ -1708,6 +1742,64 @@ function itemHtml(r, showActs) {
 function toggleDetail(id) {
   const el = $('ctp-detail-' + id);
   if (el) el.classList.toggle('hidden');
+}
+
+let _editId = null;
+function editRecord(id) {
+  const r = RECORDS.find(x => x.id === id);
+  if (!r) return;
+  _editId = id;
+  $('editContent').innerHTML = `
+    <label>Họ và tên</label><input id="editTen" value="${r.ten||''}">
+    <label>Chức vụ</label><select id="editCV">
+      <option value="CHT-NVCH" ${r.chucVu==='CHT-NVCH'?'selected':''}>CHT-NVCH</option>
+      <option value="QLKV" ${r.chucVu==='QLKV'?'selected':''}>QLKV</option>
+      <option value="HCV" ${r.chucVu==='HCV'?'selected':''}>HCV</option>
+      <option value="GĐV" ${r.chucVu==='GĐV'?'selected':''}>GĐV</option>
+      <option value="GĐM" ${r.chucVu==='GĐM'?'selected':''}>GĐM</option>
+    </select>
+    <label>Ngày đi</label><input id="editNgayDi" type="date" value="${r.ngayDi||''}">
+    <label>Ngày về</label><input id="editNgayVe" type="date" value="${r.ngayVe||''}">
+    <label>Km</label><input id="editKm" type="number" value="${r.km||0}">
+    <label>CTP (tổng)</label><input id="editCTP" type="text" inputmode="numeric" value="${(r.ctp||0).toLocaleString('vi-VN')}">
+    <label>KS (tổng)</label><input id="editKS" type="text" inputmode="numeric" value="${(r.ks||0).toLocaleString('vi-VN')}">
+    <label>Xăng</label><input id="editXang" type="text" inputmode="numeric" value="${(r.xang||0).toLocaleString('vi-VN')}">
+    <label>Vé</label><input id="editVe" type="text" inputmode="numeric" value="${(r.ve||0).toLocaleString('vi-VN')}">
+    <label>Lý do / Ghi chú</label><input id="editGhiChu" value="${r.ghiChu||''}">
+  `;
+  $('editModal').classList.add('show');
+}
+function closeEdit() { $('editModal').classList.remove('show'); _editId = null; }
+
+function saveEdit() {
+  if (!_editId) return;
+  const r = RECORDS.find(x => x.id === _editId);
+  if (!r) return;
+  const moneyVal = el => +(el.value.replace(/[^\d]/g, '')) || 0;
+  r.ten = $('editTen').value.trim();
+  r.chucVu = $('editCV').value;
+  r.ngayDi = $('editNgayDi').value;
+  r.ngayVe = $('editNgayVe').value;
+  r.km = +($('editKm').value) || 0;
+  r.ctp = moneyVal($('editCTP'));
+  r.ks = moneyVal($('editKS'));
+  r.xang = moneyVal($('editXang'));
+  r.ve = moneyVal($('editVe'));
+  r.ghiChu = $('editGhiChu').value.trim();
+  // Recalculate
+  if (r.ngayDi && r.ngayVe) {
+    const a = new Date(r.ngayDi), b = new Date(r.ngayVe);
+    r.soNgay = Math.round((b - a) / 86400000) + 1;
+    r.soNgayKS = Math.round((b - a) / 86400000);
+  }
+  r.tong = (r.ctp||0) + (r.ks||0) + (r.xang||0) + (r.ve||0);
+  r.updatedAt = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
+  r.updatedBy = ME ? ME.ten : '';
+  save();
+  if (USE_GAS && GAS_URL) { gasPost('submit', r); }
+  toast('✅ Đã cập nhật phiếu ' + (r.ctpId||''), 'success');
+  closeEdit();
+  renderAll();
 }
 
 function updatePDBadge() {
