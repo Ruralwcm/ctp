@@ -1370,19 +1370,21 @@ function renderTienDo() {
 };
 
 function renderNganSach() {
-  // Fuzzy match GĐV name: bỏ dấu, lowercase để khớp tên Storelist
+  // Fuzzy match: bỏ dấu, lowercase, chỉ giữ a-z0-9, bỏ ký tự rác do Storelist lỗi font
   const norm = s => (s||'').toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g,'d').replace(/[^a-z0-9 ]/g,'').trim();
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g,'d')
+    .replace(/[^a-z0-9 ]/g, '').replace(/\s+/g,' ').trim();
   
   const gdvCH = {};
   STORELIST.forEach(s => {
-    const key = norm(s.gdv || '—');
-    gdvCH[key] = (gdvCH[key] || 0) + 1;
+    const key = norm(s.gdv || '');
+    if (key.length > 2) gdvCH[key] = (gdvCH[key] || 0) + 1;
   });
 
   const nsRows = GDV_BUDGET.map(g => {
     const key = norm(g.ten);
-    const liveCH = gdvCH[key] || g.CH;
+    // Nếu match được >0 thì dùng live count, ko thì fallback hardcode
+    const liveCH = (gdvCH[key] > 0) ? gdvCH[key] : g.CH;
     const baseBudget = liveCH * g.K * 150000 * 2;
     const nsoBudget = (g.NSO || 0) * 1500000;
     const totalBudget = Math.round((baseBudget + nsoBudget) / 1e6 * 10) / 10;
