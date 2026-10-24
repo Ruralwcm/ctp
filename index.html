@@ -1295,7 +1295,10 @@ function saveDraft() {
   const rec = buildRecord();
   rec.trangThai = 'draft';
   rec.id = Date.now();
-  rec.ctpId = 'CTP_' + new Date().toISOString().slice(2,4) + new Date().toISOString().slice(5,7) + '_' + String(rec.id).slice(-4);
+  const nowVN = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+  rec.ctpId = 'CTP_' + String(nowVN.getFullYear()).slice(2) + String(nowVN.getMonth()+1).padStart(2,'0') + '_' + String(rec.id).slice(-4);
+  rec.ngayTao = nowVN.toISOString().slice(0, 16).replace('T', ' ');
+  rec.tracklog = nowVN.toISOString().slice(0, 19).replace('T', ' ');
   RECORDS.unshift(rec);
   save();
   gasPost('submit', rec);
@@ -1353,11 +1356,12 @@ function closeConfirm() { $('confirmModal').classList.remove('show'); }
 async function doSubmit(rec) {
   closeConfirm();
   rec.id = Date.now();
-  rec.ctpId = 'CTP_' + new Date().toISOString().slice(2,4) + new Date().toISOString().slice(5,7) + '_' + String(rec.id).slice(-4);
+  const nowVN = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+  rec.ctpId = 'CTP_' + String(nowVN.getFullYear()).slice(2) + String(nowVN.getMonth()+1).padStart(2,'0') + '_' + String(rec.id).slice(-4);
   rec.trangThai = rec._status; delete rec._status;
   rec.nguoiTao = ME ? ME.maNV : rec.maNV;
-  rec.ngayTao = new Date().toISOString().slice(0, 16).replace('T', ' ');
-  rec.tracklog = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
+  rec.ngayTao = nowVN.toISOString().slice(0, 16).replace('T', ' ');
+  rec.tracklog = nowVN.toISOString().slice(0, 19).replace('T', ' ');
   RECORDS.unshift(rec);
   save();
   if (USE_GAS && GAS_URL) {
