@@ -471,6 +471,20 @@ tr:hover td{background:#f8f9ff}
         <tfoot id="dashByMonthFoot"></tfoot>
       </table></div>
     </div>
+
+    <!-- Định mức theo GĐV & tháng -->
+    <div class="card">
+      <h3>📐 Định mức theo GĐV & tháng</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>GĐV</th><th class="text-right">ĐM CTP</th><th class="text-right">ĐM KS</th><th class="text-right">Tổng ĐM</th><th class="text-right">SL phiếu</th></tr></thead>
+        <tbody id="dashDMByGDV"></tbody>
+      </table></div>
+      <div style="margin-top:8px"></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Tháng</th><th class="text-right">ĐM CTP</th><th class="text-right">ĐM KS</th><th class="text-right">Tổng ĐM</th><th class="text-right">SL phiếu</th></tr></thead>
+        <tbody id="dashDMByMonth"></tbody>
+      </table></div>
+    </div>
   </div>
 </div>
 
@@ -1558,6 +1572,42 @@ function repaintDashboard() {
     `<tr><td><strong>${m.thang}</strong></td><td class="text-right">${m.ctp.toLocaleString()}đ</td><td class="text-right">${m.ks.toLocaleString()}đ</td><td class="text-right">${m.xang.toLocaleString()}đ</td><td class="text-right">${m.ve.toLocaleString()}đ</td><td class="text-right" style="font-weight:700">${m.tong.toLocaleString()}đ</td><td class="text-right">${m.sl}</td></tr>`
   ).join('');
   if ($('dashByMonthFoot')) $('dashByMonthFoot').innerHTML = `<tr style="font-weight:700;background:#f0f4fa"><td>Tổng</td><td class="text-right">${moRows.reduce((s,m)=>s+m.ctp,0).toLocaleString()}đ</td><td class="text-right">${moRows.reduce((s,m)=>s+m.ks,0).toLocaleString()}đ</td><td class="text-right">${moRows.reduce((s,m)=>s+m.xang,0).toLocaleString()}đ</td><td class="text-right">${moRows.reduce((s,m)=>s+m.ve,0).toLocaleString()}đ</td><td class="text-right">${totalDone.toLocaleString()}đ</td><td class="text-right">${countDone}</td></tr>`;
+// === ĐỊNH MỨC ===
+  data.forEach(r => {
+    const rate = DM_BY_CHUCVU[r.chucVu] || DM_BY_CHUCVU['CHT-NVCH'];
+    r._dmCTP = (r.soNgay||0) * rate.ctp;
+    r._dmKS = (r.soNgayKS||0) * rate.ks;
+    r._dmTong = r._dmCTP + r._dmKS;
+  });
+
+  const dmGDV = {};
+  data.forEach(r => {
+    const k = r.gdv || '—';
+    if (!dmGDV[k]) dmGDV[k] = { gdv: k, dmCTP: 0, dmKS: 0, dmTong: 0, sl: 0 };
+    dmGDV[k].dmCTP += r._dmCTP;
+    dmGDV[k].dmKS += r._dmKS;
+    dmGDV[k].dmTong += r._dmTong;
+    dmGDV[k].sl++;
+  });
+  const dmGdvRows = Object.values(dmGDV).sort((a,b) => b.dmTong - a.dmTong);
+  const totalDM = dmGdvRows.reduce((s,r)=>s+r.dmTong,0);
+  if ($('dashDMByGDV')) $('dashDMByGDV').innerHTML = dmGdvRows.map(r =>
+    '<tr><td><strong>'+r.gdv+'</strong></td><td class="text-right">'+r.dmCTP.toLocaleString()+'đ</td><td class="text-right">'+r.dmKS.toLocaleString()+'đ</td><td class="text-right" style="font-weight:700">'+r.dmTong.toLocaleString()+'đ</td><td class="text-right">'+r.sl+'</td></tr>'
+  ).join('') + '<tr style="font-weight:700;background:#f0f4fa"><td>Tổng</td><td class="text-right">'+dmGdvRows.reduce((s,r)=>s+r.dmCTP,0).toLocaleString()+'đ</td><td class="text-right">'+dmGdvRows.reduce((s,r)=>s+r.dmKS,0).toLocaleString()+'đ</td><td class="text-right">'+totalDM.toLocaleString()+'đ</td><td class="text-right">'+dmGdvRows.reduce((s,r)=>s+r.sl,0)+'</td></tr>';
+
+  const dmMo = {};
+  data.forEach(r => {
+    const k = r.thang || '—';
+    if (!dmMo[k]) dmMo[k] = { thang: k, dmCTP: 0, dmKS: 0, dmTong: 0, sl: 0 };
+    dmMo[k].dmCTP += r._dmCTP;
+    dmMo[k].dmKS += r._dmKS;
+    dmMo[k].dmTong += r._dmTong;
+    dmMo[k].sl++;
+  });
+  const dmMoRows = Object.values(dmMo).sort((a,b) => ORDER.indexOf(a.thang) - ORDER.indexOf(b.thang));
+  if ($('dashDMByMonth')) $('dashDMByMonth').innerHTML = dmMoRows.map(r =>
+    '<tr><td><strong>'+r.thang+'</strong></td><td class="text-right">'+r.dmCTP.toLocaleString()+'đ</td><td class="text-right">'+r.dmKS.toLocaleString()+'đ</td><td class="text-right" style="font-weight:700">'+r.dmTong.toLocaleString()+'đ</td><td class="text-right">'+r.sl+'</td></tr>'
+  ).join('') + '<tr style="font-weight:700;background:#f0f4fa"><td>Tổng</td><td class="text-right">'+dmMoRows.reduce((s,r)=>s+r.dmCTP,0).toLocaleString()+'đ</td><td class="text-right">'+dmMoRows.reduce((s,r)=>s+r.dmKS,0).toLocaleString()+'đ</td><td class="text-right">'+totalDM.toLocaleString()+'đ</td><td class="text-right">'+dmMoRows.reduce((s,r)=>s+r.sl,0)+'</td></tr>';
 }
 
 // Click outside → close suggest
