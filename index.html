@@ -350,7 +350,7 @@ tr:hover td{background:#f8f9ff}
 
   <!-- EDIT MODAL -->
   <div class="modal-overlay" id="editModal">
-    <div class="modal" style="max-width:550px">
+    <div class="modal" style="max-width:650px;max-height:85vh">
       <h3>✏️ Chỉnh sửa phiếu</h3>
       <div id="editContent" style="font-size:13px;line-height:1.8;margin-bottom:12px"></div>
       <div style="display:flex;gap:8px;justify-content:flex-end">
@@ -1765,29 +1765,136 @@ function editRecord(id) {
   const r = RECORDS.find(x => x.id === id);
   if (!r) return;
   _editId = id;
+  
+  // Build edit form matching Khai báo structure
   $('editContent').innerHTML = `
-    <label>Mã NV</label><input id="editMaNV" value="${r.maNV||''}">
-    <label>Họ và tên *</label><input id="editTen" value="${r.ten||''}">
-    <label>Chức vụ *</label><select id="editCV">
-      <option value="CHT-NVCH" ${r.chucVu==='CHT-NVCH'?'selected':''}>CHT-NVCH</option>
-      <option value="QLKV" ${r.chucVu==='QLKV'?'selected':''}>QLKV</option>
-      <option value="HCV" ${r.chucVu==='HCV'?'selected':''}>HCV</option>
-      <option value="GĐV" ${r.chucVu==='GĐV'?'selected':''}>GĐV</option>
-      <option value="GĐM" ${r.chucVu==='GĐM'?'selected':''}>GĐM</option>
-    </select>
-    <label>Mã CH đi</label><input id="editMaCH" value="${r.maCH||''}">
-    <label>Mã CH đến</label><input id="editDenMA" value="${r.denMA||''}">
-    <label>PT</label><input id="editPT" value="${r.pt||''}">
-    <label>Km *</label><input id="editKm" type="number" value="${r.km||0}">
-    <label>Ngày đi *</label><input id="editNgayDi" type="date" value="${r.ngayDi||''}">
-    <label>Ngày về *</label><input id="editNgayVe" type="date" value="${r.ngayVe||''}">
-    <label>CTP (tổng)</label><input id="editCTP" type="text" inputmode="numeric" value="${(r.ctp||0).toLocaleString('vi-VN')}">
-    <label>KS (tổng)</label><input id="editKS" type="text" inputmode="numeric" value="${(r.ks||0).toLocaleString('vi-VN')}">
-    <label>Xăng</label><input id="editXang" type="text" inputmode="numeric" value="${(r.xang||0).toLocaleString('vi-VN')}">
-    <label>Vé</label><input id="editVe" type="text" inputmode="numeric" value="${(r.ve||0).toLocaleString('vi-VN')}">
-    <label>Lý do</label><input id="editGhiChu" value="${r.ghiChu||''}">
+    <div style="margin-bottom:10px">
+      <h4 style="margin:0 0 6px;color:var(--blue);font-size:13px">👤 Thông tin nhân sự</h4>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="fld"><label>Mã NV</label><input id="editMaNV" value="${r.maNV||''}"></div>
+      <div class="fld"><label>Họ và tên *</label><input id="editTen" value="${r.ten||''}"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="fld"><label>Chức vụ *</label><select id="editCV">
+        <option value="CHT-NVCH" ${r.chucVu==='CHT-NVCH'?'selected':''}>CHT-NVCH</option>
+        <option value="QLKV" ${r.chucVu==='QLKV'?'selected':''}>QLKV</option>
+        <option value="HCV" ${r.chucVu==='HCV'?'selected':''}>HCV</option>
+        <option value="GĐV" ${r.chucVu==='GĐV'?'selected':''}>GĐV</option>
+        <option value="GĐM" ${r.chucVu==='GĐM'?'selected':''}>GĐM</option>
+      </select></div>
+      <div class="fld"><label>Tháng</label><input id="editThang" value="${r.thang||''}"></div>
+    </div>
+    
+    <h4 style="margin:12px 0 6px;color:var(--blue);font-size:13px">🧭 Địa điểm & Thông tin công tác</h4>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+      <div class="fld auto-wrap"><label>Địa điểm đi</label><input id="editMach" autocomplete="off" oninput="editAcCH(this.value)" value="${r.maCH||''} ${r.tenCH||''}"><div class="suggest hidden" id="editChSug"></div></div>
+      <div class="fld auto-wrap"><label>Địa điểm đến</label><input id="editDen" autocomplete="off" oninput="editAcDen(this.value)" value="${r.denMA||''} ${r.denTen||''}"><div class="suggest hidden" id="editDenSug"></div></div>
+      <div class="fld"><label>PT</label><input id="editPT" value="${r.pt||''}"></div>
+      <div class="fld"><label>Km *</label><input id="editKm" type="number" value="${r.km||0}"></div>
+    </div>
+    <div class="ch-info" id="editRoute" style="background:#e8f0fe;border:1px solid #a5c8e8;font-weight:500;padding:6px 10px;margin-bottom:8px;font-size:12px">📍 ${r.maCH||'—'} → ${r.denMA||'—'} · ${r.km||0}km · ${r.tinh||'—'} → ${r.denTinh||'—'}</div>
+    
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+      <div class="fld"><label>Ngày bắt đầu *</label><input id="editNgayDi" type="date" value="${r.ngayDi||''}"></div>
+      <div class="fld"><label>Ngày kết thúc *</label><input id="editNgayVe" type="date" value="${r.ngayVe||''}"></div>
+      <div class="fld"><label>Ngày CTP</label><input id="editNgayCTP" readonly value="${r.soNgay||''}"></div>
+      <div class="fld"><label>Ngày KS</label><input id="editNgayKS" readonly value="${r.soNgayKS||''}"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="fld"><label>Mục đích</label><input id="editGhiChu" value="${r.ghiChu||''}"></div>
+      <div class="fld"><label>Lý do</label><input id="editMucDich" value="${r.mucDich||''}"></div>
+    </div>
+    
+    <h4 style="margin:12px 0 6px;color:var(--blue);font-size:13px">💵 CTP - Khách sạn - Xăng - Vé xe/cầu đường</h4>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+      <div class="fld"><label>CTP</label><input id="editCTP" type="text" inputmode="numeric" value="${(r.ctp||0).toLocaleString('vi-VN')}"></div>
+      <div class="fld"><label>Khách sạn</label><input id="editKS" type="text" inputmode="numeric" value="${(r.ks||0).toLocaleString('vi-VN')}"></div>
+      <div class="fld"><label>Xăng</label><input id="editXang" type="text" inputmode="numeric" value="${(r.xang||0).toLocaleString('vi-VN')}"></div>
+      <div class="fld"><label>Vé xe/cầu đường</label><input id="editVe" type="text" inputmode="numeric" value="${(r.ve||0).toLocaleString('vi-VN')}"></div>
+    </div>
+    <div style="font-size:14px;padding:6px 10px;background:#e8f0fe;border-radius:6px;margin-top:8px">
+      📊 <b>Tổng:</b> <span id="editCalcTotal" style="color:var(--blue);font-weight:800;font-size:16px">${(r.tong||0).toLocaleString('vi-VN')}đ</span>
+    </div>
   `;
+  // Auto-calc when editing costs
+  ['editCTP','editKS','editXang','editVe'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => {
+      const mv = eid => +(document.getElementById(eid)?.value.replace(/[^\d]/g, '') || 0);
+      const total = mv('editCTP') + mv('editKS') + mv('editXang') + mv('editVe');
+      const t = document.getElementById('editCalcTotal');
+      if (t) t.textContent = total.toLocaleString('vi-VN') + 'đ';
+    });
+  });
+  // Auto days
+  ['editNgayDi','editNgayVe'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', () => {
+      const di = document.getElementById('editNgayDi').value, ve = document.getElementById('editNgayVe').value;
+      if (di && ve) {
+        const a = new Date(di), b = new Date(ve), diff = Math.round((b-a)/86400000);
+        if (diff >= 0) { document.getElementById('editNgayCTP').value = diff+1; document.getElementById('editNgayKS').value = diff; }
+      }
+    });
+  });
   $('editModal').classList.add('show');
+}
+
+// Light autocomplete for edit modal
+function editAcCH(v) {
+  v = (v||'').trim().toLowerCase();
+  const box = document.getElementById('editChSug');
+  if (!v || !STORELIST.length) { box.classList.add('hidden'); return; }
+  const hits = STORELIST.filter(s => s.ma.toLowerCase().includes(v) || s.ten.toLowerCase().includes(v)).slice(0, 15);
+  if (!hits.length) { box.classList.add('hidden'); return; }
+  box.innerHTML = hits.map(s =>
+    '<div class="sg" onclick="editPickCH(\''+s.ma+'\')"><span class="st">'+s.ma+'</span> · '+s.ten+'<div class="sub">'+((s.gdv||'—')+' · '+(s.mien||'—')+' · '+(s.tinh||'—'))+'</div></div>'
+  ).join('');
+  box.classList.remove('hidden');
+}
+function editPickCH(ma) {
+  const s = STORELIST.find(x => x.ma === ma);
+  if (!s) return;
+  document.getElementById('editMach').value = s.ma + ' — ' + s.ten;
+  document.getElementById('editChSug').classList.add('hidden');
+  updateEditRoute();
+}
+function editAcDen(v) {
+  v = (v||'').trim().toLowerCase();
+  const box = document.getElementById('editDenSug');
+  if (!v || !STORELIST.length) { box.classList.add('hidden'); return; }
+  const hits = STORELIST.filter(s => s.ma.toLowerCase().includes(v) || s.ten.toLowerCase().includes(v)).slice(0, 15);
+  if (!hits.length) { box.classList.add('hidden'); return; }
+  box.innerHTML = hits.map(s =>
+    '<div class="sg" onclick="editPickDen(\''+s.ma+'\')"><span class="st">'+s.ma+'</span> · '+s.ten+'<div class="sub">'+((s.gdv||'—')+' · '+(s.mien||'—')+' · '+(s.tinh||'—'))+'</div></div>'
+  ).join('');
+  box.classList.remove('hidden');
+}
+let _editSelCH = null, _editSelDen = null;
+function editPickDen(ma) {
+  const s = STORELIST.find(x => x.ma === ma);
+  if (!s) return;
+  document.getElementById('editDen').value = s.ma + ' — ' + s.ten;
+  document.getElementById('editDenSug').classList.add('hidden');
+  _editSelDen = s;
+  updateEditRoute();
+}
+function updateEditRoute() {
+  const machVal = document.getElementById('editMach').value.trim();
+  const denVal = document.getElementById('editDen').value.trim();
+  const maCH = machVal.split(' — ')[0];
+  const maDen = denVal.split(' — ')[0];
+  _editSelCH = STORELIST.find(s => s.ma === maCH);
+  _editSelDen = STORELIST.find(s => s.ma === maDen);
+  const el = document.getElementById('editRoute');
+  if (_editSelCH && _editSelDen && _editSelCH.lat != null && _editSelDen.lat != null) {
+    const km = hav(_editSelCH.lat, _editSelCH.lng, _editSelDen.lat, _editSelDen.lng);
+    document.getElementById('editKm').value = km;
+    el.innerHTML = '📍 '+_editSelCH.ma+' '+_editSelCH.ten+' ('+(_editSelCH.tinh||'—')+') → '+_editSelDen.ma+' '+_editSelDen.ten+' ('+(_editSelDen.tinh||'—')+') · <b>'+km+' km</b>';
+  } else {
+    el.innerHTML = '📍 '+(machVal||'—')+' → '+(denVal||'—');
+  }
 }
 function closeEdit() { $('editModal').classList.remove('show'); _editId = null; }
 
@@ -1796,30 +1903,42 @@ function saveEdit() {
   const r = RECORDS.find(x => x.id === _editId);
   if (!r) return;
   const moneyVal = el => +(el.value.replace(/[^\d]/g, '')) || 0;
+  const get = id => document.getElementById(id)?.value || '';
 
-  const ten = $('editTen').value.trim();
+  const ten = get('editTen').trim();
   if (!ten) { toast('⚠️ Vui lòng nhập Họ và tên', 'error'); return; }
-  const ngayDi = $('editNgayDi').value;
-  if (!ngayDi) { toast('⚠️ Vui lòng nhập Ngày đi', 'error'); return; }
-  const ngayVe = $('editNgayVe').value;
-  if (!ngayVe) { toast('⚠️ Vui lòng nhập Ngày về', 'error'); return; }
-  const km = +($('editKm').value) || 0;
+  const ngayDi = get('editNgayDi');
+  if (!ngayDi) { toast('⚠️ Vui lòng nhập Ngày bắt đầu', 'error'); return; }
+  const ngayVe = get('editNgayVe');
+  if (!ngayVe) { toast('⚠️ Vui lòng nhập Ngày kết thúc', 'error'); return; }
+  const km = +(get('editKm')) || 0;
   if (!km) { toast('⚠️ Vui lòng nhập Km', 'error'); return; }
 
-  r.maNV = $('editMaNV').value.trim();
+  const machVal = get('editMach').trim();
+  const denVal = get('editDen').trim();
+
+  r.maNV = get('editMaNV').trim();
   r.ten = ten;
-  r.chucVu = $('editCV').value;
-  r.maCH = $('editMaCH').value.trim();
-  r.denMA = $('editDenMA').value.trim();
-  r.pt = $('editPT').value.trim();
+  r.chucVu = get('editCV');
+  r.thang = get('editThang');
+  r.maCH = machVal.split(' — ')[0] || machVal;
+  r.tenCH = machVal.includes(' — ') ? machVal.split(' — ').slice(1).join(' — ') : '';
+  r.denMA = denVal.split(' — ')[0] || denVal;
+  r.denTen = denVal.includes(' — ') ? denVal.split(' — ').slice(1).join(' — ') : '';
+  r.pt = get('editPT');
   r.km = km;
   r.ngayDi = ngayDi;
   r.ngayVe = ngayVe;
-  r.ctp = moneyVal($('editCTP'));
-  r.ks = moneyVal($('editKS'));
-  r.xang = moneyVal($('editXang'));
-  r.ve = moneyVal($('editVe'));
-  r.ghiChu = $('editGhiChu').value.trim();
+  r.ctp = moneyVal(document.getElementById('editCTP'));
+  r.ks = moneyVal(document.getElementById('editKS'));
+  r.xang = moneyVal(document.getElementById('editXang'));
+  r.ve = moneyVal(document.getElementById('editVe'));
+  r.ghiChu = get('editGhiChu');
+  r.mucDich = get('editMucDich');
+  
+  // Update từ storelist nếu chọn
+  if (_editSelCH) { r.tinh = _editSelCH.tinh||r.tinh; r.gdv = _editSelCH.gdv||r.gdv; r.qlkv = _editSelCH.qlkv||r.qlkv; r.mien = _editSelCH.mien||r.mien; }
+  if (_editSelDen) { r.denTinh = _editSelDen.tinh||r.denTinh; }
 
   if (r.ngayDi && r.ngayVe) {
     const a = new Date(r.ngayDi), b = new Date(r.ngayVe);
@@ -1827,7 +1946,8 @@ function saveEdit() {
     r.soNgayKS = Math.round((b - a) / 86400000);
   }
   r.tong = (r.ctp||0) + (r.ks||0) + (r.xang||0) + (r.ve||0);
-  r.updatedAt = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' })).toISOString().slice(0, 19).replace('T', ' ');
+  const nowVN = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+  r.updatedAt = nowVN.toISOString().slice(0, 19).replace('T', ' ');
   r.updatedBy = ME ? ME.ten : '';
   save();
   if (USE_GAS && GAS_URL) { gasPost('submit', r); }
