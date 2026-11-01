@@ -227,7 +227,7 @@ tr:hover td{background:#f8f9ff}
       <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="fld auto-wrap">
           <label>Mã NV *</label>
-          <input id="f-manv" autocomplete="off" oninput="acNV(this.value)">
+          <input id="f-manv" autocomplete="off" oninput="acNV(this.value)" onblur="checkNV(this)">
           <div class="suggest hidden" id="nvSug"></div>
         </div>
         <div class="fld"><label>Họ và tên *</label><input id="f-hoten"></div>
@@ -862,7 +862,18 @@ async function loadFromGAS() {
   // Load NVDB from sheet
   const nvData = await gasGet('nhanSu');
   if (nvData && nvData.length) {
-    NVDB = nvData;
+    NVDB = nvData.map(u => ({
+      ...u,
+      // GAS trả 'role', frontend dùng 'chucVu' — chuẩn hóa cả hai
+      chucVu: u.chucVu || u.role || 'NV',
+      role: u.role || u.chucVu || 'NV',
+      gdv: u.gdv || '',
+      maCH: u.maCH || '',
+      tenCH: u.tenCH || '',
+      tinh: u.tinh || '',
+      huyen: u.huyen || '',
+      qlkv: u.qlkv || '',
+    }));
     saveNV();
     console.log('NVDB loaded from GAS:', NVDB.length);
   }
@@ -956,6 +967,16 @@ function pickNV(ma) {
         showRouteSummary();
       }
     }
+  }
+}
+function checkNV(el) {
+  const v = (el.value || '').trim();
+  if (!v) return;
+  const u = findNV(v);
+  if (u) {
+    pickNV(u.maNV);
+  } else {
+    toast('⚠️ Không tìm thấy mã NV "' + v + '" — vui lòng nhập thủ công', 'error');
   }
 }
 function acDen(v) {
