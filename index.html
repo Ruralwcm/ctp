@@ -734,6 +734,28 @@ function hideAllAdminTabs() {
 
 // =================== STORELIST LOAD ===================
 async function loadStorelist() {
+  // Ưu tiên load từ storelist.json tĩnh (cùng origin, không bị gviz type-mixed làm null mã CH dạng chữ)
+  try {
+    const sr = await fetch('storelist.json?v=' + Date.now());
+    if (sr.ok) {
+      const sj = await sr.json();
+      if (Array.isArray(sj) && sj.length) {
+        STORELIST = sj.map(s => ({
+          ma: String(s.ma || '').trim(),
+          ten: s.ten || '',
+          gdv: s.gdv || '',
+          qlkv: s.qlkv || '',
+          tinh: s.tinh || '',
+          mien: s.mien === 'Miền Tây' ? 'Miền Nam' : (s.mien || ''),
+          lat: (s.lat !== '' && s.lat != null) ? parseFloat(s.lat) : null,
+          lng: (s.lng !== '' && s.lng != null) ? parseFloat(s.lng) : null
+        }));
+        console.log('Storelist loaded from static JSON:', STORELIST.length, 'stores');
+        return;
+      }
+    }
+  } catch(e) { console.log('Static storelist fallback:', e.message); }
+
   try {
     // Dùng JSON API để tránh lỗi parse CSV với Unicode
     const resp = await fetch(STORELIST_URL.replace('out:csv','out:json'));
