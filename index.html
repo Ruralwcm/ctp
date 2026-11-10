@@ -876,6 +876,27 @@ async function loadFromGAS() {
     }));
     saveNV();
     console.log('NVDB loaded from GAS:', NVDB.length);
+  } else {
+    // Fallback: load from static nvdb.json on GitHub Pages
+    try {
+      const resp = await fetch('nvdb.json?v=' + Date.now());
+      const json = await resp.json();
+      if (json && json.length) {
+        NVDB = json.map(u => ({
+          ...u,
+          chucVu: u.chucVu || u.role || 'NV',
+          role: u.role || u.chucVu || 'NV',
+          gdv: u.gdv || '',
+          maCH: u.maCH || '',
+          tenCH: u.tenCH || '',
+          tinh: u.tinh || '',
+          huyen: u.huyen || '',
+          qlkv: u.qlkv || '',
+        }));
+        saveNV();
+        console.log('NVDB loaded from static JSON:', NVDB.length);
+      }
+    } catch(e) { console.warn('Static NVDB fallback failed:', e.message); }
   }
 
   // Load DM from sheet
