@@ -317,7 +317,7 @@ tr:hover td{background:#f8f9ff}
       <!-- SECTION 3: CHI PHÍ -->
       <h3 style="margin-top:12px">💵 CTP - Khách sạn - Xăng - Vé xe/cầu đường</h3>
       <div class="row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        <div class="fld"><label>CTP 🔒</label><input id="f-ctp" type="text" inputmode="numeric" readonly style="background:#e8f5e9;color:#2e7d32;font-weight:700"></div>
+        <div class="fld"><label>CTP 🔒 <span style="font-size:10px;color:var(--muted);font-weight:400" id="ctpMaxLabel"></span></label><input id="f-ctp" type="text" inputmode="numeric" readonly style="background:#e8f5e9;color:#2e7d32;font-weight:700"></div>
         <div class="fld"><label>Khách sạn <span style="font-size:10px;color:var(--muted);font-weight:400" id="ksMaxLabel"></span></label><input id="f-ks" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
         <div class="fld"><label>Xăng</label><input id="f-xang" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
         <div class="fld"><label>Vé xe/cầu đường</label><input id="f-ve" type="text" inputmode="numeric" oninput="moneyInput(this);autoCalc()"></div>
@@ -378,22 +378,6 @@ tr:hover td{background:#f8f9ff}
     </div>
   </div>
 
-  <!-- ========== ADMIN TAB: ĐỊNH MỨC ========== -->
-  <div id="tab-dinhmuc" class="hidden">
-    <div class="card">
-      <h3>📐 Bảng định mức CTP theo vùng & chức vụ</h3>
-      <div class="row" style="margin-bottom:10px">
-        <div class="fld"><input id="dmSearch" placeholder="🔍 Tìm tỉnh/vùng..." oninput="renderDM()"></div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Vùng / Tỉnh</th><th>CHT-NVCH</th><th>QLKV</th><th>HCV</th><th>GĐV</th><th>GĐM</th><th>Ghi chú</th></tr></thead>
-          <tbody id="dmBody"></tbody>
-        </table>
-      </div>
-      <div style="margin-top:8px;font-size:11px;color:var(--muted)">💡 Click vào vùng để sửa định mức (GĐM/Admin)</div>
-    </div>
-  </div>
   <div id="tab-pd" class="hidden">
     <!-- PENDING APPROVALS -->
     <div class="card">
@@ -722,13 +706,12 @@ function switchAdminTab(k) {
   // Hide standalone #tab-kb when in admin mode, show only if Khai báo tab selected
   $('tab-kb').classList.toggle('hidden', k !== 'khaibao');
   if (k === 'khaibao') { renderTienDo(); }
-  if (k === 'dinhmuc') { $('tab-dinhmuc').classList.remove('hidden'); renderDM(); }
   if (k === 'pd') { $('tab-pd').classList.remove('hidden'); renderPD(); }
   if (k === 'dashboard') { $('tab-dashboard').classList.remove('hidden'); repaintDashboard(); }
   if (k === 'ngansach') { $('tab-ngansach').classList.remove('hidden'); renderNganSach(); }
 }
 function hideAllAdminTabs() {
-  ['tab-dinhmuc','tab-pd','tab-dashboard','tab-ngansach'].forEach(x => $(x)?.classList.add('hidden'));
+  ['tab-pd','tab-dashboard','tab-ngansach'].forEach(x => $(x)?.classList.add('hidden'));
   $('tab-kb')?.classList.add('hidden');
 }
 
@@ -1210,8 +1193,7 @@ function checkCTPMax() {
   const ctp = money($('f-ctp'));
   const el = $('calcCTP');
   const label = $('ctpMaxLabel');
-  if (maxCTP > 0) label.textContent = '(tối đa ' + maxCTP.toLocaleString() + 'đ)';
-  else label.textContent = '';
+  if (label) label.textContent = maxCTP > 0 ? '(tối đa ' + maxCTP.toLocaleString() + 'đ)' : '';
   if (ctp > maxCTP && maxCTP > 0) {
     el.style.color = 'var(--err)';
     el.title = '⚠️ Vượt định mức tối đa ' + maxCTP.toLocaleString() + 'đ';
@@ -1226,8 +1208,7 @@ function checkKSMax() {
   const ks = money($('f-ks'));
   const el = $('calcKS');
   const label = $('ksMaxLabel');
-  if (maxKS > 0) label.textContent = '(tối đa ' + maxKS.toLocaleString() + 'đ)';
-  else label.textContent = '';
+  if (label) label.textContent = maxKS > 0 ? '(tối đa ' + maxKS.toLocaleString() + 'đ)' : '';
   if (ks > maxKS && maxKS > 0) {
     el.style.color = 'var(--err)';
     el.title = '⚠️ Vượt định mức tối đa ' + maxKS.toLocaleString() + 'đ';
@@ -1705,7 +1686,9 @@ function renderDM() {
   let data = DM_DATA;
   if (q) data = DM_DATA.filter(d => d.vung.toLowerCase().includes(q) || (d.note && d.note.toLowerCase().includes(q)));
 
-  $('dmBody').innerHTML = data.map((d, i) => `
+  const body = $('dmBody');
+  if (!body) return;
+  body.innerHTML = data.map((d, i) => `
     <tr style="cursor:pointer" onclick="editDM(${DM_DATA.indexOf(d)})">
       <td><strong>${d.vung}</strong></td>
       <td class="text-right">${(d.ctpNV||0).toLocaleString()} / ${(d.ksNV||0).toLocaleString()}</td>
