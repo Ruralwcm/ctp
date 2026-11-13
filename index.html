@@ -181,6 +181,7 @@ tr:hover td{background:#f8f9ff}
   .btn-outline{background:#1a2332;color:#9ec5fe;border-color:#2a3646}
 }
 </style>
+<script src="store-source.js"></script>
 </head>
 <body>
 
@@ -719,9 +720,12 @@ function hideAllAdminTabs() {
 async function loadStorelist() {
   // Ưu tiên load từ storelist.json tĩnh (cùng origin, không bị gviz type-mixed làm null mã CH dạng chữ)
   try {
-    const sr = await fetch('storelist.json?v=' + Date.now());
+    let sj = null;
+    try { sj = await STORE_SOURCE.live(r => ({ma:r.ma_sap,ten:r.ten_ch,gdv:r.gdv,qlkv:r.qlkv,tinh:r.tinh,mien:r.mien,lat:r.lat,lng:r.lng})); }
+    catch (err) { console.warn('API_Stores loi, dung file tinh:', err); }
+    const sr = sj ? {ok:true} : await fetch('storelist.json?v=' + Date.now());
     if (sr.ok) {
-      const sj = await sr.json();
+      if (!sj) sj = await sr.json();
       if (Array.isArray(sj) && sj.length) {
         STORELIST = sj.map(s => ({
           ma: String(s.ma || '').trim(),
